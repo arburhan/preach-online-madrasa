@@ -64,6 +64,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     name: user.name,
                     image: user.image,
                     role: user.role,
+                    isTeacherApproved: user.isTeacherApproved,
                 };
             },
         }),
@@ -103,9 +104,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     return false; // Prevent sign in for unapproved teachers
                 }
 
-                // Attach role to user object
+                // Attach role and teacher approval to user object
                 user.role = existingUser.role;
                 user.id = existingUser._id.toString();
+                user.isTeacherApproved = existingUser.isTeacherApproved;
             }
 
             return true;
@@ -116,6 +118,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
+                token.isTeacherApproved = user.isTeacherApproved;
             }
 
             // Update token on session update
@@ -131,6 +134,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.role = token.role as UserRole;
+                session.user.isTeacherApproved = token.isTeacherApproved as boolean | undefined;
             }
             return session;
         },
