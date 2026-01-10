@@ -35,9 +35,9 @@ export default function AdminLayout({
             <div className="flex">
                 {/* Sidebar */}
                 <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-card border-r">
-                    <div className="flex flex-col flex-grow pt-5 overflow-y-auto">
+                    <div className="flex flex-col grow pt-5 overflow-y-auto">
                         {/* Logo/Title */}
-                        <div className="flex items-center flex-shrink-0 px-4 mb-6">
+                        <div className="flex items-center shrink-0 px-4 mb-6">
                             <div className="w-full">
                                 <h1 className="text-xl font-bold text-purple-600">অ্যাডমিন প্যানেল</h1>
                                 <p className="text-sm text-muted-foreground">প্রিচ অনলাইন মাদ্রাসা</p>
@@ -65,7 +65,7 @@ export default function AdminLayout({
                                     >
                                         <Icon
                                             className={`
-                        mr-3 h-5 w-5 flex-shrink-0
+                        mr-3 h-5 w-5 shrink-0
                         ${isActive ? 'text-purple-600 dark:text-purple-400' : ''}
                       `}
                                         />
@@ -76,7 +76,7 @@ export default function AdminLayout({
                         </nav>
 
                         {/* Logout Button */}
-                        <div className="flex-shrink-0 p-4 border-t">
+                        <div className="shrink-0 p-4 border-t">
                             <Button
                                 variant="ghost"
                                 className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"

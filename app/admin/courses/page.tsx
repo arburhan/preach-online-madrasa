@@ -2,10 +2,27 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
-import { Badge } from '@/components/ui/badge';
+
 import { BookOpen, Users, Video, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+
+interface CourseData {
+    _id: { toString: () => string };
+    titleBn: string;
+    titleEn?: string;
+    descriptionBn?: string;
+    thumbnail?: string;
+    status: 'published' | 'draft';
+    isFree: boolean;
+    level: 'beginner' | 'intermediate' | 'advanced';
+    language: 'bn' | 'ar' | 'multi';
+    totalLessons: number;
+    enrolledCount: number;
+    createdAt: Date;
+    instructor?: { name: string; email: string };
+}
 
 export default async function AdminCoursesPage() {
     const session = await auth();
@@ -17,10 +34,12 @@ export default async function AdminCoursesPage() {
     await connectDB();
 
     // Get all courses with instructor data
-    const courses = await Course.find()
+    const coursesData = await Course.find()
         .populate('instructor', 'name email')
         .sort({ createdAt: -1 })
         .lean();
+
+    const courses = coursesData as unknown as CourseData[];
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
@@ -41,19 +60,19 @@ export default async function AdminCoursesPage() {
                 <div className="bg-card rounded-lg border p-4">
                     <p className="text-sm text-muted-foreground">প্রকাশিত</p>
                     <p className="text-2xl font-bold">
-                        {courses.filter((c: any) => c.status === 'published').length}
+                        {courses.filter((c) => c.status === 'published').length}
                     </p>
                 </div>
                 <div className="bg-card rounded-lg border p-4">
                     <p className="text-sm text-muted-foreground">খসড়া</p>
                     <p className="text-2xl font-bold">
-                        {courses.filter((c: any) => c.status === 'draft').length}
+                        {courses.filter((c) => c.status === 'draft').length}
                     </p>
                 </div>
                 <div className="bg-card rounded-lg border p-4">
                     <p className="text-sm text-muted-foreground">মোট নথিভুক্তি</p>
                     <p className="text-2xl font-bold">
-                        {courses.reduce((sum: number, c: any) => sum + (c.enrolledCount || 0), 0)}
+                        {courses.reduce((sum, c) => sum + (c.enrolledCount || 0), 0)}
                     </p>
                 </div>
             </div>
@@ -61,7 +80,7 @@ export default async function AdminCoursesPage() {
             {/* Courses Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {courses.length > 0 ? (
-                    courses.map((course: any) => (
+                    courses.map((course) => (
                         <div
                             key={course._id.toString()}
                             className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow"
@@ -77,7 +96,7 @@ export default async function AdminCoursesPage() {
                                     />
                                 </div>
                             ) : (
-                                <div className="h-48 w-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                                <div className="h-48 w-full bg-linear-to-br from-purple-500 to-blue-600 flex items-center justify-center">
                                     <BookOpen className="h-16 w-16 text-white/50" />
                                 </div>
                             )}
