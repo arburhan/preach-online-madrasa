@@ -7,12 +7,13 @@ import { getCurrentUser } from '@/lib/auth/rbac';
 // GET /api/courses/[id] - Get course details
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         await connectDB();
 
-        const course = await Course.findById(params.id)
+        const course = await Course.findById(id)
             .populate('instructor', 'name image teacherBio teacherQualifications')
             .lean();
 
@@ -24,7 +25,7 @@ export async function GET(
         }
 
         // Get lessons for this course
-        const lessons = await Lesson.find({ course: params.id })
+        const lessons = await Lesson.find({ course: id })
             .sort({ order: 1 })
             .select('-videoKey') // Don't send video key to client
             .lean();
@@ -45,21 +46,22 @@ export async function GET(
 // PUT /api/courses/[id] - Update course
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getCurrentUser();
 
-        if (!user) {
+        if (!user || !['teacher', 'admin'].includes(user.role)) {
             return NextResponse.json(
-                { error: 'অনুমোদন প্রয়োজন' },
-                { status: 401 }
+                { error: 'অনুমতি নেই' },
+                { status: 403 }
             );
         }
 
+        const { id } = await params;
         await connectDB();
 
-        const course = await Course.findById(params.id);
+        const course = await Course.findById(id);
 
         if (!course) {
             return NextResponse.json(
@@ -81,7 +83,7 @@ export async function PUT(
 
         const body = await request.json();
         const updatedCourse = await Course.findByIdAndUpdate(
-            params.id,
+            id,
             { $set: body },
             { new: true, runValidators: true }
         );
@@ -102,21 +104,22 @@ export async function PUT(
 // DELETE /api/courses/[id] - Delete course
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getCurrentUser();
 
-        if (!user) {
+        if (!user || !['teacher', 'admin'].includes(user.role)) {
             return NextResponse.json(
-                { error: 'অনুমোদন প্রয়োজন' },
-                { status: 401 }
+                { error: 'অনুমতি নেই' },
+                { status: 403 }
             );
         }
 
+        const { id } = await params;
         await connectDB();
 
-        const course = await Course.findById(params.id);
+        const course = await Course.findById(id);
 
         if (!course) {
             return NextResponse.json(
@@ -137,10 +140,10 @@ export async function DELETE(
         }
 
         // Delete all lessons associated with this course
-        await Lesson.deleteMany({ course: params.id });
+        await Lesson.deleteMany({ course: id });
 
         // Delete the course
-        await Course.findByIdAndDelete(params.id);
+        await Course.findByIdAndDelete(id);
 
         return NextResponse.json({
             message: 'কোর্স মুছে ফেলা হয়েছে',

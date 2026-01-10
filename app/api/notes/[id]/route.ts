@@ -1,20 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
 import Note from '@/lib/db/models/Note';
-import { requireAuth } from '@/lib/auth/rbac';
+import { getCurrentUser } from '@/lib/auth/rbac';
 
 // PUT /api/notes/[id] - Update note
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = await requireAuth();
+        const user = await getCurrentUser();
+
+        if (!user) {
+            return NextResponse.json(
+                { error: 'অনুমোদন প্রয়োজন' },
+                { status: 401 }
+            );
+        }
+
+        const { id } = await params;
         const body = await request.json();
 
         await connectDB();
 
-        const note = await Note.findById(params.id);
+        const note = await Note.findById(id);
 
         if (!note) {
             return NextResponse.json(
@@ -32,7 +41,7 @@ export async function PUT(
         }
 
         const updatedNote = await Note.findByIdAndUpdate(
-            params.id,
+            id,
             { $set: { content: body.content } },
             { new: true }
         );
@@ -53,14 +62,22 @@ export async function PUT(
 // DELETE /api/notes/[id] - Delete note
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = await requireAuth();
+        const user = await getCurrentUser();
 
+        if (!user) {
+            return NextResponse.json(
+                { error: 'অনুমোদন প্রয়োজন' },
+                { status: 401 }
+            );
+        }
+
+        const { id } = await params;
         await connectDB();
 
-        const note = await Note.findById(params.id);
+        const note = await Note.findById(id);
 
         if (!note) {
             return NextResponse.json(
@@ -77,7 +94,7 @@ export async function DELETE(
             );
         }
 
-        await Note.findByIdAndDelete(params.id);
+        await Note.findByIdAndDelete(id);
 
         return NextResponse.json({
             message: 'নোট মুছে ফেলা হয়েছে',

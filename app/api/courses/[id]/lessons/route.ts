@@ -7,7 +7,7 @@ import { getCurrentUser } from '@/lib/auth/rbac';
 // POST /api/courses/[id]/lessons - Create new lesson
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -19,9 +19,10 @@ export async function POST(
             );
         }
 
+        const { id } = await params;
         await connectDB();
 
-        const course = await Course.findById(params.id);
+        const course = await Course.findById(id);
 
         if (!course) {
             return NextResponse.json(
@@ -44,15 +45,8 @@ export async function POST(
         const body = await request.json();
         const {
             titleBn,
-            titleEn,
-            descriptionBn,
-            descriptionEn,
             videoUrl,
             videoKey,
-            duration,
-            order,
-            isFree,
-            attachments,
         } = body;
 
         if (!titleBn || !videoUrl || !videoKey) {
@@ -63,21 +57,12 @@ export async function POST(
         }
 
         const lesson = await Lesson.create({
-            course: params.id,
-            titleBn,
-            titleEn,
-            descriptionBn,
-            descriptionEn,
-            videoUrl,
-            videoKey,
-            duration: duration || 0,
-            order: order || 0,
-            isFree: isFree || false,
-            attachments: attachments || [],
+            ...body,
+            course: id,
         });
 
         // Update course total lessons count
-        await Course.findByIdAndUpdate(params.id, {
+        await Course.findByIdAndUpdate(id, {
             $inc: { totalLessons: 1 },
         });
 

@@ -2,19 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
 import User from '@/lib/db/models/User';
 import Course from '@/lib/db/models/Course';
-import { requireAuth } from '@/lib/auth/rbac';
+import { getCurrentUser } from '@/lib/auth/rbac';
 
 // POST /api/courses/[id]/enroll - Enroll in a course
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = await requireAuth();
+        const user = await getCurrentUser();
 
+        if (!user) {
+            return NextResponse.json(
+                { error: 'অনুমোদন প্রয়োজন' },
+                { status: 401 }
+            );
+        }
+
+        const { id } = await params;
         await connectDB();
 
-        const course = await Course.findById(params.id);
+        const course = await Course.findById(id);
 
         if (!course) {
             return NextResponse.json(
@@ -34,7 +42,7 @@ export async function POST(
         // Check if already enrolled
         const alreadyEnrolled = await User.findOne({
             _id: user.id,
-            enrolledCourses: params.id,
+            enrolledCourses: id,
         });
 
         if (alreadyEnrolled) {
@@ -60,11 +68,11 @@ export async function POST(
 
         // Enroll user in the course
         await User.findByIdAndUpdate(user.id, {
-            $addToSet: { enrolledCourses: params.id },
+            $addToSet: { enrolledCourses: id },
         });
 
         // Update course enrolled count
-        await Course.findByIdAndUpdate(params.id, {
+        await Course.findByIdAndUpdate(id, {
             $inc: { enrolledCount: 1 },
         });
 
@@ -84,14 +92,22 @@ export async function POST(
 // DELETE /api/courses/[id]/enroll - Unenroll from a course
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = await requireAuth();
+        const user = await getCurrentUser();
 
+        if (!user) {
+            return NextResponse.json(
+                { error: 'অনুমোদন প্রয়োজন' },
+                { status: 401 }
+            );
+        }
+
+        const { id } = await params;
         await connectDB();
 
-        const course = await Course.findById(params.id);
+        const course = await Course.findById(id);
 
         if (!course) {
             return NextResponse.json(
@@ -103,7 +119,7 @@ export async function DELETE(
         // Check if enrolled
         const isEnrolled = await User.findOne({
             _id: user.id,
-            enrolledCourses: params.id,
+            enrolledCourses: id,
         });
 
         if (!isEnrolled) {
@@ -115,11 +131,11 @@ export async function DELETE(
 
         // Unenroll user from the course
         await User.findByIdAndUpdate(user.id, {
-            $pull: { enrolledCourses: params.id },
+            $pull: { enrolledCourses: id },
         });
 
         // Update course enrolled count
-        await Course.findByIdAndUpdate(params.id, {
+        await Course.findByIdAndUpdate(id, {
             $inc: { enrolledCount: -1 },
         });
 

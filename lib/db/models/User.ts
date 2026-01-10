@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
 // User roles enum
 export enum UserRole {
@@ -11,27 +11,27 @@ export enum UserRole {
 export interface IUser extends Document {
     name: string;
     email: string;
-    password?: string; // Optional for OAuth users
+    password?: string;
     image?: string;
+    gender?: 'male' | 'female';
     role: UserRole;
 
-    // Teacher-specific fields
-    isTeacherApproved: boolean;
-    teacherBio?: string;
-    teacherQualifications?: string;
-
-    // Profile fields
-    phone?: string;
-    address?: string;
-
-    // Enrollment tracking
-    enrolledCourses: mongoose.Types.ObjectId[];
-
-    // OAuth fields
+    // OAuth
     provider?: 'credentials' | 'google';
     providerId?: string;
 
-    // Timestamps
+    // Teacher specific
+    isTeacherApproved?: boolean;
+    teacherBio?: string;
+    teacherQualifications?: string;
+    fatherName?: string;
+    motherName?: string;
+    mobileNumber?: string;
+    address?: string;
+
+    // Student specific
+    enrolledCourses?: Types.ObjectId[];
+
     createdAt: Date;
     updatedAt: Date;
 }
@@ -41,58 +41,57 @@ const UserSchema = new Schema<IUser>(
     {
         name: {
             type: String,
-            required: [true, 'Name is required'],
+            required: [true, 'নাম আবশ্যক'],
             trim: true,
         },
         email: {
             type: String,
-            required: [true, 'Email is required'],
+            required: [true, 'ইমেইল আবশ্যক'],
             unique: true,
             lowercase: true,
             trim: true,
         },
         password: {
             type: String,
-            select: false, // Don't include password by default in queries
+            select: false,
         },
         image: {
             type: String,
+        },
+        gender: {
+            type: String,
+            enum: ['male', 'female'],
         },
         role: {
             type: String,
             enum: Object.values(UserRole),
             default: UserRole.STUDENT,
         },
+        provider: {
+            type: String,
+            enum: ['credentials', 'google'],
+        },
+        providerId: String,
+
+        // Teacher fields
         isTeacherApproved: {
             type: Boolean,
             default: false,
         },
-        teacherBio: {
-            type: String,
-        },
-        teacherQualifications: {
-            type: String,
-        },
-        phone: {
-            type: String,
-        },
-        address: {
-            type: String,
-        },
+        teacherBio: String,
+        teacherQualifications: String,
+        fatherName: String,
+        motherName: String,
+        mobileNumber: String,
+        address: String,
+
+        // Student fields
         enrolledCourses: [
             {
                 type: Schema.Types.ObjectId,
                 ref: 'Course',
             },
         ],
-        provider: {
-            type: String,
-            enum: ['credentials', 'google'],
-            default: 'credentials',
-        },
-        providerId: {
-            type: String,
-        },
     },
     {
         timestamps: true,
@@ -102,9 +101,9 @@ const UserSchema = new Schema<IUser>(
 // Indexes
 UserSchema.index({ email: 1 });
 UserSchema.index({ role: 1 });
-UserSchema.index({ isTeacherApproved: 1, role: 1 });
+UserSchema.index({ isTeacherApproved: 1 });
 
-// Create or retrieve the model
+// Export model
 const User: Model<IUser> =
     mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 

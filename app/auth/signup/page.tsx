@@ -4,21 +4,21 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
-export default function SignUpPage() {
+export default function StudentSignUpPage() {
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'student',
+        gender: 'male',
     });
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData(prev => ({
             ...prev,
             [e.target.name]: e.target.value
@@ -27,15 +27,14 @@ export default function SignUpPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
 
         if (formData.password !== formData.confirmPassword) {
-            setError('পাসওয়ার্ড মিলছে না');
+            toast.error('পাসওয়ার্ড মিলছে না');
             return;
         }
 
         if (formData.password.length < 6) {
-            setError('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে');
+            toast.error('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে');
             return;
         }
 
@@ -49,7 +48,8 @@ export default function SignUpPage() {
                     name: formData.name,
                     email: formData.email,
                     password: formData.password,
-                    role: formData.role,
+                    gender: formData.gender,
+                    role: 'student',
                 }),
             });
 
@@ -59,18 +59,18 @@ export default function SignUpPage() {
                 throw new Error(data.error || 'নিবন্ধন করতে সমস্যা হয়েছে');
             }
 
-            // Redirect to sign in page
+            toast.success('নিবন্ধন সফল হয়েছে!');
             router.push('/auth/signin?registered=true');
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'নিবন্ধন করতে সমস্যা হয়েছে';
-            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-primary/10 via-background to-accent/10 px-4 py-12">
+        <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="mb-8 text-center">
@@ -78,116 +78,143 @@ export default function SignUpPage() {
                         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
                             <BookOpen className="h-9 w-9" />
                         </div>
-                        <h1 className="text-2xl font-bold text-primary">অনলাইন মাদ্রাসা</h1>
+                        <div>
+                            <h1 className="text-2xl font-bold">Preach Madrasa</h1>
+                            <p className="text-sm text-muted-foreground">শিক্ষার্থী নিবন্ধন</p>
+                        </div>
                     </Link>
                 </div>
 
-                {/* Sign Up Card */}
-                <div className="rounded-xl border border-border bg-card p-8 shadow-lg">
-                    <h2 className="mb-6 text-center text-2xl font-bold">নিবন্ধন করুন</h2>
-
-                    {error && (
-                        <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
-                            {error}
-                        </div>
-                    )}
+                {/* Form */}
+                <div className="rounded-2xl border bg-card p-8 shadow-lg">
+                    <h2 className="mb-6 text-center text-2xl font-bold">অ্যাকাউন্ট তৈরি করুন</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Name */}
                         <div>
-                            <label htmlFor="name" className="mb-2 block text-sm font-medium">
-                                নাম
+                            <label htmlFor="name" className="block text-sm font-medium mb-2">
+                                পূর্ণ নাম *
                             </label>
                             <input
                                 id="name"
                                 name="name"
                                 type="text"
+                                required
                                 value={formData.name}
                                 onChange={handleChange}
-                                required
                                 className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                placeholder="আপনার নাম"
+                                placeholder="আপনার পূর্ণ নাম"
                             />
                         </div>
 
+                        {/* Email */}
                         <div>
-                            <label htmlFor="email" className="mb-2 block text-sm font-medium">
-                                ইমেইল
+                            <label htmlFor="email" className="block text-sm font-medium mb-2">
+                                ইমেইল *
                             </label>
                             <input
                                 id="email"
                                 name="email"
                                 type="email"
+                                required
                                 value={formData.email}
                                 onChange={handleChange}
-                                required
                                 className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                placeholder="your@email.com"
+                                placeholder="example@email.com"
                             />
                         </div>
 
+                        {/* Gender */}
                         <div>
-                            <label htmlFor="role" className="mb-2 block text-sm font-medium">
-                                ভূমিকা
-                            </label>
-                            <select
-                                id="role"
-                                name="role"
-                                value={formData.role}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                            >
-                                <option value="student">ছাত্র/ছাত্রী</option>
-                                <option value="teacher">শিক্ষক (অনুমোদনের প্রয়োজন)</option>
-                            </select>
+                            <label className="block text-sm font-medium mb-2">লিঙ্গ *</label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="gender"
+                                        value="male"
+                                        checked={formData.gender === 'male'}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-primary focus:ring-2 focus:ring-primary/20"
+                                    />
+                                    <span className="text-sm">পুরুষ</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="gender"
+                                        value="female"
+                                        checked={formData.gender === 'female'}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-primary focus:ring-2 focus:ring-primary/20"
+                                    />
+                                    <span className="text-sm">মহিলা</span>
+                                </label>
+                            </div>
                         </div>
 
+                        {/* Password */}
                         <div>
-                            <label htmlFor="password" className="mb-2 block text-sm font-medium">
-                                পাসওয়ার্ড
+                            <label htmlFor="password" className="block text-sm font-medium mb-2">
+                                পাসওয়ার্ড *
                             </label>
                             <input
                                 id="password"
                                 name="password"
                                 type="password"
+                                required
                                 value={formData.password}
                                 onChange={handleChange}
-                                required
                                 className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                placeholder="••••••••"
+                                placeholder="কমপক্ষে ৬ অক্ষর"
                             />
                         </div>
 
+                        {/* Confirm Password */}
                         <div>
-                            <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium">
-                                পাসওয়ার্ড নিশ্চিত করুন
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+                                পাসওয়ার্ড নিশ্চিত করুন *
                             </label>
                             <input
                                 id="confirmPassword"
                                 name="confirmPassword"
                                 type="password"
+                                required
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                required
                                 className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                placeholder="••••••••"
+                                placeholder="পাসওয়ার্ড পুনরায় লিখুন"
                             />
                         </div>
 
-                        <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={loading}
-                        >
-                            {loading ? 'নিবন্ধন হচ্ছে...' : 'নিবন্ধন করুন'}
+                        {/* Submit Button */}
+                        <Button type="submit" className="w-full" disabled={loading}>
+                            {loading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    অপেক্ষা করুন...
+                                </>
+                            ) : (
+                                'নিবন্ধন করুন'
+                            )}
                         </Button>
                     </form>
 
-                    <p className="mt-6 text-center text-sm text-muted-foreground">
-                        ইতিমধ্যে অ্যাকাউন্ট আছে?{' '}
-                        <Link href="/auth/signin" className="font-medium text-primary hover:underline">
-                            লগইন করুন
-                        </Link>
-                    </p>
+                    {/* Links */}
+                    <div className="mt-6 space-y-3 text-center text-sm">
+                        <p className="text-muted-foreground">
+                            ইতিমধ্যে একটি অ্যাকাউন্ট আছে?{' '}
+                            <Link href="/auth/signin" className="font-medium text-primary hover:underline">
+                                সাইন ইন করুন
+                            </Link>
+                        </p>
+                        <p className="text-muted-foreground">
+                            প্রশিক্ষক হতে চান?{' '}
+                            <Link href="/teacherRegister" className="font-medium text-primary hover:underline">
+                                প্রশিক্ষক নিবন্ধন
+                            </Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

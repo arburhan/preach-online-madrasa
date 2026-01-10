@@ -6,7 +6,7 @@ import { getCurrentUser } from '@/lib/auth/rbac';
 // POST /api/courses/[id]/publish - Publish a course
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -18,9 +18,10 @@ export async function POST(
             );
         }
 
+        const { id } = await params;
         await connectDB();
 
-        const course = await Course.findById(params.id);
+        const course = await Course.findById(id);
 
         if (!course) {
             return NextResponse.json(
@@ -69,7 +70,7 @@ export async function POST(
 // DELETE /api/courses/[id]/publish - Unpublish a course
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -81,9 +82,10 @@ export async function DELETE(
             );
         }
 
+        const { id } = await params;
         await connectDB();
 
-        const course = await Course.findById(params.id);
+        const course = await Course.findById(id);
 
         if (!course) {
             return NextResponse.json(

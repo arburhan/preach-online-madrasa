@@ -7,7 +7,7 @@ import { getCurrentUser } from '@/lib/auth/rbac';
 // GET /api/lessons/[id] - Get lesson details
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -19,9 +19,10 @@ export async function GET(
             );
         }
 
+        const { id } = await params;
         await connectDB();
 
-        const lesson = await Lesson.findById(params.id)
+        const lesson = await Lesson.findById(id)
             .populate('course', 'titleBn titleEn instructor')
             .lean();
 
@@ -49,7 +50,7 @@ export async function GET(
 // PUT /api/lessons/[id] - Update lesson
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -61,9 +62,10 @@ export async function PUT(
             );
         }
 
+        const { id } = await params;
         await connectDB();
 
-        const lesson = await Lesson.findById(params.id).populate('course');
+        const lesson = await Lesson.findById(id).populate('course');
 
         if (!lesson) {
             return NextResponse.json(
@@ -86,7 +88,7 @@ export async function PUT(
 
         const body = await request.json();
         const updatedLesson = await Lesson.findByIdAndUpdate(
-            params.id,
+            id,
             { $set: body },
             { new: true, runValidators: true }
         );
@@ -107,7 +109,7 @@ export async function PUT(
 // DELETE /api/lessons/[id] - Delete lesson
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -119,9 +121,10 @@ export async function DELETE(
             );
         }
 
+        const { id } = await params;
         await connectDB();
 
-        const lesson = await Lesson.findById(params.id).populate('course');
+        const lesson = await Lesson.findById(id).populate('course');
 
         if (!lesson) {
             return NextResponse.json(
@@ -143,7 +146,7 @@ export async function DELETE(
         }
 
         // Delete the lesson
-        await Lesson.findByIdAndDelete(params.id);
+        await Lesson.findByIdAndDelete(id);
 
         // Update course total lessons count
         await Course.findByIdAndUpdate(lesson.course, {

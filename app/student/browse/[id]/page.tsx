@@ -11,13 +11,15 @@ import EnrollButton from '@/components/courses/EnrollButton';
 export default async function CourseDetailPage({
     params,
 }: {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }) {
     const user = await requireAuth();
+    const { id } = await params;
+
     await connectDB();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const course: any = await Course.findById(params.id)
+    const course: any = await Course.findById(id)
         .populate('instructor', 'name image teacherBio teacherQualifications')
         .lean();
 
@@ -26,7 +28,7 @@ export default async function CourseDetailPage({
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lessons: any[] = await Lesson.find({ course: params.id })
+    const lessons: any[] = await Lesson.find({ course: id })
         .sort({ order: 1 })
         .select('-videoKey')
         .lean();
@@ -34,7 +36,7 @@ export default async function CourseDetailPage({
     // Check if user is enrolled
     const enrolledUser = await User.findOne({
         _id: user.id,
-        enrolledCourses: params.id,
+        enrolledCourses: id,
     });
 
     const isEnrolled = !!enrolledUser;
@@ -140,7 +142,7 @@ export default async function CourseDetailPage({
 
                             {/* Enroll Button */}
                             <EnrollButton
-                                courseId={params.id}
+                                courseId={id}
                                 isEnrolled={isEnrolled}
                                 isFree={course.isFree}
                                 price={course.price}
