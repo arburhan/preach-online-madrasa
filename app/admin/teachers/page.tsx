@@ -7,6 +7,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TeacherApprovalCard } from '@/components/admin/TeacherApprovalCard';
 import { Check, X, BookOpen, Users, Clock } from 'lucide-react';
 
+interface PendingTeacher {
+    _id: { toString: () => string };
+    name: string;
+    email: string;
+    mobileNumber?: string;
+    gender?: string;
+    fatherName?: string;
+    motherName?: string;
+    address?: string;
+    teacherQualifications?: string;
+    createdAt: Date;
+}
+
+interface ApprovedTeacher {
+    _id: { toString: () => string };
+    name: string;
+    email: string;
+    mobileNumber?: string;
+    teacherQualifications?: string;
+    courseCount: number;
+    publishedCount: number;
+    createdAt: Date;
+}
+
 export default async function TeachersAdminPage() {
     const session = await auth();
 
@@ -17,15 +41,16 @@ export default async function TeachersAdminPage() {
     await connectDB();
 
     // Get pending teachers
-    const pendingTeachers = await User.find({
+    const pendingTeachersData = await User.find({
         role: 'teacher',
         isTeacherApproved: false,
     })
         .sort({ createdAt: -1 })
         .lean();
+    const pendingTeachers = pendingTeachersData as unknown as PendingTeacher[];
 
     // Get approved teachers with their course counts
-    const approvedTeachers = await User.aggregate([
+    const approvedTeachersData = await User.aggregate([
         { $match: { role: 'teacher', isTeacherApproved: true } },
         {
             $lookup: {
@@ -51,6 +76,7 @@ export default async function TeachersAdminPage() {
         },
         { $sort: { createdAt: -1 } },
     ]);
+    const approvedTeachers = approvedTeachersData as ApprovedTeacher[];
 
     // Get student counts for approved teachers
     const teacherIds = approvedTeachers.map((t) => t._id);
@@ -89,7 +115,7 @@ export default async function TeachersAdminPage() {
                 {/* Pending Teachers */}
                 <TabsContent value="pending" className="space-y-4">
                     {pendingTeachers.length > 0 ? (
-                        pendingTeachers.map((teacher: any) => (
+                        pendingTeachers.map((teacher: PendingTeacher) => (
                             <TeacherApprovalCard
                                 key={teacher._id.toString()}
                                 teacher={JSON.parse(JSON.stringify(teacher))}
@@ -110,7 +136,7 @@ export default async function TeachersAdminPage() {
                 <TabsContent value="approved" className="space-y-4">
                     {approvedTeachers.length > 0 ? (
                         <div className="grid grid-cols-1 gap-4">
-                            {approvedTeachers.map((teacher: any) => (
+                            {approvedTeachers.map((teacher: ApprovedTeacher) => (
                                 <div
                                     key={teacher._id.toString()}
                                     className="bg-card rounded-xl border p-6 hover:shadow-md transition-shadow"

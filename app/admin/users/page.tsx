@@ -6,6 +6,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users as UsersIcon, GraduationCap, UserCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
+interface StudentUser {
+    _id: { toString: () => string };
+    name: string;
+    email: string;
+    gender?: 'male' | 'female';
+    enrolledCourses?: { length: number };
+    createdAt: Date;
+}
+
+interface TeacherUser {
+    _id: { toString: () => string };
+    name: string;
+    email: string;
+    teacherQualifications?: string;
+    createdAt: Date;
+}
+
+interface AdminUser {
+    _id: { toString: () => string };
+    name: string;
+    email: string;
+    createdAt: Date;
+}
+
 export default async function UsersAdminPage() {
     const session = await auth();
 
@@ -16,20 +40,23 @@ export default async function UsersAdminPage() {
     await connectDB();
 
     // Get all users with enrollment data
-    const students = await User.find({ role: 'student' })
+    const studentsData = await User.find({ role: 'student' })
         .select('name email gender enrolledCourses createdAt')
         .sort({ createdAt: -1 })
         .lean();
+    const students = studentsData as unknown as StudentUser[];
 
-    const teachers = await User.find({ role: 'teacher', isTeacherApproved: true })
+    const teachersData = await User.find({ role: 'teacher', isTeacherApproved: true })
         .select('name email teacherQualifications createdAt')
         .sort({ createdAt: -1 })
         .lean();
+    const teachers = teachersData as unknown as TeacherUser[];
 
-    const admins = await User.find({ role: 'admin' })
+    const adminsData = await User.find({ role: 'admin' })
         .select('name email createdAt')
         .sort({ createdAt: -1 })
         .lean();
+    const admins = adminsData as unknown as AdminUser[];
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
@@ -82,7 +109,7 @@ export default async function UsersAdminPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {students.map((student: any) => (
+                                {students.map((student: StudentUser) => (
                                     <tr key={student._id.toString()} className="hover:bg-muted/50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="font-medium">{student.name}</div>
@@ -137,7 +164,7 @@ export default async function UsersAdminPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {teachers.map((teacher: any) => (
+                                {teachers.map((teacher: TeacherUser) => (
                                     <tr key={teacher._id.toString()} className="hover:bg-muted/50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="font-medium">{teacher.name}</div>
@@ -184,7 +211,7 @@ export default async function UsersAdminPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {admins.map((admin: any) => (
+                                {admins.map((admin: AdminUser) => (
                                     <tr key={admin._id.toString()} className="hover:bg-muted/50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="font-medium">{admin.name}</div>

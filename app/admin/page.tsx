@@ -13,6 +13,14 @@ import {
     TrendingUp
 } from 'lucide-react';
 
+interface RecentUser {
+    _id: { toString: () => string };
+    name: string;
+    email: string;
+    role: 'student' | 'teacher' | 'admin';
+    createdAt: Date;
+}
+
 interface StatsCardProps {
     title: string;
     value: string | number;
@@ -85,11 +93,12 @@ export default async function AdminDashboardPage() {
     const totalEnrollments = enrollmentStats[0]?.total || 0;
 
     // Get recent users (last 5)
-    const recentUsers = await User.find()
+    const recentUsersData = await User.find()
         .sort({ createdAt: -1 })
         .limit(5)
         .select('name email role createdAt')
         .lean();
+    const recentUsers = recentUsersData as unknown as RecentUser[];
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
@@ -175,7 +184,7 @@ export default async function AdminDashboardPage() {
                 <h2 className="text-xl font-semibold mb-4">সাম্প্রতিক ইউজার</h2>
                 <div className="space-y-4">
                     {recentUsers.length > 0 ? (
-                        recentUsers.map((user: any) => (
+                        recentUsers.map((user: RecentUser) => (
                             <div
                                 key={user._id.toString()}
                                 className="flex items-center justify-between py-3 border-b last:border-0"

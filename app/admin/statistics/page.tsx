@@ -11,6 +11,20 @@ import {
     Award
 } from 'lucide-react';
 
+interface TopCourse {
+    _id: { toString: () => string };
+    titleBn: string;
+    enrolledCount: number;
+    instructor?: { name?: string } | null;
+}
+
+interface TopTeacher {
+    _id: { toString: () => string };
+    totalStudents: number;
+    courseCount: number;
+    teacherData: { name: string };
+}
+
 export default async function StatisticsPage() {
     const session = await auth();
 
@@ -21,14 +35,15 @@ export default async function StatisticsPage() {
     await connectDB();
 
     // Get top courses by enrollment
-    const topCourses = await Course.find({ status: 'published' })
+    const topCoursesData = await Course.find({ status: 'published' })
         .sort({ enrolledCount: -1 })
         .limit(10)
         .populate('instructor', 'name')
         .lean();
+    const topCourses = topCoursesData as unknown as TopCourse[];
 
     // Get top teachers by total students
-    const topTeachers = await Course.aggregate([
+    const topTeachersData = await Course.aggregate([
         { $match: { status: 'published', instructor: { $ne: null } } },
         {
             $group: {
@@ -49,6 +64,7 @@ export default async function StatisticsPage() {
         },
         { $unwind: '$teacherData' },
     ]);
+    const topTeachers = topTeachersData as TopTeacher[];
 
     // Get overview stats
     const [totalStudents, totalTeachers, totalCourses, totalLessons] = await Promise.all([
@@ -120,7 +136,7 @@ export default async function StatisticsPage() {
                     </div>
                     <div className="space-y-3">
                         {topCourses.length > 0 ? (
-                            topCourses.map((course: any, index) => (
+                            topCourses.map((course: TopCourse, index: number) => (
                                 <div
                                     key={course._id.toString()}
                                     className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
@@ -156,7 +172,7 @@ export default async function StatisticsPage() {
                     </div>
                     <div className="space-y-3">
                         {topTeachers.length > 0 ? (
-                            topTeachers.map((item: any, index) => (
+                            topTeachers.map((item: TopTeacher, index: number) => (
                                 <div
                                     key={item._id.toString()}
                                     className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
