@@ -3,6 +3,11 @@ import connectDB from '@/lib/db/mongodb';
 import Progress from '@/lib/db/models/Progress';
 import { requireAuth } from '@/lib/auth/rbac';
 
+interface PopulatedProgress {
+    isCompleted: boolean;
+    [key: string]: unknown;
+}
+
 // POST /api/progress - Update or create progress
 export async function POST(request: NextRequest) {
     try {
@@ -58,12 +63,13 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// GET /api/progress?courseId=xxx - Get user's progress for a course
+// GET /api/progress?courseId=xxx&lessonId=xxx - Get user's progress
 export async function GET(request: NextRequest) {
     try {
         const user = await requireAuth();
         const { searchParams } = new URL(request.url);
         const courseId = searchParams.get('courseId');
+        const lessonId = searchParams.get('lessonId');
 
         if (!courseId) {
             return NextResponse.json(
@@ -74,6 +80,18 @@ export async function GET(request: NextRequest) {
 
         await connectDB();
 
+        // If lessonId provided, return single lesson progress
+        if (lessonId) {
+            const progress = await Progress.findOne({
+                user: user.id,
+                lesson: lessonId,
+                course: courseId
+            }).lean();
+
+            return NextResponse.json({ progress });
+        }
+
+        // Otherwise return all progress for the course
         const progressList = await Progress.find({
             user: user.id,
             course: courseId,
@@ -84,7 +102,7 @@ export async function GET(request: NextRequest) {
 
         // Calculate overall course progress
         const totalLessons = progressList.length;
-        const completedLessons = progressList.filter(p => p.isCompleted).length;
+        const completedLessons = (progressList as unknown as PopulatedProgress[]).filter((p) => p.isCompleted).length;
         const overallProgress = totalLessons > 0
             ? Math.round((completedLessons / totalLessons) * 100)
             : 0;
