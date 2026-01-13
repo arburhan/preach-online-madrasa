@@ -29,6 +29,10 @@ export interface IUser extends Document {
     mobileNumber?: string;
     address?: string;
 
+    // Common fields
+    phone?: string;
+    bio?: string;
+
     // Student specific
     enrolledCourses?: Types.ObjectId[];
 
@@ -84,6 +88,10 @@ const UserSchema = new Schema<IUser>(
         motherName: String,
         mobileNumber: String,
         address: String,
+
+        // Common fields
+        phone: String,
+        bio: String,
 
         // Student fields
         enrolledCourses: [
