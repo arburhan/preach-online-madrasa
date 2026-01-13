@@ -8,6 +8,7 @@ import { VideoPlayer } from '@/components/video/VideoPlayer';
 
 import { BookOpen, Clock, FileText } from 'lucide-react';
 import { LessonPlaylist } from '@/components/video/LessonPlaylist';
+import { NoteEditor } from '@/components/notes/NoteEditor';
 
 interface PageProps {
     params: Promise<{
@@ -122,15 +123,13 @@ export default async function WatchLessonPage({ params }: PageProps) {
                             )}
                         </div>
 
-                        {/* Notes Section - Placeholder */}
+                        {/* Notes Section */}
                         <div className="bg-card rounded-xl border p-6">
                             <div className="flex items-center gap-2 mb-4">
                                 <FileText className="h-5 w-5" />
                                 <h3 className="font-semibold">নোট</h3>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                                নোট ফিচার শীঘ্রই আসছে...
-                            </p>
+                            <NoteEditor lessonId={lessonId} courseId={courseId} />
                         </div>
                     </div>
 
