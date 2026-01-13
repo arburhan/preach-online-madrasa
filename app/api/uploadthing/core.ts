@@ -18,12 +18,12 @@ export const ourFileRouter = {
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log('Video upload complete for userId:', metadata.userId);
-            console.log('File URL:', file.url);
+            console.log('File URL:', file.ufsUrl);
             console.log('File key:', file.key);
 
             return {
                 uploadedBy: metadata.userId,
-                url: file.url,
+                url: file.ufsUrl,
                 key: file.key,
             };
         }),
@@ -41,9 +41,9 @@ export const ourFileRouter = {
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log('Thumbnail upload complete for userId:', metadata.userId);
-            console.log('File URL:', file.url);
+            console.log('File URL:', file.ufsUrl);
 
-            return { uploadedBy: metadata.userId, url: file.url };
+            return { uploadedBy: metadata.userId, url: file.ufsUrl };
         }),
 
     // Lesson attachments uploader - teachers and admins
@@ -62,9 +62,9 @@ export const ourFileRouter = {
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log('Attachment upload complete for userId:', metadata.userId);
-            console.log('File URL:', file.url);
+            console.log('File URL:', file.ufsUrl);
 
-            return { uploadedBy: metadata.userId, url: file.url };
+            return { uploadedBy: metadata.userId, url: file.ufsUrl };
         }),
 
     // Profile image uploader - all authenticated users
@@ -80,9 +80,9 @@ export const ourFileRouter = {
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log('Profile image upload complete for userId:', metadata.userId);
-            console.log('File URL:', file.url);
+            console.log('File URL:', file.ufsUrl);
 
-            return { uploadedBy: metadata.userId, url: file.url };
+            return { uploadedBy: metadata.userId, url: file.ufsUrl };
         }),
 } satisfies FileRouter;
 

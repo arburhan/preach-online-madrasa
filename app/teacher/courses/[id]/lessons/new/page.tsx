@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { VideoUploader } from '@/components/upload/UploadComponents';
+import { DirectR2VideoUpload } from '@/components/upload/DirectR2Upload';
 
 export default function NewLessonPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -111,7 +111,7 @@ export default function NewLessonPage({ params }: { params: Promise<{ id: string
                                 </p>
                             </div>
                         ) : (
-                            <VideoUploader onUploadComplete={handleVideoUpload} />
+                            <DirectR2VideoUpload onUploadComplete={handleVideoUpload} />
                         )}
                     </div>
 

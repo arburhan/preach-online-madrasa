@@ -42,17 +42,41 @@ export default async function EditCoursePage({
         .lean();
 
     // Serialize course for client component
-    const serializedCourse = JSON.parse(JSON.stringify({
+    const serializedCourse = {
         _id: course._id.toString(),
         titleBn: course.titleBn,
         titleEn: course.titleEn,
         descriptionBn: course.descriptionBn,
         descriptionEn: course.descriptionEn,
+        thumbnailUrl: course.thumbnailUrl,
         price: course.price,
-        isFree: course.isFree,
+        isFree: course.isFree || false,
         level: course.level,
         language: course.language,
-        status: course.status,
+        category: course.category,
+        tags: course.tags,
+        status: course.status || 'draft',
+        isPublished: course.isPublished,
+        totalLessons: course.totalLessons,
+        totalDuration: course.totalDuration,
+        studentsEnrolled: course.studentsEnrolled,
+        createdAt: course.createdAt?.toISOString(),
+        updatedAt: course.updatedAt?.toISOString(),
+    };
+
+    // Serialize lessons for client component  
+    const serializedLessons = lessons.map((lesson) => ({
+        _id: lesson._id.toString(),
+        course: lesson.course.toString(),
+        titleBn: lesson.titleBn,
+        titleEn: lesson.titleEn,
+        order: lesson.order,
+        isFree: lesson.isFree || false,
+        isPublished: lesson.isPublished,
+        videoUrl: lesson.videoUrl,
+        duration: lesson.duration,
+        createdAt: lesson.createdAt?.toISOString(),
+        updatedAt: lesson.updatedAt?.toISOString(),
     }));
 
     return (
@@ -92,7 +116,7 @@ export default async function EditCoursePage({
                         <div>
                             <h2 className="text-2xl font-bold">পাঠসমূহ</h2>
                             <p className="text-sm text-muted-foreground mt-1">
-                                {lessons.length} টি পাঠ
+                                {serializedLessons.length} টি পাঠ
                             </p>
                         </div>
                         <Link href={`/teacher/courses/${id}/lessons/new`}>
@@ -103,7 +127,7 @@ export default async function EditCoursePage({
                         </Link>
                     </div>
 
-                    <LessonList lessons={lessons} courseId={id} />
+                    <LessonList lessons={serializedLessons} courseId={id} />
                 </div>
             </div>
         </div>
