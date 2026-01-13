@@ -20,7 +20,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
 
     // Fetch course details
     const course = await Course.findById(id)
-        .populate('instructor', 'name teacherBio')
+        .populate('instructors', 'name teacherBio')
         .lean();
 
     if (!course || !course.publishedAt) {
@@ -41,7 +41,14 @@ export default async function CourseDetailPage({ params }: PageProps) {
 
     // Serialize course
     const courseData = course as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    const instructorData = courseData.instructor as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const instructorsData = Array.isArray(courseData.instructors) ? courseData.instructors : [];
+
+    // Get first instructor for display (or expand to show all)
+    const primaryInstructor = instructorsData[0] || {};
+    const allInstructorNames = instructorsData
+        .map((inst: any) => inst?.name || 'Unknown') // eslint-disable-line @typescript-eslint/no-explicit-any
+        .filter(Boolean)
+        .join(', ') || 'Unknown';
 
     const serializedCourse = {
         _id: courseData._id.toString(),
@@ -58,9 +65,9 @@ export default async function CourseDetailPage({ params }: PageProps) {
         totalDuration: courseData.duration || 0,
         studentsEnrolled: courseData.enrolledStudents || 0,
         instructor: {
-            _id: instructorData?._id?.toString(),
-            name: instructorData?.name || 'Unknown',
-            bio: instructorData?.teacherBio || '',
+            _id: primaryInstructor?._id?.toString(),
+            name: allInstructorNames,
+            bio: primaryInstructor?.teacherBio || '',
         },
     };
 

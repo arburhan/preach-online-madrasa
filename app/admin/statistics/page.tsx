@@ -38,16 +38,17 @@ export default async function StatisticsPage() {
     const topCoursesData = await Course.find({ status: 'published' })
         .sort({ enrolledCount: -1 })
         .limit(10)
-        .populate('instructor', 'name')
+        .populate('instructors', 'name')
         .lean();
     const topCourses = topCoursesData as unknown as TopCourse[];
 
     // Get top teachers by total students
     const topTeachersData = await Course.aggregate([
-        { $match: { status: 'published', instructor: { $ne: null } } },
+        { $match: { status: 'published', instructors: { $exists: true, $ne: [] } } },
+        { $unwind: '$instructors' }, // Unwind the instructors array
         {
             $group: {
-                _id: '$instructor',
+                _id: '$instructors',
                 totalStudents: { $sum: '$enrolledCount' },
                 courseCount: { $sum: 1 },
             },

@@ -14,19 +14,19 @@ export default async function PublicCoursesPage() {
 
     // Fetch all published courses
     const courses = await Course.find({ isPublished: true })
-        .populate('instructor', 'name')
+        .populate('instructors', 'name')
         .sort({ createdAt: -1 })
         .lean();
 
     // Serialize courses
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serializedCourses = courses.map((course: any) => {
-        // Handle instructors array
-        const instructorsData = Array.isArray(course.instructor) ? course.instructor : [course.instructor];
+        // Handle instructors array - now properly populated
+        const instructorsData = Array.isArray(course.instructors) ? course.instructors : [];
         const instructorNames = instructorsData
             .map((inst: any) => inst?.name || 'Unknown') // eslint-disable-line @typescript-eslint/no-explicit-any
             .filter(Boolean)
-            .join(', ');
+            .join(', ') || 'No instructor';
 
         return {
             _id: course._id.toString(),

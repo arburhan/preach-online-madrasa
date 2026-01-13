@@ -3,10 +3,11 @@ import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
 
-import { BookOpen, Users, Video, Calendar } from 'lucide-react';
+import { BookOpen, Users, Video, Calendar, Plus } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface CourseData {
     _id: { toString: () => string };
@@ -35,7 +36,7 @@ export default async function AdminCoursesPage() {
 
     // Get all courses with instructor data
     const coursesData = await Course.find()
-        .populate('instructor', 'name email')
+        .populate('instructors', 'name email')
         .sort({ createdAt: -1 })
         .lean();
 
@@ -44,11 +45,19 @@ export default async function AdminCoursesPage() {
     return (
         <div className="px-4 sm:px-6 lg:px-8">
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold">কোর্স ব্যবস্থাপনা</h1>
-                <p className="text-muted-foreground mt-2">
-                    সকল কোর্স দেখুন এবং পরিচালনা করুন
-                </p>
+            <div className="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold">কোর্স ব্যবস্থাপনা</h1>
+                    <p className="text-muted-foreground mt-2">
+                        সকল কোর্স দেখুন এবং পরিচালনা করুন
+                    </p>
+                </div>
+                <Link href="/admin/courses/new">
+                    <Button className="bg-purple-600 hover:bg-purple-700">
+                        <Plus className="mr-2 h-4 w-4" />
+                        নতুন কোর্স তৈরি করুন
+                    </Button>
+                </Link>
             </div>
 
             {/* Stats */}
@@ -127,9 +136,11 @@ export default async function AdminCoursesPage() {
                                     {course.titleBn}
                                 </h3>
 
-                                {/* Instructor */}
+                                {/* Instructors */}
                                 <p className="text-sm text-muted-foreground mb-3">
-                                    {course.instructor?.name || 'Unknown'}
+                                    উস্তায: {Array.isArray(course.instructor)
+                                        ? course.instructor.map((i: any) => i?.name).filter(Boolean).join(', ') || 'Unknown' // eslint-disable-line
+                                        : course.instructor?.name || 'Unknown'}
                                 </p>
 
                                 {/* Meta Info */}

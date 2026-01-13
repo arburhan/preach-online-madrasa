@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         // Search approved teachers by name or email
         const teachers = await User.find({
             role: 'teacher',
-            isApproved: true,
+            isTeacherApproved: true,
             $or: [
                 { name: { $regex: query, $options: 'i' } },
                 { email: { $regex: query, $options: 'i' } },
