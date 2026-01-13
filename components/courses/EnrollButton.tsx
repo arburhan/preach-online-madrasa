@@ -62,7 +62,7 @@ export default function EnrollButton({ courseId, isEnrolled, isLoggedIn, isFree,
                 className="w-full"
                 onClick={() => router.push(`/student/courses/${courseId}`)}
             >
-                কোর্স দেখুন
+                কোর্স এনরোল করুন
             </Button>
         );
     }
@@ -81,7 +81,7 @@ export default function EnrollButton({ courseId, isEnrolled, isLoggedIn, isFree,
                 </>
             ) : (
                 <>
-                    {isFree ? 'বিনামূল্যে নথিভুক্ত হন' : `৳${price} - এখনই কিনুন`}
+                    এনরোল করুন
                 </>
             )}
         </Button>

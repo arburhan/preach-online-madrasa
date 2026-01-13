@@ -13,7 +13,7 @@ export default async function PublicCoursesPage() {
     const session = await auth();
 
     // Fetch all published courses
-    const courses = await Course.find({ isPublished: true })
+    const courses = await Course.find({ status: 'published' })
         .populate('instructors', 'name')
         .sort({ createdAt: -1 })
         .lean();
@@ -111,7 +111,7 @@ export default async function PublicCoursesPage() {
                                             {course.descriptionBn}
                                         </p>
 
-                                        {/* Meta Info */}
+                                        {/* Meta Info - with proper spacing and Bengali labels */}
                                         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                                             <div className="flex items-center gap-1">
                                                 <BookOpen className="h-4 w-4" />
@@ -119,12 +119,12 @@ export default async function PublicCoursesPage() {
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <Users className="h-4 w-4" />
-                                                <span>{course.studentsEnrolled || 0}</span>
+                                                <span>{course.studentsEnrolled || 0} জন</span>
                                             </div>
-                                            {course.totalDuration && (
+                                            {course.totalDuration > 0 && (
                                                 <div className="flex items-center gap-1">
                                                     <Clock className="h-4 w-4" />
-                                                    <span>{Math.floor(course.totalDuration / 60)}m</span>
+                                                    <span>{Math.floor(course.totalDuration / 60)} মিনিট</span>
                                                 </div>
                                             )}
                                         </div>
@@ -134,15 +134,15 @@ export default async function PublicCoursesPage() {
                                             উস্তায: {course.instructorNames}
                                         </p>
 
-                                        {/* Price & Enroll */}
-                                        <div className="flex items-center justify-between">
+                                        {/* Price & Enroll - Vertical Layout */}
+                                        <div className="space-y-3">
                                             <div>
                                                 {course.isFree ? (
-                                                    <span className="text-lg font-bold text-green-600">
+                                                    <span className="font-bold text-green-600">
                                                         বিনামূল্যে
                                                     </span>
                                                 ) : (
-                                                    <span className="text-lg font-bold">
+                                                    <span className="text-lg font-bold text-purple-600">
                                                         ৳{course.price}
                                                     </span>
                                                 )}

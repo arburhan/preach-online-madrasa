@@ -57,7 +57,7 @@ export default function Home() {
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link href="/courses">
                 <Button size="lg" className="w-full sm:w-auto">
-                  কোর্স দেখুন
+                  এনরোল করুন
                 </Button>
               </Link>
               <Link href="/about">

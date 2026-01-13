@@ -23,7 +23,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
         .populate('instructors', 'name teacherBio')
         .lean();
 
-    if (!course || !course.publishedAt) {
+    if (!course || course.status !== 'published') {
         notFound();
     }
 
@@ -157,10 +157,10 @@ export default async function CourseDetailPage({ params }: PageProps) {
 
                     {/* Sidebar */}
                     <div className="lg:col-span-1">
-                        <div className="bg-card border rounded-xl p-6 sticky top-4">
+                        <div className="bg-card border rounded-xl p-6 sticky top-4 space-y-6">
                             {/* Thumbnail */}
                             {serializedCourse.thumbnailUrl && (
-                                <div className="relative h-48 rounded-lg overflow-hidden mb-6">
+                                <div className="relative h-48 rounded-lg overflow-hidden">
                                     <Image
                                         src={serializedCourse.thumbnailUrl}
                                         alt={serializedCourse.titleBn}
@@ -171,13 +171,13 @@ export default async function CourseDetailPage({ params }: PageProps) {
                             )}
 
                             {/* Price */}
-                            <div className="mb-6">
+                            <div>
                                 {serializedCourse.isFree ? (
                                     <div className="text-3xl font-bold text-green-600">
                                         বিনামূল্যে
                                     </div>
                                 ) : (
-                                    <div className="text-3xl font-bold">
+                                    <div className="text-3xl font-bold text-purple-600">
                                         ৳{serializedCourse.price}
                                     </div>
                                 )}
@@ -192,22 +192,54 @@ export default async function CourseDetailPage({ params }: PageProps) {
                                 price={serializedCourse.price}
                             />
 
-                            {/* Course Includes */}
-                            <div className="mt-6 pt-6 border-t space-y-3">
-                                <h3 className="font-semibold mb-3">এই কোর্সে রয়েছে:</h3>
-                                <div className="flex items-center gap-2 text-sm">
-                                    <BookOpen className="h-4 w-4 text-purple-600" />
-                                    <span>{serializedCourse.totalLessons} টি ভিডিও পাঠ</span>
+                            {/* Course Info Cards */}
+                            <div className="pt-6 border-t space-y-4">
+                                <h3 className="font-semibold text-lg mb-3">এই কোর্সে রয়েছে:</h3>
+
+                                {/* Lessons Count */}
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                                        <BookOpen className="h-5 w-5 text-purple-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">ভিডিও পাঠ</p>
+                                        <p className="font-semibold">{serializedCourse.totalLessons} টি</p>
+                                    </div>
                                 </div>
+
+                                {/* Duration */}
                                 {serializedCourse.totalDuration && (
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Clock className="h-4 w-4 text-purple-600" />
-                                        <span>{Math.floor(serializedCourse.totalDuration / 60)} মিনিট কন্টেন্ট</span>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                            <Clock className="h-5 w-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">মোট সময়</p>
+                                            <p className="font-semibold">{Math.floor(serializedCourse.totalDuration / 60)} মিনিট</p>
+                                        </div>
                                     </div>
                                 )}
-                                <div className="flex items-center gap-2 text-sm">
-                                    <Award className="h-4 w-4 text-purple-600" />
-                                    <span>সার্টিফিকেট (সম্পন্ন করার পর)</span>
+
+                                {/* Students Enrolled */}
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                        <Users className="h-5 w-5 text-green-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">এনরোল করেছেন</p>
+                                        <p className="font-semibold">{serializedCourse.studentsEnrolled} জন</p>
+                                    </div>
+                                </div>
+
+                                {/* Certificate */}
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center">
+                                        <Award className="h-5 w-5 text-amber-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">সার্টিফিকেট</p>
+                                        <p className="font-semibold">সম্পন্ন করার পর</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>

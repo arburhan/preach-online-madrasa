@@ -32,6 +32,7 @@ export default function NewCoursePage() {
         price: '0',
         isFree: true,
         level: 'beginner',
+        publishImmediately: false,
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -281,6 +282,21 @@ export default function NewCoursePage() {
                             />
                             <label htmlFor="isFree" className="text-sm font-medium">
                                 এটি একটি বিনামূল্যে কোর্স
+                            </label>
+                        </div>
+
+                        {/* Publish Immediately Checkbox */}
+                        <div className="flex items-center gap-2">
+                            <input
+                                id="publishImmediately"
+                                name="publishImmediately"
+                                type="checkbox"
+                                checked={formData.publishImmediately}
+                                onChange={handleChange}
+                                className="h-4 w-4 rounded border-input"
+                            />
+                            <label htmlFor="publishImmediately" className="text-sm font-medium">
+                                তৈরি করার সাথে সাথে প্রকাশ করুন (ভিডিও ছাড়াই এনরোলমেন্ট শুরু হবে)
                             </label>
                         </div>
                     </div>

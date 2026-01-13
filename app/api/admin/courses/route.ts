@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
             level,
             instructors,
             thumbnail,
+            publishImmediately,
         } = body;
 
         // Validation
@@ -66,7 +67,8 @@ export async function POST(request: NextRequest) {
             instructors,
             thumbnail,
             createdBy: user.id,
-            status: 'draft', // Admin can publish later
+            status: publishImmediately ? 'published' : 'draft',
+            publishedAt: publishImmediately ? new Date() : undefined,
         });
 
         return NextResponse.json({

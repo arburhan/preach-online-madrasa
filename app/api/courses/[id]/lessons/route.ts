@@ -31,13 +31,14 @@ export async function POST(
             );
         }
 
-        // Check if user is the instructor or admin
-        if (
-            course.instructor.toString() !== user.id &&
-            user.role !== 'admin'
-        ) {
+        // Check if user is one of the instructors or admin
+        const isAssigned = course.instructors?.some(
+            (instructorId: any) => instructorId.toString() === user.id // eslint-disable-line
+        );
+
+        if (!isAssigned && user.role !== 'admin') {
             return NextResponse.json(
-                { error: 'আপনার এই কোর্সে পাঠ যোগ করার অনুমতি নেই' },
+                { error: 'আপনি এই কোর্সে পাঠ যোগ করার অনুমতি পাননি' },
                 { status: 403 }
             );
         }

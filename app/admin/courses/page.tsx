@@ -40,7 +40,24 @@ export default async function AdminCoursesPage() {
         .sort({ createdAt: -1 })
         .lean();
 
-    const courses = coursesData as unknown as CourseData[];
+    // Serialize courses properly
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const courses: CourseData[] = coursesData.map((course: any) => ({
+        _id: course._id,
+        titleBn: course.titleBn,
+        titleEn: course.titleEn || '',
+        descriptionBn: course.descriptionBn || '',
+        thumbnail: course.thumbnail || '',
+        status: course.status,
+        isFree: course.isFree,
+        price: course.price || 0,
+        level: course.level || 'beginner',
+        language: course.language || 'bn',
+        totalLessons: course.totalLessons || 0,
+        enrolledCount: course.enrolledCount || 0,
+        createdAt: course.createdAt,
+        instructor: course.instructors || [],
+    }));
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
