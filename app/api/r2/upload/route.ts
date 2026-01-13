@@ -25,11 +25,24 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Generate unique key for R2
+        // Generate unique key for R2 based on file type
         const timestamp = Date.now();
         const randomString = Math.random().toString(36).substring(2, 15);
         const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const key = `videos/${timestamp}-${randomString}-${sanitizedFileName}`;
+
+        let key: string;
+        if (fileType.startsWith('image/')) {
+            // Images go to images/course-thumbnails/
+            key = `images/course-thumbnails/${timestamp}-${sanitizedFileName}`;
+        } else if (fileType.startsWith('video/')) {
+            // Videos go to videos/
+            key = `videos/${timestamp}-${randomString}-${sanitizedFileName}`;
+        } else {
+            return NextResponse.json(
+                { error: 'অসমর্থিত ফাইল টাইপ' },
+                { status: 400 }
+            );
+        }
 
         // Create presigned URL (valid for 1 hour)
         const command = new PutObjectCommand({

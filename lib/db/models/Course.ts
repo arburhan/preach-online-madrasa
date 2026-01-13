@@ -22,8 +22,9 @@ export interface ICourse extends Document {
     descriptionBn: string;
     descriptionEn?: string;
 
-    // Instructor
-    instructor: mongoose.Types.ObjectId; // Reference to User (teacher)
+    // Instructors (multi-teacher support)
+    instructors: mongoose.Types.ObjectId[]; // References to Users (teachers)
+    createdBy: mongoose.Types.ObjectId; // Admin who created the course
 
     // Pricing
     price: number; // 0 for free courses
@@ -36,6 +37,7 @@ export interface ICourse extends Document {
     // Course details
     level: CourseLevel;
     duration: number; // Total duration in minutes
+    courseDuration?: string; // e.g., '30 দিন', '3 মাস'
     language: string; // e.g., 'bn', 'en', 'ar'
 
     // Status
@@ -74,10 +76,15 @@ const CourseSchema = new Schema<ICourse>(
         descriptionEn: {
             type: String,
         },
-        instructor: {
+        instructors: [{
             type: Schema.Types.ObjectId,
             ref: 'User',
-            required: [true, 'Instructor is required'],
+            required: [true, 'At least one instructor is required'],
+        }],
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: [true, 'Creator (admin) is required'],
         },
         price: {
             type: Number,
@@ -102,6 +109,9 @@ const CourseSchema = new Schema<ICourse>(
         duration: {
             type: Number,
             default: 0,
+        },
+        courseDuration: {
+            type: String,
         },
         language: {
             type: String,
@@ -140,7 +150,8 @@ const CourseSchema = new Schema<ICourse>(
 );
 
 // Indexes
-CourseSchema.index({ instructor: 1 });
+CourseSchema.index({ instructors: 1 });
+CourseSchema.index({ createdBy: 1 });
 CourseSchema.index({ status: 1 });
 CourseSchema.index({ isFree: 1 });
 CourseSchema.index({ createdAt: -1 });

@@ -9,15 +9,23 @@ import { toast } from 'sonner';
 interface EnrollButtonProps {
     courseId: string;
     isEnrolled: boolean;
+    isLoggedIn: boolean;
     isFree: boolean;
     price: number;
 }
 
-export default function EnrollButton({ courseId, isEnrolled, isFree, price }: EnrollButtonProps) {
+export default function EnrollButton({ courseId, isEnrolled, isLoggedIn, isFree, price }: EnrollButtonProps) {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleEnroll = async () => {
+        // Check if user is logged in
+        if (!isLoggedIn) {
+            toast.info('দয়া করে লগইন করুন');
+            router.push(`/auth/signin?callbackUrl=/courses/${courseId}`);
+            return;
+        }
+
         setLoading(true);
 
         try {

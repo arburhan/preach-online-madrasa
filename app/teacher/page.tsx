@@ -15,9 +15,9 @@ export default async function TeacherDashboard() {
 
     await connectDB();
 
-    // Get teacher's courses
+    // Get teacher's assigned courses (where they are in instructors array)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const courses: any[] = await Course.find({ instructor: user.id })
+    const courses: any[] = await Course.find({ instructors: user.id })
         .sort({ createdAt: -1 })
         .lean();
 
@@ -34,14 +34,11 @@ export default async function TeacherDashboard() {
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-3xl font-bold">প্রশিক্ষক ড্যাশবোর্ড</h1>
-                            <p className="text-muted-foreground mt-1">আপনার কোর্স পরিচালনা করুন</p>
+                            <p className="text-muted-foreground mt-1">আপনার নিয়োগপ্রাপ্ত কোর্স পরিচালনা করুন</p>
                         </div>
-                        <div className="flex gap-3">
+                        <div>
                             <Link href="/">
                                 <Button variant="outline">হোম পেজ</Button>
-                            </Link>
-                            <Link href="/teacher/courses/new">
-                                <Button>নতুন কোর্স তৈরি করুন</Button>
                             </Link>
                         </div>
                     </div>
@@ -103,7 +100,7 @@ export default async function TeacherDashboard() {
                 {/* Courses List */}
                 <section>
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold">আমার কোর্সসমূহ</h2>
+                        <h2 className="text-2xl font-bold">নিয়োগপ্রাপ্ত কোর্সসমূহ</h2>
                     </div>
 
                     {courses.length === 0 ? (
@@ -130,8 +127,8 @@ export default async function TeacherDashboard() {
                                                 <h3 className="text-xl font-bold">{course.titleBn}</h3>
                                                 <span
                                                     className={`text-xs px-3 py-1 rounded-full ${course.status === 'published'
-                                                            ? 'bg-green-500/10 text-green-600'
-                                                            : 'bg-amber-500/10 text-amber-600'
+                                                        ? 'bg-green-500/10 text-green-600'
+                                                        : 'bg-amber-500/10 text-amber-600'
                                                         }`}
                                                 >
                                                     {course.status === 'published' ? 'প্রকাশিত' : 'খসড়া'}

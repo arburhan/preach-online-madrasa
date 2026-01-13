@@ -31,8 +31,12 @@ export default async function EditCoursePage({
         notFound();
     }
 
-    // Check if user is the instructor or admin
-    if (course.instructor.toString() !== user.id && user.role !== 'admin') {
+    // Check if user is one of the instructors or admin
+    const isAssigned = course.instructors?.some(
+        (instructorId: any) => instructorId.toString() === user.id // eslint-disable-line @typescript-eslint/no-explicit-any
+    );
+
+    if (!isAssigned && user.role !== 'admin') {
         redirect('/unauthorized');
     }
 
