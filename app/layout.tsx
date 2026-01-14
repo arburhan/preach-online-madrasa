@@ -3,6 +3,7 @@ import { Noto_Sans_Bengali, Inter } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/providers/AuthProvider";
 import ToastProvider from "@/components/providers/ToastProvider";
+import Navbar from "@/components/layout/Navbar";
 
 const notoSansBengali = Noto_Sans_Bengali({
   variable: "--font-bengali",
@@ -34,6 +35,7 @@ export default function RootLayout({
         className={`${notoSansBengali.variable} ${inter.variable} font-bengali antialiased`}
       >
         <AuthProvider>
+          <Navbar />
           {children}
           <ToastProvider />
         </AuthProvider>

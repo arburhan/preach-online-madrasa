@@ -22,7 +22,7 @@ export default async function StudentDashboard() {
         .populate({
             path: 'enrolledCourses',
             populate: {
-                path: 'instructor',
+                path: 'instructors',
                 select: 'name image',
             },
         })
@@ -34,7 +34,7 @@ export default async function StudentDashboard() {
     // Get recent published courses
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recentCourses: any[] = await Course.find({ status: 'published' })
-        .populate('instructor', 'name image')
+        .populate('instructors', 'name image')
         .sort({ createdAt: -1 })
         .limit(4)
         .lean();
@@ -155,13 +155,13 @@ export default async function StudentDashboard() {
                                             </p>
                                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                 <Image
-                                                    src={course.instructor?.image || '/placeholder-avatar.png'}
-                                                    alt={course.instructor?.name || 'Instructor'}
+                                                    src={course.instructors?.[0]?.image || '/placeholder-avatar.png'}
+                                                    alt={course.instructors?.[0]?.name || 'Instructor'}
                                                     width={24}
                                                     height={24}
                                                     className="w-6 h-6 rounded-full"
                                                 />
-                                                <span>{course.instructor?.name}</span>
+                                                <span>{course.instructors?.[0]?.name || 'Unknown'}</span>
                                             </div>
                                         </div>
                                     </div>

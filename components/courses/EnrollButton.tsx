@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -9,18 +10,28 @@ import { toast } from 'sonner';
 interface EnrollButtonProps {
     courseId: string;
     isEnrolled: boolean;
-    isLoggedIn: boolean;
+    isLoggedIn?: boolean; // Keep for backwards compatibility but won't use
     isFree: boolean;
     price: number;
 }
 
-export default function EnrollButton({ courseId, isEnrolled, isLoggedIn, isFree, price }: EnrollButtonProps) {
-    const [loading, setLoading] = useState(false);
+export default function EnrollButton({
+    courseId,
+    isEnrolled,
+    isFree,
+    price,
+}: EnrollButtonProps) {
     const router = useRouter();
+    const { data: session, status } = useSession();
+    const [loading, setLoading] = useState(false);
 
     const handleEnroll = async () => {
-        // Check if user is logged in
-        if (!isLoggedIn) {
+        // Check if user is logged in using session hook (most reliable)
+        if (status === 'loading') {
+            return; // Wait for session to load
+        }
+
+        if (status === 'unauthenticated' || !session) {
             toast.info('দয়া করে লগইন করুন');
             router.push(`/auth/signin?callbackUrl=/courses/${courseId}`);
             return;
@@ -62,7 +73,7 @@ export default function EnrollButton({ courseId, isEnrolled, isLoggedIn, isFree,
                 className="w-full"
                 onClick={() => router.push(`/student/courses/${courseId}`)}
             >
-                কোর্স এনরোল করুন
+                কোর্সে যান
             </Button>
         );
     }
@@ -72,9 +83,9 @@ export default function EnrollButton({ courseId, isEnrolled, isLoggedIn, isFree,
             size="lg"
             className="w-full"
             onClick={handleEnroll}
-            disabled={loading}
+            disabled={loading || status === 'loading'}
         >
-            {loading ? (
+            {loading || status === 'loading' ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     অপেক্ষা করুন...
@@ -82,6 +93,7 @@ export default function EnrollButton({ courseId, isEnrolled, isLoggedIn, isFree,
             ) : (
                 <>
                     এনরোল করুন
+                    {!isFree && <span className="ml-2">(৳{price})</span>}
                 </>
             )}
         </Button>

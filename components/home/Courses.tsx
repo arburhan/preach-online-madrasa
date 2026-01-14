@@ -4,7 +4,7 @@ import Course from '@/lib/db/models/Course';
 import { BookOpen } from 'lucide-react';
 import CourseCard from '@/components/courses/CourseCard';
 
-export default async function PublicCoursesPage() {
+export default async function Courses() {
     await connectDB();
 
     // Get current session (if any)
@@ -48,7 +48,7 @@ export default async function PublicCoursesPage() {
             {/* Header */}
             <div className="py-16">
                 <div className="container mx-auto px-4 text-center">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-4">সকল কোর্স</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold mb-4">আমাদের কোর্স সমুহ</h1>
                     <p className=" md:text-lg">
                         ইসলামিক শিক্ষার জন্য আমাদের সেরা কোর্সগুলো ব্রাউজ করুন
                     </p>
@@ -67,12 +67,6 @@ export default async function PublicCoursesPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="mb-6">
-                            <p className="text-muted-foreground">
-                                {serializedCourses.length} টি কোর্স পাওয়া গেছে
-                            </p>
-                        </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {serializedCourses.map((course) => (
                                 <CourseCard
