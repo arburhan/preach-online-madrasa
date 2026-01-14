@@ -46,9 +46,9 @@ export default function TeachersSection({ teachers }: TeachersSectionProps) {
                             href={`/teachers/${teacher._id}`}
                             className="group"
                         >
-                            <div className="bg-card border rounded-xl hover:shadow-lg hover:border-purple-500 transition-all text-center px-6 py-12">
+                            <div className="bg-card border rounded-xl hover:shadow-lg hover:border-purple-500 transition-all text-center py-6 md:py-8 px-3 md:px-4 w-48 md:w-76">
                                 {/* Round Image */}
-                                <div className="relative w-24 h-24 mx-auto mb-4">
+                                <div className="relative w-20 h-20 md:w-28 md:h-28 mx-auto mb-4">
                                     {teacher.image ? (
                                         <Image
                                             src={teacher.image}
@@ -64,13 +64,13 @@ export default function TeachersSection({ teachers }: TeachersSectionProps) {
                                 </div>
 
                                 {/* Name */}
-                                <h3 className="font-semibold text-sm mb-1 group-hover:text-purple-600 transition-colors line-clamp-2">
+                                <h3 className="font-semibold text-sm md:text-lg lg:text-xl mb-1 group-hover:text-purple-600 transition-colors line-clamp-2 px-1">
                                     {teacher.name}
                                 </h3>
 
                                 {/* Qualifications */}
                                 {teacher.teacherQualifications && (
-                                    <p className="text-xs text-muted-foreground line-clamp-2">
+                                    <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 px-2">
                                         {teacher.teacherQualifications}
                                     </p>
                                 )}

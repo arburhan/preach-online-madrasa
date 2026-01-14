@@ -64,7 +64,7 @@ export default async function TeachersPage() {
                                     href={`/teachers/${teacher._id}`}
                                     className="group"
                                 >
-                                    <div className="bg-card border rounded-xl p-6 hover:shadow-lg hover:border-purple-500 transition-all text-center">
+                                    <div className="bg-card border rounded-xl hover:shadow-lg hover:border-purple-500 transition-all text-center py-6 md:py-8 px-3 md:px-4 w-48 md:w-76">
                                         {/* Round Image */}
                                         <div className="relative w-24 h-24 mx-auto mb-4">
                                             {teacher.image ? (
