@@ -87,7 +87,7 @@ export default async function CourseDetailPage({
                                 {lessons.map((lesson, index: number) => (
                                     <div
                                         key={lesson._id.toString()}
-                                        className="flex items-center justify-between p-4 rounded-lg hover:bg-accent transition-colors"
+                                        className="flex items-center justify-between p-4 rounded-lg hover:bg-green-300 transition-colors"
                                     >
                                         <div className="flex items-center gap-3">
                                             <span className="text-sm font-medium text-muted-foreground">
