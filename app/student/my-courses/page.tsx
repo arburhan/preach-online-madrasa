@@ -23,6 +23,11 @@ export default async function MyCoursesPage() {
         redirect('/auth/signin');
     }
 
+    // Only students can access this page
+    if (session.user.role !== 'student') {
+        redirect('/');
+    }
+
     await connectDB();
 
     // Get user's enrolled courses

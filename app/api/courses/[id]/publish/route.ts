@@ -31,10 +31,12 @@ export async function POST(
         }
 
         // Check if user is the instructor or admin
-        if (
-            course.instructor.toString() !== user.id &&
-            user.role !== 'admin'
-        ) {
+        const isInstructor = Array.isArray(course.instructors)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ? course.instructors.some((inst: any) => inst.toString() === user.id)
+            : false;
+
+        if (!isInstructor && user.role !== 'admin') {
             return NextResponse.json(
                 { error: 'আপনার এই কোর্স প্রকাশের অনুমতি নেই' },
                 { status: 403 }
@@ -95,10 +97,12 @@ export async function DELETE(
         }
 
         // Check if user is the instructor or admin
-        if (
-            course.instructor.toString() !== user.id &&
-            user.role !== 'admin'
-        ) {
+        const isInstructor = Array.isArray(course.instructors)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ? course.instructors.some((inst: any) => inst.toString() === user.id)
+            : false;
+
+        if (!isInstructor && user.role !== 'admin') {
             return NextResponse.json(
                 { error: 'আপনার এই কোর্স অপ্রকাশের অনুমতি নেই' },
                 { status: 403 }

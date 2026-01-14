@@ -97,12 +97,12 @@ export default function Navbar() {
                                         </div>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem asChild>
+                                    {user?.role !== 'admin' && <DropdownMenuItem asChild>
                                         <Link href="/student/profile" className="cursor-pointer">
                                             <UserCircle className="mr-2 h-4 w-4" />
                                             প্রোফাইল
                                         </Link>
-                                    </DropdownMenuItem>
+                                    </DropdownMenuItem>}
                                     <DropdownMenuItem asChild>
                                         <Link href={getDashboardLink()} className="cursor-pointer">
                                             <LayoutDashboard className="mr-2 h-4 w-4" />

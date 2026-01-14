@@ -37,6 +37,12 @@ export default function EnrollButton({
             return;
         }
 
+        // Prevent teachers and admins from enrolling
+        if (session.user.role !== 'student') {
+            toast.error('শিক্ষক এবং অ্যাডমিনরা কোর্সে এনরোল করতে পারবেন না');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -67,15 +73,20 @@ export default function EnrollButton({
     };
 
     if (isEnrolled) {
-        return (
-            <Button
-                size="lg"
-                className="w-full"
-                onClick={() => router.push(`/student/courses/${courseId}`)}
-            >
-                কোর্সে যান
-            </Button>
-        );
+        // Only students can access enrolled courses
+        if (session && session.user.role === 'student') {
+            return (
+                <Button
+                    size="lg"
+                    className="w-full"
+                    onClick={() => router.push(`/student/courses/${courseId}`)}
+                >
+                    কোর্সে যান
+                </Button>
+            );
+        }
+        // For teachers/admins who are enrolled (shouldn't happen but safeguard)
+        return null;
     }
 
     return (
