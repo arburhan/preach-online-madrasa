@@ -1,28 +1,21 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
+import User from '@/lib/db/models/User';
 import Course from '@/lib/db/models/Course';
 import Lesson from '@/lib/db/models/Lesson';
-import User from '@/lib/db/models/User';
 import { VideoPlayer } from '@/components/video/VideoPlayer';
+import { LessonPlaylist } from '@/components/video/LessonPlaylist';
+
 
 import { BookOpen, Clock, FileText } from 'lucide-react';
-import { LessonPlaylist } from '@/components/video/LessonPlaylist';
-import { NoteEditor } from '@/components/notes/NoteEditor';
+import NoteEditor from '@/components/notes/NoteEditor';
 
 interface PageProps {
     params: Promise<{
         courseId: string;
         lessonId: string;
     }>;
-}
-
-interface PlaylistLesson {
-    _id: { toString: () => string };
-    titleBn: string;
-    duration?: number;
-    order: number;
-    isFree?: boolean;
 }
 
 export default async function WatchLessonPage({ params }: PageProps) {
@@ -75,6 +68,19 @@ export default async function WatchLessonPage({ params }: PageProps) {
         .sort({ order: 1 })
         .select('_id titleBn duration order isFree')
         .lean();
+
+    // Serialize lessons for client component
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const serializedLessons = allLessons.map((lesson: any) => ({
+        _id: lesson._id.toString(),
+        titleBn: lesson.titleBn,
+        duration: lesson.duration || 0,
+        order: lesson.order,
+        isFree: lesson.isFree || false,
+    }));
+
+    // Get current lesson index for sequential enforcement
+    const currentLessonIndex = serializedLessons.findIndex(l => l._id === lessonId);
 
     return (
         <div className="min-h-screen bg-background">
@@ -141,7 +147,8 @@ export default async function WatchLessonPage({ params }: PageProps) {
                         <LessonPlaylist
                             courseId={courseId}
                             currentLessonId={lessonId}
-                            lessons={allLessons as unknown as PlaylistLesson[]}
+                            lessons={serializedLessons}
+                            currentIndex={currentLessonIndex}
                             isEnrolled={isEnrolled || isInstructor || isAdmin}
                         />
                     </div>

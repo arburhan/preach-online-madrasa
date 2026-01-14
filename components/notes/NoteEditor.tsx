@@ -1,44 +1,55 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Save, Loader2 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Trash2, Plus } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface Note {
+    _id: string;
+    content: string;
+    timestamp: number;
+    createdAt: string;
+}
 
 interface NoteEditorProps {
     lessonId: string;
     courseId: string;
 }
 
-export function NoteEditor({ lessonId, courseId }: NoteEditorProps) {
-    const [content, setContent] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
-    const [lastSaved, setLastSaved] = useState<Date | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+export default function NoteEditor({ lessonId, courseId }: NoteEditorProps) {
+    const [newNote, setNewNote] = useState('');
+    const [notes, setNotes] = useState<Note[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [fetchingNotes, setFetchingNotes] = useState(true);
 
-    // Load existing notes
-    useEffect(() => {
-        const loadNotes = async () => {
-            try {
-                const response = await fetch(`/api/notes?lessonId=${lessonId}&courseId=${courseId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.note) {
-                        setContent(data.note.content || '');
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to load notes:', error);
-            } finally {
-                setIsLoading(false);
+    // Fetch existing notes
+    const fetchNotes = useCallback(async () => {
+        try {
+            setFetchingNotes(true);
+            const response = await fetch(`/api/notes?lessonId=${lessonId}&courseId=${courseId}`);
+            if (response.ok) {
+                const data = await response.json();
+                setNotes(data.notes || []);
             }
-        };
-
-        loadNotes();
+        } catch (error) {
+            console.error('Failed to fetch notes:', error);
+        } finally {
+            setFetchingNotes(false);
+        }
     }, [lessonId, courseId]);
 
-    const saveNote = useCallback(async () => {
-        if (!content.trim()) return;
+    useEffect(() => {
+        fetchNotes();
+    }, [fetchNotes]);
 
-        setIsSaving(true);
+    const handleAddNote = async () => {
+        if (!newNote.trim()) {
+            toast.error('নোট খালি হতে পারবে না');
+            return;
+        }
+
+        setLoading(true);
         try {
             const response = await fetch('/api/notes', {
                 method: 'POST',
@@ -46,98 +57,117 @@ export function NoteEditor({ lessonId, courseId }: NoteEditorProps) {
                 body: JSON.stringify({
                     lessonId,
                     courseId,
-                    content
-                })
+                    content: newNote,
+                    timestamp: 0,
+                }),
             });
 
             if (response.ok) {
-                setLastSaved(new Date());
+                const data = await response.json();
+                setNotes([data.note, ...notes]);
+                setNewNote('');
+                toast.success('নোট সফলভাবে সংরক্ষিত হয়েছে! ✓');
+            } else {
+                toast.error('নোট সংরক্ষণ করতে সমস্যা হয়েছে');
             }
         } catch (error) {
-            console.error('Failed to save note:', error);
+            console.error('Failed to add note:', error);
+            toast.error('নোট সংরক্ষণ করতে সমস্যা হয়েছে');
         } finally {
-            setIsSaving(false);
+            setLoading(false);
         }
-    }, [content, lessonId, courseId]);
-
-    // Auto-save debounced
-    useEffect(() => {
-        if (isLoading || !content) return;
-
-        const timeoutId = setTimeout(() => {
-            saveNote();
-        }, 2000); // Save 2 seconds after user stops typing
-
-        return () => clearTimeout(timeoutId);
-    }, [content, isLoading, saveNote]);
-
-    const formatLastSaved = () => {
-        if (!lastSaved) return '';
-        const now = new Date();
-        const diff = Math.floor((now.getTime() - lastSaved.getTime()) / 1000);
-
-        if (diff < 60) return 'এইমাত্র সংরক্ষিত';
-        if (diff < 3600) return `${Math.floor(diff / 60)} মিনিট আগে সংরক্ষিত`;
-        return lastSaved.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center p-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-        );
-    }
+    const handleDeleteNote = async (noteId: string) => {
+        try {
+            const response = await fetch(`/api/notes/${noteId}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                setNotes(notes.filter(note => note._id !== noteId));
+                toast.success('নোট মুছে ফেলা হয়েছে');
+            } else {
+                toast.error('নোট মুছতে সমস্যা হয়েছে');
+            }
+        } catch (error) {
+            console.error('Failed to delete note:', error);
+            toast.error('নোট মুছতে সমস্যা হয়েছে');
+        }
+    };
 
     return (
-        <div className="space-y-3">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    {isSaving ? (
+        <div className="space-y-4">
+            {/* Add Note Form */}
+            <div className="space-y-3">
+                <textarea
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    placeholder="এখানে আপনার নোট লিখুন..."
+                    className="w-full min-h-24 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    disabled={loading}
+                />
+                <Button
+                    onClick={handleAddNote}
+                    disabled={loading || !newNote.trim()}
+                    className="w-full"
+                >
+                    {loading ? (
+                        <span>সংরক্ষণ হচ্ছে...</span>
+                    ) : (
                         <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>সংরক্ষণ হচ্ছে...</span>
+                            <Plus className="h-4 w-4 mr-2" />
+                            নোট যুক্ত করুন
                         </>
-                    ) : lastSaved ? (
-                        <>
-                            <Save className="h-4 w-4" />
-                            <span>{formatLastSaved()}</span>
-                        </>
-                    ) : null}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                    {content.length} অক্ষর
-                </div>
+                    )}
+                </Button>
             </div>
 
-            {/* Editor */}
-            <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="এখানে আপনার নোট লিখুন... (স্বয়ংক্রিয়ভাবে সংরক্ষিত হবে)"
-                className="w-full min-h-[200px] p-4 rounded-lg border bg-background resize-y focus:outline-none focus:ring-2 focus:ring-purple-500"
-                style={{ fontFamily: 'inherit' }}
-            />
-
-            {/* Manual Save Button */}
-            <button
-                onClick={saveNote}
-                disabled={isSaving || !content.trim()}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-            >
-                {isSaving ? (
-                    <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        সংরক্ষণ হচ্ছে...
-                    </>
+            {/* Notes List */}
+            <div className="space-y-3">
+                {fetchingNotes ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-600 border-t-transparent mx-auto" />
+                    </div>
+                ) : notes.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                        <p>এখনও কোনো নোট নেই</p>
+                        <p className="text-sm">উপরে নোট যুক্ত করুন</p>
+                    </div>
                 ) : (
                     <>
-                        <Save className="h-4 w-4" />
-                        নোট সংরক্ষণ করুন
+                        <h4 className="font-semibold text-sm text-muted-foreground">সংরক্ষিত নোট ({notes.length})</h4>
+                        {notes.map((note) => (
+                            <div
+                                key={note._id}
+                                className="bg-muted/50 p-4 rounded-lg border border-border group hover:border-purple-500 transition-colors"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1">
+                                        <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                                        <p className="text-xs text-muted-foreground mt-2">
+                                            {new Date(note.createdAt).toLocaleDateString('bn-BD', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleDeleteNote(note._id)}
+                                        className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        title="নোট মুছুন"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </>
                 )}
-            </button>
+            </div>
         </div>
     );
 }
