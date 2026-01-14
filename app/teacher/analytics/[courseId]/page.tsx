@@ -49,7 +49,7 @@ export default async function CourseAnalyticsPage({ params }: PageProps) {
 
     // Get course details
     const course = await Course.findById(courseId)
-        .populate('instructor', 'name')
+        .populate('instructors', 'name')
         .lean();
 
     if (!course) {
@@ -57,7 +57,12 @@ export default async function CourseAnalyticsPage({ params }: PageProps) {
     }
 
     // Verify teacher owns this course (unless admin)
-    if (session.user.role === 'teacher' && course.instructor._id.toString() !== session.user.id) {
+    const isInstructor = Array.isArray(course.instructors)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? course.instructors.some((inst: any) => inst._id?.toString() === session.user.id)
+        : false;
+
+    if (session.user.role === 'teacher' && !isInstructor) {
         redirect('/teacher/analytics');
     }
 

@@ -14,7 +14,7 @@ export async function GET(
         await connectDB();
 
         const course = await Course.findById(id)
-            .populate('instructor', 'name image teacherBio teacherQualifications')
+            .populate('instructors', 'name image teacherBio teacherQualifications')
             .lean();
 
         if (!course) {
@@ -70,11 +70,13 @@ export async function PUT(
             );
         }
 
-        // Check if user is the instructor or admin
-        if (
-            course.instructor.toString() !== user.id &&
-            user.role !== 'admin'
-        ) {
+        // Check if user is one of the instructors or admin
+        const isInstructor = Array.isArray(course.instructors)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ? course.instructors.some((inst: any) => inst._id?.toString() === user.id)
+            : false;
+
+        if (!isInstructor && user.role !== 'admin') {
             return NextResponse.json(
                 { error: 'আপনার এই কোর্স সম্পাদনার অনুমতি নেই' },
                 { status: 403 }
@@ -128,13 +130,15 @@ export async function DELETE(
             );
         }
 
-        // Check if user is the instructor or admin
-        if (
-            course.instructor.toString() !== user.id &&
-            user.role !== 'admin'
-        ) {
+        // Check if user is one of the instructors or admin
+        const isInstructor = Array.isArray(course.instructors)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ? course.instructors.some((inst: any) => inst._id?.toString() === user.id)
+            : false;
+
+        if (!isInstructor && user.role !== 'admin') {
             return NextResponse.json(
-                { error: 'আপনার এই কোর্স মুছার অনুমতি নেই' },
+                { error: 'আপনার এই কোর্স মুছে ফেলার অনুমতি নেই' },
                 { status: 403 }
             );
         }

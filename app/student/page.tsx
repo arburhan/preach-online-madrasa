@@ -153,7 +153,7 @@ export default async function StudentDashboard() {
                                             <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                                                 {course.descriptionBn}
                                             </p>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                                                 <Image
                                                     src={course.instructors?.[0]?.image || '/placeholder-avatar.png'}
                                                     alt={course.instructors?.[0]?.name || 'Instructor'}
@@ -163,6 +163,9 @@ export default async function StudentDashboard() {
                                                 />
                                                 <span>{course.instructors?.[0]?.name || 'Unknown'}</span>
                                             </div>
+                                            <Button className="w-full" size="sm">
+                                                ক্লাস ভিডিও দেখুন
+                                            </Button>
                                         </div>
                                     </div>
                                 </Link>

@@ -60,7 +60,7 @@ export default async function MyCoursesPage() {
     const coursesData = await Course.find({
         _id: { $in: userData.enrolledCourses }
     })
-        .populate('instructor', 'name')
+        .populate('instructors', 'name')
         .select('titleBn titleEn thumbnail totalLessons status')
         .lean();
 

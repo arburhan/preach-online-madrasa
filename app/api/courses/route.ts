@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
         const [courses, total] = await Promise.all([
             Course.find(query)
-                .populate('instructor', 'name image')
+                .populate('instructors', 'name image')
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
@@ -112,7 +112,8 @@ export async function POST(request: NextRequest) {
             titleEn,
             descriptionBn,
             descriptionEn,
-            instructor: user.id,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            instructors: [user.id as any],
             price: price || 0,
             level,
             language: language || 'bn',

@@ -42,7 +42,7 @@ export default async function WatchLessonPage({ params }: PageProps) {
         .lean();
 
     const course = await Course.findById(courseId)
-        .populate('instructor', 'name')
+        .populate('instructors', 'name')
         .lean();
 
     if (!course) {
@@ -53,7 +53,10 @@ export default async function WatchLessonPage({ params }: PageProps) {
     const isEnrolled = user?.enrolledCourses?.some(
         (id: unknown) => id?.toString() === courseId
     );
-    const isInstructor = course.instructor._id.toString() === session.user.id;
+    const isInstructor = Array.isArray(course.instructors)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? course.instructors.some((inst: any) => inst._id?.toString() === session.user.id)
+        : false;
     const isAdmin = session.user.role === 'admin';
 
     if (!isEnrolled && !isInstructor && !isAdmin) {

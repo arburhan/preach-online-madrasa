@@ -20,7 +20,7 @@ export default async function CourseDetailPage({
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const course: any = await Course.findById(id)
-        .populate('instructor', 'name image teacherBio teacherQualifications')
+        .populate('instructors', 'name image teacherBio teacherQualifications')
         .lean();
 
     if (!course) {
@@ -167,23 +167,25 @@ export default async function CourseDetailPage({
                             {/* Instructor */}
                             <div className="pt-6 border-t">
                                 <h4 className="font-semibold mb-3">প্রশিক্ষক</h4>
-                                <div className="flex items-center gap-3">
-                                    <Image
-                                        src={course.instructor?.image || '/placeholder-avatar.png'}
-                                        alt={course.instructor?.name || 'Instructor'}
-                                        width={48}
-                                        height={48}
-                                        className="w-12 h-12 rounded-full"
-                                    />
-                                    <div>
-                                        <p className="font-medium">{course.instructor?.name}</p>
-                                        {course.instructor?.teacherQualifications && (
-                                            <p className="text-sm text-muted-foreground line-clamp-1">
-                                                {course.instructor.teacherQualifications}
-                                            </p>
-                                        )}
+                                {course.instructors && course.instructors.length > 0 && (
+                                    <div className="flex items-center gap-3">
+                                        <Image
+                                            src={course.instructors[0]?.image || '/placeholder-avatar.png'}
+                                            alt={course.instructors[0]?.name || 'Instructor'}
+                                            width={48}
+                                            height={48}
+                                            className="w-12 h-12 rounded-full"
+                                        />
+                                        <div>
+                                            <p className="font-medium">{course.instructors[0]?.name}</p>
+                                            {course.instructors[0]?.teacherQualifications && (
+                                                <p className="text-sm text-muted-foreground line-clamp-1">
+                                                    {course.instructors[0].teacherQualifications}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>

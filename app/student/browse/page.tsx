@@ -12,7 +12,7 @@ export default async function BrowseCoursesPage() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const courses: any[] = await Course.find({ status: 'published' })
-        .populate('instructor', 'name image')
+        .populate('instructors', 'name image')
         .sort({ createdAt: -1 })
         .lean();
 
