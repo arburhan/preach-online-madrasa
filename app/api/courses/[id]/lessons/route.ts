@@ -82,3 +82,27 @@ export async function POST(
         );
     }
 }
+
+// GET /api/courses/[id]/lessons - Get all lessons for a course
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id } = await params;
+        await connectDB();
+
+        const lessons = await Lesson.find({ course: id })
+            .sort({ order: 1 })
+            .select('_id titleBn order duration isFree')
+            .lean();
+
+        return NextResponse.json({ lessons });
+    } catch (error) {
+        console.error('Error fetching lessons:', error);
+        return NextResponse.json(
+            { error: 'Failed to fetch lessons' },
+            { status: 500 }
+        );
+    }
+}

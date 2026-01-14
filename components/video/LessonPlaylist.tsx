@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Lock, PlayCircle, Clock, CheckCircle2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Clock, Lock } from 'lucide-react';
 
 export interface PlaylistLesson {
     _id: string;
@@ -10,42 +9,16 @@ export interface PlaylistLesson {
     duration?: number;
     order: number;
     isFree?: boolean;
+    isCompleted?: boolean;
 }
 
 interface LessonPlaylistProps {
     courseId: string;
     currentLessonId: string;
     lessons: PlaylistLesson[];
-    currentIndex: number;
-    isEnrolled: boolean;
 }
 
-export function LessonPlaylist({ courseId, currentLessonId, lessons, currentIndex, isEnrolled }: LessonPlaylistProps) {
-    const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
-
-    // Fetch completed lessons progress
-    useEffect(() => {
-        const fetchProgress = async () => {
-            try {
-                const response = await fetch(`/api/progress/course?courseId=${courseId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const completed = new Set<string>(
-                        data.progress
-                            ?.filter((p: { isCompleted: boolean }) => p.isCompleted)
-                            .map((p: { lesson: { toString: () => string } }) => p.lesson.toString()) || []
-                    );
-                    setCompletedLessons(completed);
-                }
-            } catch (error) {
-                console.error('Failed to fetch progress:', error);
-            }
-        };
-
-        if (isEnrolled) {
-            fetchProgress();
-        }
-    }, [courseId, isEnrolled]);
+export function LessonPlaylist({ courseId, currentLessonId, lessons }: LessonPlaylistProps) {
 
     return (
         <div className="bg-card rounded-xl border overflow-hidden sticky top-6">
@@ -60,20 +33,24 @@ export function LessonPlaylist({ courseId, currentLessonId, lessons, currentInde
                 {lessons.map((lesson, index) => {
                     const lessonId = lesson._id;
                     const isCurrent = lessonId === currentLessonId;
-                    const isCompleted = completedLessons.has(lessonId);
+                    const isCompleted = lesson.isCompleted || false;
 
-                    // Strict sequential enforcement
-                    // User can only access: 
-                    // 1. Current lesson
-                    // 2. Completed lessons
-                    // 3. Next lesson after current (if enrolled)
-                    // 4. Free lessons (if not enrolled)
+                    // Find the index of the last completed lesson
+                    const lastCompletedIndex = lessons.reduce((acc, lesson, idx) => {
+                        return lesson.isCompleted ? idx : acc;
+                    }, -1);
+
+                    // Allow access if:
+                    // 1. Lesson is completed
+                    // 2. Lesson is current
+                    // 3. Lesson is previous to or immediately following the last completed lesson
+                    //    (e.g., if L1 is done, L2 is unlocked. If L1, L2 done, L3 unlocked)
+                    // 4. Force unlock the first lesson always
                     const canAccess =
-                        !isEnrolled ? lesson.isFree : // Not enrolled: only free lessons
-                            isCompleted || // Completed lessons
-                            isCurrent || // Current lesson
-                            index === currentIndex + 1 || // Next lesson
-                            index <= currentIndex; // Previous lessons
+                        index === 0 ||
+                        isCompleted ||
+                        isCurrent ||
+                        index <= lastCompletedIndex + 1;
 
                     const isLocked = !canAccess;
 
@@ -90,17 +67,17 @@ export function LessonPlaylist({ courseId, currentLessonId, lessons, currentInde
                             }}
                         >
                             <div className="flex items-start gap-3">
-                                {/* Lesson Number/Status Icon */}
-                                <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${isCompleted ? 'bg-green-100 dark:bg-green-900' :
-                                    isCurrent ? 'bg-purple-100 dark:bg-purple-900' :
-                                        'bg-muted'
+                                {/* Lesson Number - Green badge for completed */}
+                                <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCompleted
+                                    ? 'bg-green-500 text-white'
+                                    : isCurrent
+                                        ? 'bg-purple-600 text-white'
+                                        : isLocked
+                                            ? 'bg-muted text-muted-foreground'
+                                            : 'bg-muted text-foreground'
                                     }`}>
                                     {isLocked ? (
                                         <Lock className="h-4 w-4" />
-                                    ) : isCompleted ? (
-                                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                    ) : isCurrent ? (
-                                        <PlayCircle className="h-4 w-4 text-purple-600" />
                                     ) : (
                                         <span>{index + 1}</span>
                                     )}
@@ -122,7 +99,7 @@ export function LessonPlaylist({ courseId, currentLessonId, lessons, currentInde
                                         )}
                                         {isLocked && (
                                             <span className="text-red-600">
-                                                {!isEnrolled ? 'Enroll করুন' : 'আগের পাঠ সম্পূর্ণ করুন'}
+                                                লক করা - পর্যায়ক্রমে দেখুন
                                             </span>
                                         )}
                                         {isCompleted && (

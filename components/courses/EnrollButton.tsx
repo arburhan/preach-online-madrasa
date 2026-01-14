@@ -75,13 +75,51 @@ export default function EnrollButton({
     if (isEnrolled) {
         // Only students can access enrolled courses
         if (session && session.user.role === 'student') {
+            const handleGoToCourse = async () => {
+                setLoading(true);
+                try {
+                    // Fetch last watched lesson
+                    const response = await fetch(`/api/progress/lastWatchedLesson?courseId=${courseId}`);
+                    const data = await response.json();
+
+                    if (data.lastWatchedLessonId) {
+                        // Resume from last watched lesson
+                        router.push(`/student/watch/${courseId}/${data.lastWatchedLessonId}`);
+                    } else {
+                        // Get first lesson and start from there
+                        const lessonsResponse = await fetch(`/api/courses/${courseId}/lessons`);
+                        const lessonsData = await lessonsResponse.json();
+
+                        if (lessonsData.lessons && lessonsData.lessons.length > 0) {
+                            router.push(`/student/watch/${courseId}/${lessonsData.lessons[0]._id}`);
+                        } else {
+                            // Fallback to course detail page if no lessons
+                            router.push(`/student/browse/${courseId}`);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching lesson:', error);
+                    toast.error('লেসন লোড করতে সমস্যা হয়েছে');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
             return (
                 <Button
                     size="lg"
                     className="w-full"
-                    onClick={() => router.push(`/student/courses/${courseId}`)}
+                    onClick={handleGoToCourse}
+                    disabled={loading}
                 >
-                    কোর্সে যান
+                    {loading ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            লোড হচ্ছে...
+                        </>
+                    ) : (
+                        'কোর্সে যান'
+                    )}
                 </Button>
             );
         }

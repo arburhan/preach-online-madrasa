@@ -40,10 +40,19 @@ export async function POST(
         }
 
         // Check if already enrolled
-        const alreadyEnrolled = await User.findOne({
-            _id: user.id,
-            enrolledCourses: id,
-        });
+        const userData = await User.findById(user.id);
+
+        // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
+        const alreadyEnrolled = userData?.enrolledCourses?.some(
+            (e) => {
+                // Old format: e is just an ObjectId
+                if ((e as unknown as { toString: () => string })?.toString && !(e as { course?: unknown }).course) {
+                    return (e as unknown as { toString: () => string }).toString() === id;
+                }
+                // New format: e has course property
+                return (e as { course: { toString: () => string } })?.course?.toString() === id;
+            }
+        );
 
         if (alreadyEnrolled) {
             return NextResponse.json(
@@ -68,7 +77,12 @@ export async function POST(
 
         // Enroll user in the course
         await User.findByIdAndUpdate(user.id, {
-            $addToSet: { enrolledCourses: id },
+            $push: {
+                enrolledCourses: {
+                    course: id,
+                    enrolledAt: new Date(),
+                },
+            },
         });
 
         // Update course enrolled count
@@ -117,10 +131,19 @@ export async function DELETE(
         }
 
         // Check if enrolled
-        const isEnrolled = await User.findOne({
-            _id: user.id,
-            enrolledCourses: id,
-        });
+        const userData = await User.findById(user.id);
+
+        // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
+        const isEnrolled = userData?.enrolledCourses?.some(
+            (e) => {
+                // Old format: e is just an ObjectId
+                if ((e as unknown as { toString: () => string })?.toString && !(e as { course?: unknown }).course) {
+                    return (e as unknown as { toString: () => string }).toString() === id;
+                }
+                // New format: e has course property
+                return (e as { course: { toString: () => string } })?.course?.toString() === id;
+            }
+        );
 
         if (!isEnrolled) {
             return NextResponse.json(
@@ -131,7 +154,7 @@ export async function DELETE(
 
         // Unenroll user from the course
         await User.findByIdAndUpdate(user.id, {
-            $pull: { enrolledCourses: id },
+            $pull: { enrolledCourses: { course: id } },
         });
 
         // Update course enrolled count

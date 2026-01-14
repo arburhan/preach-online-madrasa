@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Gauge, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Play, Pause, Volume2, VolumeX, Maximize, Gauge, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface VideoPlayerProps {
@@ -10,10 +11,12 @@ interface VideoPlayerProps {
     videoUrl: string;
     currentIndex?: number;
     totalLessons?: number;
+    previousLessonId?: string | null;
     nextLessonId?: string | null;
 }
 
-export function VideoPlayer({ lessonId, courseId, videoUrl, currentIndex, totalLessons, nextLessonId }: VideoPlayerProps) {
+export function VideoPlayer({ lessonId, courseId, videoUrl, previousLessonId, nextLessonId }: VideoPlayerProps) {
+    const router = useRouter();
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -61,8 +64,9 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, currentIndex, totalL
                         lessonId,
                         courseId,
                         progress,
-                        currentTime,
-                        duration
+                        lastWatchedPosition: currentTime,
+                        watchedDuration: currentTime,
+                        totalDuration: duration
                     })
                 });
 
@@ -280,15 +284,53 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, currentIndex, totalL
                 </div>
             </div>
 
-            {/* Next Lesson Button */}
-            {nextLessonId && (
-                <Link href={`/student/watch/${courseId}/${nextLessonId}`}>
-                    <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                        <span>পরবর্তী ভিডিও দেখুন</span>
+            {/* Navigation Buttons */}
+            <div className="flex gap-3">
+                {previousLessonId ? (
+                    <Link href={`/student/watch/${courseId}/${previousLessonId}`} className="flex-1">
+                        <button className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                            <ChevronLeft className="h-5 w-5" />
+                            <span>আগের ভিডিও</span>
+                        </button>
+                    </Link>
+                ) : (
+                    <button
+                        disabled
+                        className="flex-1 bg-gray-300 dark:bg-gray-700 text-gray-500 py-3 px-4 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed"
+                    >
+                        <ChevronLeft className="h-5 w-5" />
+                        <span>আগের ভিডিও</span>
+                    </button>
+                )}
+
+                {nextLessonId ? (
+                    <button
+                        onClick={() => {
+                            // Mark current lesson as complete (fire and forget - don't wait)
+                            fetch('/api/progress/complete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ lessonId, courseId })
+                            }).catch(error => console.error('Failed to mark as complete:', error));
+
+                            // Navigate immediately using Next.js router (no page reload)
+                            router.push(`/student/watch/${courseId}/${nextLessonId}`);
+                        }}
+                        className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                    >
+                        <span>পরবর্তী ভিডিও</span>
                         <ChevronRight className="h-5 w-5" />
                     </button>
-                </Link>
-            )}
+                ) : (
+                    <button
+                        disabled
+                        className="flex-1 bg-gray-300 dark:bg-gray-700 text-gray-500 py-3 px-4 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed"
+                    >
+                        <span>পরবর্তী ভিডিও</span>
+                        <ChevronRight className="h-5 w-5" />
+                    </button>
+                )}
+            </div>
         </div>
     );
 }

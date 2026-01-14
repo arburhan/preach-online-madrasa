@@ -35,7 +35,11 @@ export interface IUser extends Document {
     bio?: string;
 
     // Student specific
-    enrolledCourses?: Types.ObjectId[];
+    enrolledCourses?: Array<{
+        course: Types.ObjectId;
+        lastWatchedLesson?: Types.ObjectId;
+        enrolledAt: Date;
+    }>;
 
     createdAt: Date;
     updatedAt: Date;
@@ -102,8 +106,19 @@ const UserSchema = new Schema<IUser>(
         // Student fields
         enrolledCourses: [
             {
-                type: Schema.Types.ObjectId,
-                ref: 'Course',
+                course: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'Course',
+                    required: true,
+                },
+                lastWatchedLesson: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'Lesson',
+                },
+                enrolledAt: {
+                    type: Date,
+                    default: Date.now,
+                },
             },
         ],
     },

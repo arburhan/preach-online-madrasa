@@ -12,6 +12,8 @@ import { BookOpen, Clock, FileText } from 'lucide-react';
 import NoteEditor from '@/components/notes/NoteEditor';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
     params: Promise<{
         courseId: string;
@@ -44,9 +46,18 @@ export default async function WatchLessonPage({ params }: PageProps) {
     }
 
     // Check access
+    // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
     const isEnrolled = user?.enrolledCourses?.some(
-        (id: unknown) => id?.toString() === courseId
-    );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (e: any) => {
+            // Old format: e is just an ObjectId
+            if (e?.toString && typeof e.toString === 'function' && !e.course) {
+                return e.toString() === courseId;
+            }
+            // New format: e is an object with course property
+            return e?.course?.toString() === courseId;
+        }
+    ) || false;
     const isInstructor = Array.isArray(course.instructors)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? course.instructors.some((inst: any) => inst._id?.toString() === session.user.id)
@@ -70,7 +81,23 @@ export default async function WatchLessonPage({ params }: PageProps) {
         .select('_id titleBn duration order isFree')
         .lean();
 
-    // Serialize lessons for client component
+    // Get user's progress for all lessons in this course
+    const Progress = (await import('@/lib/db/models/Progress')).default;
+    const progresses = await Progress.find({
+        user: session.user.id,
+        course: courseId
+    }).lean();
+
+    // Get completed lesson IDs
+    const completedLessonIds = new Set(
+        progresses
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .filter((p: any) => p.isCompleted)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((p: any) => p.lesson.toString())
+    );
+
+    // Serialize lessons for client component with completion status
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serializedLessons = allLessons.map((lesson: any) => ({
         _id: lesson._id.toString(),
@@ -78,10 +105,32 @@ export default async function WatchLessonPage({ params }: PageProps) {
         duration: lesson.duration || 0,
         order: lesson.order,
         isFree: lesson.isFree || false,
+        isCompleted: completedLessonIds.has(lesson._id.toString()),
     }));
 
-    // Get current lesson index for sequential enforcement
+    // Get current lesson index
     const currentLessonIndex = serializedLessons.findIndex(l => l._id === lessonId);
+
+    // Calculate previous and next lesson IDs
+    const previousLessonId = currentLessonIndex > 0
+        ? serializedLessons[currentLessonIndex - 1]._id
+        : null;
+
+    const nextLessonId = currentLessonIndex < serializedLessons.length - 1
+        ? serializedLessons[currentLessonIndex + 1]._id
+        : null;
+
+    // Track this lesson as last watched (don't await to avoid blocking page load)
+    fetch('/api/progress/lastWatchedLesson', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            courseId,
+            lessonId,
+        }),
+    }).catch(error => {
+        console.error('Failed to update last watched lesson:', error);
+    });
 
     return (
         <div className="min-h-screen bg-background">
@@ -103,6 +152,8 @@ export default async function WatchLessonPage({ params }: PageProps) {
                                 lessonId={lessonId}
                                 courseId={courseId}
                                 videoUrl={lesson.videoUrl || ''}
+                                previousLessonId={previousLessonId}
+                                nextLessonId={nextLessonId}
                             />
                         </div>
 
@@ -149,8 +200,6 @@ export default async function WatchLessonPage({ params }: PageProps) {
                             courseId={courseId}
                             currentLessonId={lessonId}
                             lessons={serializedLessons}
-                            currentIndex={currentLessonIndex}
-                            isEnrolled={isEnrolled || isInstructor || isAdmin}
                         />
                     </div>
                 </div>

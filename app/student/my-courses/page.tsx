@@ -7,14 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { BookOpen, CheckCircle2, PlayCircle } from 'lucide-react';
 
-interface EnrolledCourse {
-    _id: { toString: () => string };
-    titleBn: string;
-    titleEn?: string;
-    thumbnail?: string;
-    totalLessons: number;
-    instructor?: { name: string };
-}
+export const dynamic = 'force-dynamic';
 
 export default async function MyCoursesPage() {
     const session = await auth();
@@ -61,15 +54,24 @@ export default async function MyCoursesPage() {
         );
     }
 
-    // Fetch enrolled course details
-    const coursesData = await Course.find({
-        _id: { $in: userData.enrolledCourses }
+    // Fetch enrolled courses
+    // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enrolledCourseIds = userData.enrolledCourses.map((e: any) => {
+        // Old format: e is just an ObjectId
+        if (e?.toString && typeof e.toString === 'function' && !e.course) {
+            return e;
+        }
+        // New format: e.course is the ObjectId
+        return e.course;
+    });
+    const courses = await Course.find({
+        _id: { $in: enrolledCourseIds }
     })
         .populate('instructors', 'name')
         .select('titleBn titleEn thumbnail totalLessons status')
         .lean();
 
-    const courses = coursesData as unknown as EnrolledCourse[];
 
     return (
         <div className="min-h-screen bg-background">
@@ -113,9 +115,11 @@ export default async function MyCoursesPage() {
                                 </h3>
 
                                 {/* Instructor */}
-                                {course.instructor && (
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                {(course as any).instructors?.[0] && (
                                     <p className="text-sm text-muted-foreground mb-4">
-                                        {course.instructor.name}
+                                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                        {(course as any).instructors[0].name}
                                     </p>
                                 )}
 

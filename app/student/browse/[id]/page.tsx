@@ -34,12 +34,20 @@ export default async function CourseDetailPage({
         .lean();
 
     // Check if user is enrolled
-    const enrolledUser = await User.findOne({
-        _id: user.id,
-        enrolledCourses: id,
-    });
+    const enrolledUser = await User.findById(user.id).select('enrolledCourses');
 
-    const isEnrolled = !!enrolledUser;
+    // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
+    const isEnrolled = enrolledUser?.enrolledCourses?.some(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (e: any) => {
+            // Old format: e is just an ObjectId
+            if (e?.toString && typeof e.toString === 'function' && !e.course) {
+                return e.toString() === id;
+            }
+            // New format: e is an object with course property
+            return e?.course?.toString() === id;
+        }
+    ) || false;
 
     return (
         <div className="min-h-screen bg-background">

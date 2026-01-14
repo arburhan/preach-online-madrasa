@@ -34,8 +34,18 @@ export default async function CourseDetailPage({ params }: PageProps) {
     let isEnrolled = false;
     if (session?.user?.id) {
         const user = await User.findById(session.user.id).lean();
+        // For students, only show enrolled courses
+        // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
         isEnrolled = user?.enrolledCourses?.some(
-            (c: any) => c.toString() === id // eslint-disable-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (e: any) => {
+                // Old format: e is just an ObjectId
+                if (e?.toString && typeof e.toString === 'function' && !e.course) {
+                    return e.toString() === course._id.toString();
+                }
+                // New format: e is an object with course property
+                return e?.course?.toString() === course._id.toString();
+            }
         ) || false;
     }
 

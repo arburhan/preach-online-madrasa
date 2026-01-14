@@ -19,17 +19,28 @@ export default async function StudentDashboard() {
 
     // Get user's enrolled courses
     const userData = await User.findById(user.id)
-        .populate({
-            path: 'enrolledCourses',
-            populate: {
-                path: 'instructors',
-                select: 'name image',
-            },
-        })
+        .select('enrolledCourses')
         .lean();
 
+    // Extract course IDs from both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const enrolledCourses: any[] = userData?.enrolledCourses || [];
+    const enrolledCourseIds = userData?.enrolledCourses?.map((e: any) => {
+        // Old format: e is just an ObjectId
+        if (e?.toString && typeof e.toString === 'function' && !e.course) {
+            return e;
+        }
+        // New format: e.course is the ObjectId
+        return e.course;
+    }).filter(Boolean) || [];
+
+    // Fetch full course data separately to avoid populate issues
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enrolledCourses: any[] = await Course.find({
+        _id: { $in: enrolledCourseIds }
+    })
+        .populate('instructors', 'name image')
+        .select('titleBn titleEn thumbnail level descriptionBn')
+        .lean();
 
     // Get recent published courses
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
