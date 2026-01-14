@@ -22,6 +22,7 @@ export interface IUser extends Document {
 
     // Teacher specific
     isTeacherApproved?: boolean;
+    approvalStatus?: 'pending' | 'approved' | 'rejected';
     teacherBio?: string;
     teacherQualifications?: string;
     fatherName?: string;
@@ -81,6 +82,11 @@ const UserSchema = new Schema<IUser>(
         isTeacherApproved: {
             type: Boolean,
             default: false,
+        },
+        approvalStatus: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected'],
+            default: 'pending',
         },
         teacherBio: String,
         teacherQualifications: String,
