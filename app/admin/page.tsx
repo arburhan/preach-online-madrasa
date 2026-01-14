@@ -12,6 +12,7 @@ import {
     Clock,
     TrendingUp
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface RecentUser {
     _id: { toString: () => string };
@@ -169,12 +170,12 @@ export default async function AdminDashboardPage() {
                                 {pendingTeachers} জন শিক্ষক অনুমোদনের জন্য অপেক্ষায় আছেন
                             </p>
                         </div>
-                        <a
+                        <Link
                             href="/admin/teachers"
                             className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
                         >
                             এখনই পর্যালোচনা করুন
-                        </a>
+                        </Link>
                     </div>
                 </div>
             )}

@@ -10,6 +10,7 @@ import { LessonPlaylist } from '@/components/video/LessonPlaylist';
 
 import { BookOpen, Clock, FileText } from 'lucide-react';
 import NoteEditor from '@/components/notes/NoteEditor';
+import Link from 'next/link';
 
 interface PageProps {
     params: Promise<{
@@ -86,12 +87,12 @@ export default async function WatchLessonPage({ params }: PageProps) {
         <div className="min-h-screen bg-background">
             <div className="container mx-auto px-4 py-6">
                 {/* Back to Course Button */}
-                <a
+                <Link
                     href={`/student/browse/${courseId}`}
                     className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
                 >
                     ← কোর্সে ফিরে যান
-                </a>
+                </Link>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Video Area */}
