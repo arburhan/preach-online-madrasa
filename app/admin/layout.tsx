@@ -10,7 +10,8 @@ import {
     BarChart3,
     Settings,
     LogOut,
-    Calendar
+    Calendar,
+    FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
@@ -20,6 +21,7 @@ const navigation = [
     { name: 'ইউজার', href: '/admin/users', icon: Users },
     { name: 'শিক্ষক', href: '/admin/teachers', icon: GraduationCap },
     { name: 'সেমিস্টার', href: '/admin/semesters', icon: Calendar },
+    { name: 'পরীক্ষা', href: '/admin/exams', icon: FileText },
     { name: 'কোর্স', href: '/admin/courses', icon: BookOpen },
     { name: 'পরিসংখ্যান', href: '/admin/statistics', icon: BarChart3 },
     { name: 'সেটিংস', href: '/admin/settings', icon: Settings },

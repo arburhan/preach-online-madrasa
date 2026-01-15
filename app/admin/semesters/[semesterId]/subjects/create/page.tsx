@@ -236,8 +236,8 @@ export default function CreateSubjectPage() {
                                     <label
                                         key={teacher._id}
                                         className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedMaleTeachers.includes(teacher._id)
-                                                ? 'border-primary bg-primary/5'
-                                                : 'hover:bg-muted'
+                                            ? 'border-primary bg-primary/5'
+                                            : 'hover:bg-muted'
                                             }`}
                                     >
                                         <input
@@ -287,8 +287,8 @@ export default function CreateSubjectPage() {
                                     <label
                                         key={teacher._id}
                                         className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedFemaleTeachers.includes(teacher._id)
-                                                ? 'border-primary bg-primary/5'
-                                                : 'hover:bg-muted'
+                                            ? 'border-primary bg-primary/5'
+                                            : 'hover:bg-muted'
                                             }`}
                                     >
                                         <input
@@ -316,10 +316,10 @@ export default function CreateSubjectPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                                <div className="text-sm font-medium mb-2 flex items-center gap-2">
                                     <span className="w-2 h-2 rounded-full bg-blue-500" />
                                     ছেলে শিক্ষার্থীদের জন্য
-                                </label>
+                                </div>
                                 <input
                                     type="url"
                                     name="liveClassLinkMale"
@@ -330,10 +330,10 @@ export default function CreateSubjectPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                                <div className="text-sm font-medium mb-2 flex items-center gap-2">
                                     <span className="w-2 h-2 rounded-full bg-pink-500" />
                                     মেয়ে শিক্ষার্থীদের জন্য
-                                </label>
+                                </div>
                                 <input
                                     type="url"
                                     name="liveClassLinkFemale"
