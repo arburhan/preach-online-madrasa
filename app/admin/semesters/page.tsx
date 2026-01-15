@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Semester from '@/lib/db/models/Semester';
+import '@/lib/db/models/Subject'; // Register Subject model for populate
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -122,8 +123,8 @@ export default async function AdminSemestersPage() {
                                                     <span>{semester.subjects?.length || 0} বিষয়</span>
                                                 </div>
                                                 <span className={`px-2 py-1 rounded-full text-xs ${semester.status === 'active'
-                                                        ? 'bg-green-100 text-green-700'
-                                                        : 'bg-gray-100 text-gray-700'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : 'bg-gray-100 text-gray-700'
                                                     }`}>
                                                     {semester.status === 'active' ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
                                                 </span>

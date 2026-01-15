@@ -32,3 +32,7 @@ export type { IExamResult, IAnswer } from './ExamResult';
 
 export { default as StudentSemester } from './StudentSemester';
 export type { IStudentSemester, ISubjectProgress, ISemesterResult } from './StudentSemester';
+
+// Long course program model
+export { default as Program } from './Program';
+export type { IProgram } from './Program';

@@ -11,7 +11,8 @@ import {
     Settings,
     LogOut,
     Calendar,
-    FileText
+    FileText,
+    Library
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
@@ -20,6 +21,7 @@ const navigation = [
     { name: 'ড্যাশবোর্ড', href: '/admin', icon: LayoutDashboard },
     { name: 'ইউজার', href: '/admin/users', icon: Users },
     { name: 'শিক্ষক', href: '/admin/teachers', icon: GraduationCap },
+    { name: 'লং কোর্স', href: '/admin/programs', icon: Library },
     { name: 'সেমিস্টার', href: '/admin/semesters', icon: Calendar },
     { name: 'পরীক্ষা', href: '/admin/exams', icon: FileText },
     { name: 'কোর্স', href: '/admin/courses', icon: BookOpen },
