@@ -63,7 +63,7 @@ export default function EnrollButton({
             }
 
             toast.success('কোর্সে নথিভুক্তি সফল হয়েছে!');
-            router.push('/student/courses');
+            router.push('/student/my-courses');
             router.refresh();
         } catch {
             toast.error('কোর্সে নথিভুক্ত হতে সমস্যা হয়েছে');

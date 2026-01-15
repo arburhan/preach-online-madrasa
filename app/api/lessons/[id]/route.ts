@@ -23,7 +23,7 @@ export async function GET(
         await connectDB();
 
         const lesson = await Lesson.findById(id)
-            .populate('course', 'titleBn titleEn instructor')
+            .populate('course', 'titleBn titleEn instructors')
             .lean();
 
         if (!lesson) {
@@ -76,10 +76,11 @@ export async function PUT(
 
         // Check if user is the course instructor or admin
         const course = lesson.course as unknown as ICourse;
-        if (
-            course.instructor.toString() !== user.id &&
-            user.role !== 'admin'
-        ) {
+        const isInstructor = course.instructors && course.instructors.some(
+            (inst) => inst.toString() === user.id
+        );
+
+        if (!isInstructor && user.role !== 'admin') {
             return NextResponse.json(
                 { error: 'আপনার এই পাঠ সম্পাদনার অনুমতি নেই' },
                 { status: 403 }
@@ -135,10 +136,11 @@ export async function DELETE(
 
         // Check if user is the course instructor or admin
         const course = lesson.course as unknown as ICourse;
-        if (
-            course.instructor.toString() !== user.id &&
-            user.role !== 'admin'
-        ) {
+        const isInstructor = course.instructors && course.instructors.some(
+            (inst) => inst.toString() === user.id
+        );
+
+        if (!isInstructor && user.role !== 'admin') {
             return NextResponse.json(
                 { error: 'আপনার এই পাঠ মুছার অনুমতি নেই' },
                 { status: 403 }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Clock, Users } from 'lucide-react';
+import { ObjectId } from 'mongoose';
 
 export default async function BrowseCoursesPage() {
     await requireAuth();
@@ -12,9 +13,17 @@ export default async function BrowseCoursesPage() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const courses: any[] = await Course.find({ status: 'published' })
-        .populate('instructors', 'name image')
         .sort({ createdAt: -1 })
         .lean();
+
+    // Manually fetch all teachers
+    const Teacher = (await import('@/lib/db/models/Teacher')).default;
+    const allInstructorIds = courses.flatMap(c => c.instructors || []);
+    const teachers = await Teacher.find({ _id: { $in: allInstructorIds } })
+        .select('_id name image')
+        .lean();
+
+    const teacherMap = new Map(teachers.map(t => [t._id.toString(), t]));
 
     return (
         <div className="min-h-screen bg-background">
@@ -82,14 +91,16 @@ export default async function BrowseCoursesPage() {
 
                                     <div className="flex items-center gap-2 mb-4 pb-4 border-b">
                                         <Image
-                                            src={course.instructor?.image || '/placeholder-avatar.png'}
-                                            alt={course.instructor?.name || 'Instructor'}
+                                            src={(course.instructors?.[0] && teacherMap.get(course.instructors[0].toString())?.image) || '/placeholder-avatar.png'}
+                                            alt="Instructor"
                                             width={32}
                                             height={32}
                                             className="w-8 h-8 rounded-full"
                                         />
                                         <div>
-                                            <p className="text-sm font-medium">{course.instructor?.name}</p>
+                                            <p className="text-sm font-medium">
+                                                {course.instructors?.map((id: ObjectId) => teacherMap.get(id.toString())?.name).filter(Boolean).join(', ') || 'Unknown'}
+                                            </p>
                                             <p className="text-xs text-muted-foreground">প্রশিক্ষক</p>
                                         </div>
                                     </div>

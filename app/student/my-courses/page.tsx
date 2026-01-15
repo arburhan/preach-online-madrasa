@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -24,7 +24,7 @@ export default async function MyCoursesPage() {
     await connectDB();
 
     // Get user's enrolled courses
-    const userData = await User.findById(session.user.id)
+    const userData = await Student.findById(session.user.id)
         .select('enrolledCourses')
         .lean();
 
@@ -68,9 +68,17 @@ export default async function MyCoursesPage() {
     const courses = await Course.find({
         _id: { $in: enrolledCourseIds }
     })
-        .populate('instructors', 'name')
-        .select('titleBn titleEn thumbnail totalLessons status')
+        .select('titleBn titleEn thumbnail totalLessons status instructors')
         .lean();
+
+    // Manually fetch all teachers
+    const Teacher = (await import('@/lib/db/models/Teacher')).default;
+    const allInstructorIds = courses.flatMap(c => c.instructors || []);
+    const teachers = await Teacher.find({ _id: { $in: allInstructorIds } })
+        .select('_id name')
+        .lean();
+
+    const teacherMap = new Map(teachers.map(t => [t._id.toString(), t]));
 
 
     return (
@@ -116,10 +124,10 @@ export default async function MyCoursesPage() {
 
                                 {/* Instructor */}
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {(course as any).instructors?.[0] && (
+                                {(course as any).instructors?.length > 0 && (
                                     <p className="text-sm text-muted-foreground mb-4">
                                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                        {(course as any).instructors[0].name}
+                                        {(course as any).instructors.map((id: any) => teacherMap.get(id.toString())?.name).filter(Boolean).join(', ') || 'Unknown'}
                                     </p>
                                 )}
 

@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
+import Teacher from '@/lib/db/models/Teacher';
+import Admin from '@/lib/db/models/Admin';
 import Course from '@/lib/db/models/Course';
 import Lesson from '@/lib/db/models/Lesson';
 import {
@@ -68,38 +70,48 @@ export default async function AdminDashboardPage() {
 
     // Get statistics
     const [
-        totalUsers,
         totalStudents,
         totalTeachers,
         pendingTeachers,
         totalCourses,
         publishedCourses,
         totalLessons,
+        adminCount
     ] = await Promise.all([
-        User.countDocuments(),
-        User.countDocuments({ role: 'student' }),
-        User.countDocuments({ role: 'teacher', isTeacherApproved: true }),
-        User.countDocuments({ role: 'teacher', isTeacherApproved: false }),
+        Student.countDocuments(),
+        Teacher.countDocuments({ isApproved: true }),
+        Teacher.countDocuments({ isApproved: false }),
         Course.countDocuments(),
         Course.countDocuments({ status: 'published' }),
         Lesson.countDocuments(),
+        Admin.countDocuments()
     ]);
 
-    // Get total enrollments (count all enrolledCourses across users)
-    const enrollmentStats = await User.aggregate([
-        { $match: { role: 'student' } },
+    const totalUsers = totalStudents + totalTeachers + adminCount;
+
+    // Get total enrollments (count all enrolledCourses across students)
+    const enrollmentStats = await Student.aggregate([
         { $project: { enrollmentCount: { $size: { $ifNull: ['$enrolledCourses', []] } } } },
         { $group: { _id: null, total: { $sum: '$enrollmentCount' } } },
     ]);
     const totalEnrollments = enrollmentStats[0]?.total || 0;
 
-    // Get recent users (last 5)
-    const recentUsersData = await User.find()
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select('name email role createdAt')
-        .lean();
-    const recentUsers = recentUsersData as unknown as RecentUser[];
+    // Get recent users (last 5 from each, then sort and take top 5)
+    // This is a bit more complex now. We'll fetch 5 from each and merge.
+    const [recentStudents, recentTeachers, recentAdmins] = await Promise.all([
+        Student.find().sort({ createdAt: -1 }).limit(5).select('name email createdAt').lean(),
+        Teacher.find().sort({ createdAt: -1 }).limit(5).select('name email createdAt').lean(),
+        Admin.find().sort({ createdAt: -1 }).limit(5).select('name email createdAt').lean()
+    ]);
+
+    const allRecent = [
+        ...recentStudents.map(u => ({ ...u, role: 'student' as const })),
+        ...recentTeachers.map(u => ({ ...u, role: 'teacher' as const })),
+        ...recentAdmins.map(u => ({ ...u, role: 'admin' as const }))
+    ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5);
+
+    const recentUsers = allRecent as unknown as RecentUser[];
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
 import Lesson from '@/lib/db/models/Lesson';
 import { VideoPlayer } from '@/components/video/VideoPlayer';
@@ -33,7 +33,7 @@ export default async function WatchLessonPage({ params }: PageProps) {
     await connectDB();
 
     // Check if user is enrolled or lesson is free
-    const user = await User.findById(session.user.id)
+    const user = await Student.findById(session.user.id)
         .select('enrolledCourses role')
         .lean();
 
@@ -71,7 +71,7 @@ export default async function WatchLessonPage({ params }: PageProps) {
     // Get current lesson
     const lesson = await Lesson.findById(lessonId).lean();
 
-    if (!lesson || lesson.course.toString() !== courseId) {
+    if (!lesson || lesson.course?.toString() !== courseId) {
         redirect(`/student/browse/${courseId}`);
     }
 

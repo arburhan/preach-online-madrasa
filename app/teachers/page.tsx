@@ -1,5 +1,5 @@
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Teacher from '@/lib/db/models/Teacher';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BookOpen, GraduationCap } from 'lucide-react';
@@ -7,15 +7,11 @@ import { BookOpen, GraduationCap } from 'lucide-react';
 export default async function TeachersPage() {
     await connectDB();
 
-    // Fetch all approved teachers (support both old and new data)
-    const teachers = await User.find({
-        role: 'teacher',
-        $or: [
-            { approvalStatus: 'approved' }, // New field
-            { isTeacherApproved: true }     // Old field for backward compatibility
-        ]
+    // Fetch all approved teachers
+    const teachers = await Teacher.find({
+        isApproved: true
     })
-        .select('name image teacherBio teacherQualifications')
+        .select('name image bio qualifications gender')
         .lean();
 
     // Serialize teachers
@@ -24,8 +20,9 @@ export default async function TeachersPage() {
         _id: teacher._id.toString(),
         name: teacher.name,
         image: teacher.image,
-        teacherBio: teacher.teacherBio,
-        teacherQualifications: teacher.teacherQualifications,
+        bio: teacher.bio,
+        qualifications: teacher.qualifications,
+        gender: teacher.gender,
     }));
 
     return (
@@ -87,9 +84,9 @@ export default async function TeachersPage() {
                                         </h3>
 
                                         {/* Qualifications */}
-                                        {teacher.teacherQualifications && (
+                                        {teacher.qualifications && (
                                             <p className="text-xs text-muted-foreground line-clamp-2">
-                                                {teacher.teacherQualifications}
+                                                {teacher.qualifications}
                                             </p>
                                         )}
                                     </div>

@@ -1,6 +1,8 @@
 // Extend NextAuth types to include custom properties
 import { DefaultSession, DefaultUser } from 'next-auth';
-import { UserRole } from '@/lib/db/models/User';
+
+
+type UserRole = 'student' | 'teacher' | 'admin';
 
 declare module 'next-auth' {
     interface Session {

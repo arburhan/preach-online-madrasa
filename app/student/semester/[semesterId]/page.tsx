@@ -4,7 +4,7 @@ import connectDB from '@/lib/db/mongodb';
 import Semester from '@/lib/db/models/Semester';
 import Subject from '@/lib/db/models/Subject';
 import StudentSemester from '@/lib/db/models/StudentSemester';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import Lesson from '@/lib/db/models/Lesson';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ export default async function StudentSemesterDetailPage({
     await connectDB();
 
     // Get user with gender
-    const userData = await User.findById(user.id).select('gender').lean();
+    const userData = await Student.findById(user.id).select('gender').lean();
     const userGender = userData?.gender;
 
     // Get semester

@@ -118,7 +118,7 @@ const ExamSchema = new Schema<IExam>(
         },
         createdBy: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Admin',
             required: true,
         },
     },

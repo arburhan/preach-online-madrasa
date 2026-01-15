@@ -5,7 +5,7 @@ import { requireAuth } from '@/lib/auth/rbac';
 import connectDB from '@/lib/db/mongodb';
 import Lesson from '@/lib/db/models/Lesson';
 import { ICourse } from '@/lib/db/models/Course';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 
 // Initialize S3 client for Cloudflare R2
 const s3Client = new S3Client({
@@ -47,15 +47,15 @@ export async function POST(request: NextRequest) {
         // Check if lesson is free or user is enrolled
         if (!lesson.isFree) {
             // Check if user is enrolled in the course
-            const enrolledUser = await User.findOne({
+            const enrolledUser = await Student.findOne({
                 _id: user.id,
-                enrolledCourses: course._id,
+                'enrolledCourses.course': course._id,
             });
 
             // Allow if user is instructor, admin, or enrolled
             const hasAccess =
                 enrolledUser ||
-                course.instructor.toString() === user.id ||
+                course.instructors.some((inst) => inst.toString() === user.id) ||
                 user.role === 'admin';
 
             if (!hasAccess) {

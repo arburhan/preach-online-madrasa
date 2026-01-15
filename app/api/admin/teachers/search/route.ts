@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Teacher from '@/lib/db/models/Teacher';
 import { requireAuth } from '@/lib/auth/rbac';
 
 // GET /api/admin/teachers/search - Search approved teachers
@@ -21,15 +21,14 @@ export async function GET(request: NextRequest) {
         await connectDB();
 
         // Search approved teachers by name or email
-        const teachers = await User.find({
-            role: 'teacher',
-            isTeacherApproved: true,
+        const teachers = await Teacher.find({
+            isApproved: true,
             $or: [
                 { name: { $regex: query, $options: 'i' } },
                 { email: { $regex: query, $options: 'i' } },
             ],
         })
-            .select('_id name email')
+            .select('_id name email gender')
             .limit(10)
             .lean();
 
@@ -38,6 +37,7 @@ export async function GET(request: NextRequest) {
             _id: teacher._id.toString(),
             name: teacher.name,
             email: teacher.email,
+            gender: teacher.gender,
         }));
 
         return NextResponse.json({ teachers: serializedTeachers });

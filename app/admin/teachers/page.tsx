@@ -1,22 +1,23 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Teacher from '@/lib/db/models/Teacher';
 import Course from '@/lib/db/models/Course';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TeacherApprovalCard } from '@/components/admin/TeacherApprovalCard';
 import { Check, X, BookOpen, Users, Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface PendingTeacher {
     _id: { toString: () => string };
     name: string;
     email: string;
     mobileNumber?: string;
-    gender?: string;
+    gender: 'male' | 'female';
     fatherName?: string;
     motherName?: string;
     address?: string;
-    teacherQualifications?: string;
+    qualifications?: string;
     createdAt: Date;
 }
 
@@ -24,8 +25,9 @@ interface ApprovedTeacher {
     _id: { toString: () => string };
     name: string;
     email: string;
+    gender: 'male' | 'female';
     mobileNumber?: string;
-    teacherQualifications?: string;
+    qualifications?: string;
     courseCount: number;
     publishedCount: number;
     createdAt: Date;
@@ -41,17 +43,16 @@ export default async function TeachersAdminPage() {
     await connectDB();
 
     // Get pending teachers
-    const pendingTeachersData = await User.find({
-        role: 'teacher',
-        isTeacherApproved: false,
+    const pendingTeachersData = await Teacher.find({
+        isApproved: false,
     })
         .sort({ createdAt: -1 })
         .lean();
     const pendingTeachers = pendingTeachersData as unknown as PendingTeacher[];
 
     // Get approved teachers with their course counts
-    const approvedTeachersData = await User.aggregate([
-        { $match: { role: 'teacher', isTeacherApproved: true } },
+    const approvedTeachersData = await Teacher.aggregate([
+        { $match: { isApproved: true } },
         {
             $lookup: {
                 from: 'courses',
@@ -143,16 +144,21 @@ export default async function TeachersAdminPage() {
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
-                                            <h3 className="text-lg font-semibold">{teacher.name}</h3>
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-lg font-semibold">{teacher.name}</h3>
+                                                <Badge variant="outline" className={teacher.gender === 'male' ? 'border-blue-500 text-blue-600' : 'border-pink-500 text-pink-600'}>
+                                                    {teacher.gender === 'male' ? 'পুরুষ' : 'মহিলা'}
+                                                </Badge>
+                                            </div>
                                             <p className="text-sm text-muted-foreground">{teacher.email}</p>
                                             {teacher.mobileNumber && (
                                                 <p className="text-sm text-muted-foreground">
                                                     মোবাইল: {teacher.mobileNumber}
                                                 </p>
                                             )}
-                                            {teacher.teacherQualifications && (
+                                            {teacher.qualifications && (
                                                 <p className="text-sm mt-2">
-                                                    <span className="font-medium">যোগ্যতা:</span> {teacher.teacherQualifications}
+                                                    <span className="font-medium">যোগ্যতা:</span> {teacher.qualifications}
                                                 </p>
                                             )}
                                         </div>

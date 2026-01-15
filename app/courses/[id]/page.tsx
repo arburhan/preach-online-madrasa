@@ -2,7 +2,8 @@ import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
 import Lesson from '@/lib/db/models/Lesson';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
+import '@/lib/db/models/Teacher';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { BookOpen, Clock, Users, Award } from 'lucide-react';
@@ -19,24 +20,33 @@ export default async function CourseDetailPage({ params }: PageProps) {
     await connectDB();
 
     // Fetch course details
-    const course = await Course.findById(id)
-        .populate('instructors', 'name teacherBio')
-        .lean();
+    const course = await Course.findById(id).lean();
 
     if (!course || course.status !== 'published') {
         notFound();
     }
+
+    // Manually fetch instructors
+    const Teacher = (await import('@/lib/db/models/Teacher')).default;
+    const instructors = await Teacher.find({ _id: { $in: course.instructors || [] } })
+        .select('_id name bio')
+        .lean();
+
+    const instructorsData = instructors.map(t => ({
+        _id: t._id,
+        name: t.name,
+        bio: t.bio || ''
+    }));
 
     // Fetch lessons count
     const lessonsCount = await Lesson.countDocuments({ course: id });
 
     // Check if user is enrolled
     let isEnrolled = false;
-    if (session?.user?.id) {
-        const user = await User.findById(session.user.id).lean();
-        // For students, only show enrolled courses
+    if (session?.user?.id && session.user.role === 'student') {
+        const student = await Student.findById(session.user.id).select('enrolledCourses').lean();
         // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
-        isEnrolled = user?.enrolledCourses?.some(
+        isEnrolled = student?.enrolledCourses?.some(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (e: any) => {
                 // Old format: e is just an ObjectId
@@ -47,11 +57,18 @@ export default async function CourseDetailPage({ params }: PageProps) {
                 return e?.course?.toString() === course._id.toString();
             }
         ) || false;
+    } else if (session?.user && (session.user.role === 'admin' || session.user.role === 'teacher')) {
+        // Admins and teachers (instructors) generally have access, but for "isEnrolled" UI state (e.g. button), 
+        // we might validly say false unless we want to show "Go to Course" for them too.
+        // For now, let's keep it false for enrollment check unless we check if teacher is the instructor.
+        // The original code only checked User.enrolledCourses.
+        // If the intention is to show "Start Learning" button, maybe we don't need it for admins in this view.
+        // Let's stick to Student enrollment for now.
+        isEnrolled = false;
     }
 
     // Serialize course
     const courseData = course as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    const instructorsData = Array.isArray(courseData.instructors) ? courseData.instructors : [];
 
     // Get first instructor for display (or expand to show all)
     const primaryInstructor = instructorsData[0] || {};
@@ -77,7 +94,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
         instructor: {
             _id: primaryInstructor?._id?.toString(),
             name: allInstructorNames,
-            bio: primaryInstructor?.teacherBio || '',
+            bio: primaryInstructor?.bio || '',
         },
     };
 

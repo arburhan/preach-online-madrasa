@@ -4,23 +4,31 @@ import CourseCard from '@/components/courses/CourseCard';
 import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
 import Link from 'next/link';
+import { ObjectId } from 'mongoose';
 
 export default async function CoursesSection() {
     await connectDB();
 
     // Fetch only 6 published courses for homepage
     const courses = await Course.find({ status: 'published' })
-        .populate('instructors', 'name')
         .sort({ createdAt: -1 })
         .limit(6)
         .lean();
 
+    // Manually fetch all teachers
+    const Teacher = (await import('@/lib/db/models/Teacher')).default;
+    const allInstructorIds = courses.flatMap(c => c.instructors || []);
+    const teachers = await Teacher.find({ _id: { $in: allInstructorIds } })
+        .select('_id name')
+        .lean();
+
+    const teacherMap = new Map(teachers.map(t => [t._id.toString(), t]));
+
     // Serialize courses (same logic as courses page)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serializedCourses = courses.map((course: any) => {
-        const instructorsData = Array.isArray(course.instructors) ? course.instructors : [];
-        const instructorNames = instructorsData
-            .map((inst: any) => inst?.name || 'Unknown') // eslint-disable-line
+        const instructorNames = (course.instructors || [])
+            .map((id: ObjectId) => teacherMap.get(id.toString())?.name)
             .filter(Boolean)
             .join(', ') || 'No instructor';
 

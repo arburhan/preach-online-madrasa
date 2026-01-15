@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
 import { getCurrentUser } from '@/lib/auth/rbac';
 
@@ -40,7 +40,7 @@ export async function POST(
         }
 
         // Check if already enrolled
-        const userData = await User.findById(user.id);
+        const userData = await Student.findById(user.id);
 
         // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
         const alreadyEnrolled = userData?.enrolledCourses?.some(
@@ -76,7 +76,7 @@ export async function POST(
         }
 
         // Enroll user in the course
-        await User.findByIdAndUpdate(user.id, {
+        await Student.findByIdAndUpdate(user.id, {
             $push: {
                 enrolledCourses: {
                     course: id,
@@ -131,7 +131,7 @@ export async function DELETE(
         }
 
         // Check if enrolled
-        const userData = await User.findById(user.id);
+        const userData = await Student.findById(user.id);
 
         // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
         const isEnrolled = userData?.enrolledCourses?.some(
@@ -153,7 +153,7 @@ export async function DELETE(
         }
 
         // Unenroll user from the course
-        await User.findByIdAndUpdate(user.id, {
+        await Student.findByIdAndUpdate(user.id, {
             $pull: { enrolledCourses: { course: id } },
         });
 

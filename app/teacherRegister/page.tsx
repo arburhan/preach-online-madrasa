@@ -17,7 +17,7 @@ export default function TeacherRegisterPage() {
         mobileNumber: '',
         address: '',
         gender: '' as 'male' | 'female' | '',
-        teacherQualifications: '',
+        qualifications: '',
         password: '',
         confirmPassword: '',
     });
@@ -62,7 +62,7 @@ export default function TeacherRegisterPage() {
                     mobileNumber: formData.mobileNumber,
                     address: formData.address,
                     gender: formData.gender,
-                    teacherQualifications: formData.teacherQualifications,
+                    qualifications: formData.qualifications,
                     password: formData.password,
                     role: 'teacher',
                 }),
@@ -245,15 +245,15 @@ export default function TeacherRegisterPage() {
 
                         {/* Qualifications */}
                         <div>
-                            <label htmlFor="teacherQualifications" className="block text-sm font-medium mb-2">
+                            <label htmlFor="qualifications" className="block text-sm font-medium mb-2">
                                 শিক্ষাগত যোগ্যতা *
                             </label>
                             <textarea
-                                id="teacherQualifications"
-                                name="teacherQualifications"
+                                id="qualifications"
+                                name="qualifications"
                                 required
                                 rows={3}
-                                value={formData.teacherQualifications}
+                                value={formData.qualifications}
                                 onChange={handleChange}
                                 className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 placeholder="আপনার শিক্ষাগত যোগ্যতা এবং অভিজ্ঞতা লিখুন..."

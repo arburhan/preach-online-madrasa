@@ -65,11 +65,11 @@ const SubjectSchema = new Schema<ISubject>(
         },
         maleInstructors: [{
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Teacher',
         }],
         femaleInstructors: [{
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Teacher',
         }],
         thumbnail: {
             type: String,

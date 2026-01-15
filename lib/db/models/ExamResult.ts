@@ -41,7 +41,7 @@ const ExamResultSchema = new Schema<IExamResult>(
     {
         student: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Student',
             required: [true, 'শিক্ষার্থী আবশ্যক'],
         },
         exam: {
@@ -96,7 +96,7 @@ const ExamResultSchema = new Schema<IExamResult>(
         },
         gradedBy: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Teacher',
         },
     },
     {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
 import Subject from '@/lib/db/models/Subject';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import { auth } from '@/lib/auth/auth.config';
 
 // GET - Get live class link for a subject based on student gender
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Get user's gender
-        const user = await User.findById(session.user.id).select('gender');
+        const user = await Student.findById(session.user.id).select('gender');
         const userGender = user?.gender;
 
         // Get subject with live class links

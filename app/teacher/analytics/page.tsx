@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import Progress from '@/lib/db/models/Progress';
 import { BookOpen, Users, TrendingUp, Award } from 'lucide-react';
 import Link from 'next/link';
@@ -48,8 +48,8 @@ export default async function TeacherAnalyticsPage() {
             const courseId = course._id.toString();
 
             // Get total enrollments
-            const enrolledUsers = await User.find({
-                enrolledCourses: courseId
+            const enrolledUsers = await Student.find({
+                'enrolledCourses.course': courseId
             }).countDocuments();
 
             // Get all progress records for this course

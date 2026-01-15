@@ -36,7 +36,7 @@ const StudentSemesterSchema = new Schema<IStudentSemester>(
     {
         student: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Student',
             required: [true, 'শিক্ষার্থী আবশ্যক'],
         },
         semester: {

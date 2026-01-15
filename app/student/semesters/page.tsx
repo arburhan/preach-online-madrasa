@@ -3,7 +3,7 @@ import { requireAuth } from '@/lib/auth/rbac';
 import connectDB from '@/lib/db/mongodb';
 import Semester from '@/lib/db/models/Semester';
 import StudentSemester from '@/lib/db/models/StudentSemester';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,7 +34,7 @@ export default async function StudentSemesterDashboard() {
     await connectDB();
 
     // Get user details including gender
-    const userData = await User.findById(user.id).select('name gender').lean();
+    const userData = await Student.findById(user.id).select('name gender').lean();
 
     // Get all active semesters
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

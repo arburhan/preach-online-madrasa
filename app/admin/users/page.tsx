@@ -1,12 +1,14 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
+import Teacher from '@/lib/db/models/Teacher';
+import Admin from '@/lib/db/models/Admin';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users as UsersIcon, GraduationCap, UserCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-interface StudentUser {
+interface StudentData {
     _id: { toString: () => string };
     name: string;
     email: string;
@@ -15,15 +17,16 @@ interface StudentUser {
     createdAt: Date;
 }
 
-interface TeacherUser {
+interface TeacherData {
     _id: { toString: () => string };
     name: string;
     email: string;
-    teacherQualifications?: string;
+    gender: 'male' | 'female';
+    qualifications?: string;
     createdAt: Date;
 }
 
-interface AdminUser {
+interface AdminData {
     _id: { toString: () => string };
     name: string;
     email: string;
@@ -39,24 +42,26 @@ export default async function UsersAdminPage() {
 
     await connectDB();
 
-    // Get all users with enrollment data
-    const studentsData = await User.find({ role: 'student' })
+    // Get all students
+    const studentsData = await Student.find()
         .select('name email gender enrolledCourses createdAt')
         .sort({ createdAt: -1 })
         .lean();
-    const students = studentsData as unknown as StudentUser[];
+    const students = studentsData as unknown as StudentData[];
 
-    const teachersData = await User.find({ role: 'teacher', isTeacherApproved: true })
-        .select('name email teacherQualifications createdAt')
+    // Get approved teachers
+    const teachersData = await Teacher.find({ isApproved: true })
+        .select('name email gender qualifications createdAt')
         .sort({ createdAt: -1 })
         .lean();
-    const teachers = teachersData as unknown as TeacherUser[];
+    const teachers = teachersData as unknown as TeacherData[];
 
-    const adminsData = await User.find({ role: 'admin' })
+    // Get admins
+    const adminsData = await Admin.find()
         .select('name email createdAt')
         .sort({ createdAt: -1 })
         .lean();
-    const admins = adminsData as unknown as AdminUser[];
+    const admins = adminsData as unknown as AdminData[];
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
@@ -109,7 +114,7 @@ export default async function UsersAdminPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {students.map((student: StudentUser) => (
+                                {students.map((student: StudentData) => (
                                     <tr key={student._id.toString()} className="hover:bg-muted/50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="font-medium">{student.name}</div>
@@ -156,6 +161,9 @@ export default async function UsersAdminPage() {
                                         ইমেইল
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        লিঙ্গ
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                         যোগ্যতা
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -164,7 +172,7 @@ export default async function UsersAdminPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {teachers.map((teacher: TeacherUser) => (
+                                {teachers.map((teacher: TeacherData) => (
                                     <tr key={teacher._id.toString()} className="hover:bg-muted/50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="font-medium">{teacher.name}</div>
@@ -172,9 +180,14 @@ export default async function UsersAdminPage() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                             {teacher.email}
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <Badge variant="outline" className={teacher.gender === 'male' ? 'border-blue-500 text-blue-600' : 'border-pink-500 text-pink-600'}>
+                                                {teacher.gender === 'male' ? 'পুরুষ' : 'মহিলা'}
+                                            </Badge>
+                                        </td>
                                         <td className="px-6 py-4 text-sm">
-                                            <div className="max-w-xs truncate" title={teacher.teacherQualifications}>
-                                                {teacher.teacherQualifications || 'N/A'}
+                                            <div className="max-w-xs truncate" title={teacher.qualifications}>
+                                                {teacher.qualifications || 'N/A'}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
@@ -211,7 +224,7 @@ export default async function UsersAdminPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {admins.map((admin: AdminUser) => (
+                                {admins.map((admin: AdminData) => (
                                     <tr key={admin._id.toString()} className="hover:bg-muted/50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="font-medium">{admin.name}</div>

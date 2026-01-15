@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import connectDB from '@/lib/db/mongodb';
 import Program from '@/lib/db/models/LongCourse';
 import '@/lib/db/models/Semester';
-import '@/lib/db/models/User';
+import '@/lib/db/models/Teacher';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {

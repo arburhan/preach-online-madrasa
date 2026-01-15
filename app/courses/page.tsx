@@ -2,11 +2,12 @@ import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
 import Program from '@/lib/db/models/LongCourse';
-import '@/lib/db/models/User'; // For populate
+import '@/lib/db/models/Teacher'; // For populate
 import { BookOpen, GraduationCap, Clock, Tag, Users, ArrowRight, Star } from 'lucide-react';
 import CourseCard from '@/components/courses/CourseCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { ObjectId } from 'mongoose';
 
 export default async function PublicCoursesPage() {
     await connectDB();
@@ -16,9 +17,17 @@ export default async function PublicCoursesPage() {
 
     // Fetch all published courses
     const courses = await Course.find({ status: 'published' })
-        .populate('instructors', 'name')
         .sort({ createdAt: -1 })
         .lean();
+
+    // Manually fetch all teachers
+    const Teacher = (await import('@/lib/db/models/Teacher')).default;
+    const allInstructorIds = courses.flatMap(c => c.instructors || []);
+    const teachers = await Teacher.find({ _id: { $in: allInstructorIds } })
+        .select('_id name')
+        .lean();
+
+    const teacherMap = new Map(teachers.map(t => [t._id.toString(), t]));
 
     // Fetch published programs (long courses)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,9 +38,8 @@ export default async function PublicCoursesPage() {
     // Serialize courses
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serializedCourses = courses.map((course: any) => {
-        const instructorsData = Array.isArray(course.instructors) ? course.instructors : [];
-        const instructorNames = instructorsData
-            .map((inst: { name?: string }) => inst?.name || 'Unknown')
+        const instructorNames = (course.instructors || [])
+            .map((id: ObjectId) => teacherMap.get(id.toString())?.name)
             .filter(Boolean)
             .join(', ') || 'No instructor';
 

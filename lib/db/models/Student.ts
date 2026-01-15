@@ -1,43 +1,31 @@
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
-// User roles enum
-export enum UserRole {
-    STUDENT = 'student',
-    TEACHER = 'teacher',
-    ADMIN = 'admin',
-}
-
-// User interface
-export interface IUser extends Document {
+// Student interface
+export interface IStudent extends Document {
     name: string;
     email: string;
     password?: string;
     image?: string;
     gender?: 'male' | 'female';
-    role: UserRole;
+    phone?: string;
+    address?: string;
+    bio?: string;
 
     // OAuth
     provider?: 'credentials' | 'google';
     providerId?: string;
 
-    // Teacher specific
-    isTeacherApproved?: boolean;
-    approvalStatus?: 'pending' | 'approved' | 'rejected';
-    teacherBio?: string;
-    teacherQualifications?: string;
-    fatherName?: string;
-    motherName?: string;
-    mobileNumber?: string;
-    address?: string;
-
-    // Common fields
-    phone?: string;
-    bio?: string;
-
-    // Student specific
+    // Course enrollments
     enrolledCourses?: Array<{
         course: Types.ObjectId;
         lastWatchedLesson?: Types.ObjectId;
+        enrolledAt: Date;
+    }>;
+
+    // Program (long course) enrollments
+    enrolledPrograms?: Array<{
+        program: Types.ObjectId;
+        currentSemester?: Types.ObjectId;
         enrolledAt: Date;
     }>;
 
@@ -45,8 +33,8 @@ export interface IUser extends Document {
     updatedAt: Date;
 }
 
-// User schema
-const UserSchema = new Schema<IUser>(
+// Student schema
+const StudentSchema = new Schema<IStudent>(
     {
         name: {
             type: String,
@@ -64,46 +52,21 @@ const UserSchema = new Schema<IUser>(
             type: String,
             select: false,
         },
-        image: {
-            type: String,
-        },
+        image: String,
         gender: {
             type: String,
             enum: ['male', 'female'],
         },
-        role: {
-            type: String,
-            enum: Object.values(UserRole),
-            default: UserRole.STUDENT,
-        },
+        phone: String,
+        address: String,
+        bio: String,
+
         provider: {
             type: String,
             enum: ['credentials', 'google'],
         },
         providerId: String,
 
-        // Teacher fields
-        isTeacherApproved: {
-            type: Boolean,
-            default: false,
-        },
-        approvalStatus: {
-            type: String,
-            enum: ['pending', 'approved', 'rejected'],
-            default: 'pending',
-        },
-        teacherBio: String,
-        teacherQualifications: String,
-        fatherName: String,
-        motherName: String,
-        mobileNumber: String,
-        address: String,
-
-        // Common fields
-        phone: String,
-        bio: String,
-
-        // Student fields
         enrolledCourses: [
             {
                 course: {
@@ -121,6 +84,24 @@ const UserSchema = new Schema<IUser>(
                 },
             },
         ],
+
+        enrolledPrograms: [
+            {
+                program: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'LongCourse',
+                    required: true,
+                },
+                currentSemester: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'Semester',
+                },
+                enrolledAt: {
+                    type: Date,
+                    default: Date.now,
+                },
+            },
+        ],
     },
     {
         timestamps: true,
@@ -129,11 +110,8 @@ const UserSchema = new Schema<IUser>(
 
 // Indexes
 
-UserSchema.index({ role: 1 });
-UserSchema.index({ isTeacherApproved: 1 });
 
-// Export model
-const User: Model<IUser> =
-    mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const Student: Model<IStudent> =
+    mongoose.models.Student || mongoose.model<IStudent>('Student', StudentSchema);
 
-export default User;
+export default Student;

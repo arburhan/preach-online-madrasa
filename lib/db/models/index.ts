@@ -1,7 +1,20 @@
 // Export all models from a single entry point
+
+// User models (separated by role)
+export { default as Student } from './Student';
+export type { IStudent } from './Student';
+
+export { default as Teacher } from './Teacher';
+export type { ITeacher, TeacherApprovalStatus } from './Teacher';
+
+export { default as Admin } from './Admin';
+export type { IAdmin } from './Admin';
+
+// Legacy User export (for backwards compatibility during migration)
 export { default as User, UserRole } from './User';
 export type { IUser } from './User';
 
+// Course models
 export { default as Course, CourseStatus, CourseLevel } from './Course';
 export type { ICourse } from './Course';
 
@@ -36,3 +49,7 @@ export type { IStudentSemester, ISubjectProgress, ISemesterResult } from './Stud
 // Long course program model
 export { default as Program } from './LongCourse';
 export type { IProgram } from './LongCourse';
+
+// System Settings
+export { default as SystemSetting } from './SystemSetting';
+export type { ISystemSetting } from './SystemSetting';

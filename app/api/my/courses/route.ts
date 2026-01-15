@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import Progress from '@/lib/db/models/Progress';
 import { requireAuth } from '@/lib/auth/rbac';
 
@@ -46,11 +46,11 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ courses });
         } else {
             // Get enrolled courses
-            const userData = await User.findById(user.id)
+            const userData = await Student.findById(user.id)
                 .populate({
-                    path: 'enrolledCourses',
+                    path: 'enrolledCourses.course',
                     populate: {
-                        path: 'instructor',
+                        path: 'instructors',
                         select: 'name image',
                     },
                 })

@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
+import Teacher from '@/lib/db/models/Teacher';
 import Course from '@/lib/db/models/Course';
 import Lesson from '@/lib/db/models/Lesson';
 import {
@@ -57,7 +58,7 @@ export default async function StatisticsPage() {
         { $limit: 10 },
         {
             $lookup: {
-                from: 'users',
+                from: 'teachers',
                 localField: '_id',
                 foreignField: '_id',
                 as: 'teacherData',
@@ -69,8 +70,8 @@ export default async function StatisticsPage() {
 
     // Get overview stats
     const [totalStudents, totalTeachers, totalCourses, totalLessons] = await Promise.all([
-        User.countDocuments({ role: 'student' }),
-        User.countDocuments({ role: 'teacher', isTeacherApproved: true }),
+        Student.countDocuments(),
+        Teacher.countDocuments({ isApproved: true }),
         Course.countDocuments({ status: 'published' }),
         Lesson.countDocuments(),
     ]);

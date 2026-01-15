@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation';
 import { requireAuth } from '@/lib/auth/rbac';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
 import { BookOpen, GraduationCap, Clock, Award } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { ObjectId } from 'mongoose';
 
 export default async function StudentDashboard() {
     const user = await requireAuth();
@@ -18,7 +19,7 @@ export default async function StudentDashboard() {
     await connectDB();
 
     // Get user's enrolled courses
-    const userData = await User.findById(user.id)
+    const userData = await Student.findById(user.id)
         .select('enrolledCourses')
         .lean();
 
@@ -38,17 +39,25 @@ export default async function StudentDashboard() {
     const enrolledCourses: any[] = await Course.find({
         _id: { $in: enrolledCourseIds }
     })
-        .populate('instructors', 'name image')
-        .select('titleBn titleEn thumbnail level descriptionBn')
+        .select('titleBn titleEn thumbnail level descriptionBn instructors')
         .lean();
 
     // Get recent published courses
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recentCourses: any[] = await Course.find({ status: 'published' })
-        .populate('instructors', 'name image')
         .sort({ createdAt: -1 })
         .limit(4)
         .lean();
+
+    // Manually fetch all teachers for both enrolled and recent courses
+    const Teacher = (await import('@/lib/db/models/Teacher')).default;
+    const allCourses = [...enrolledCourses, ...recentCourses];
+    const allInstructorIds = allCourses.flatMap(c => c.instructors || []);
+    const teachers = await Teacher.find({ _id: { $in: allInstructorIds } })
+        .select('_id name image')
+        .lean();
+
+    const teacherMap = new Map(teachers.map(t => [t._id.toString(), t]));
 
     return (
         <div className="min-h-screen bg-background">
@@ -123,7 +132,7 @@ export default async function StudentDashboard() {
                 <section className="mb-12">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold">আমার কোর্সসমূহ</h2>
-                        <Link href="/student/courses">
+                        <Link href="/student/my-courses">
                             <Button variant="ghost">সব দেখুন</Button>
                         </Link>
                     </div>
@@ -166,13 +175,15 @@ export default async function StudentDashboard() {
                                             </p>
                                             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                                                 <Image
-                                                    src={course.instructors?.[0]?.image || '/placeholder-avatar.png'}
-                                                    alt={course.instructors?.[0]?.name || 'Instructor'}
+                                                    src={(course.instructors?.[0] && teacherMap.get(course.instructors[0].toString())?.image) || '/placeholder-avatar.png'}
+                                                    alt="Instructor"
                                                     width={24}
                                                     height={24}
                                                     className="w-6 h-6 rounded-full"
                                                 />
-                                                <span>{course.instructors?.[0]?.name || 'Unknown'}</span>
+                                                <span>
+                                                    {course.instructors?.map((id: ObjectId) => teacherMap.get(id.toString())?.name).filter(Boolean).join(', ') || 'Unknown'}
+                                                </span>
                                             </div>
                                             <Button className="w-full" size="sm">
                                                 ক্লাস ভিডিও দেখুন

@@ -2,7 +2,7 @@ import { requireAuth } from '@/lib/auth/rbac';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
 import Lesson from '@/lib/db/models/Lesson';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { BookOpen, Users, Award, CheckCircle2 } from 'lucide-react';
@@ -19,13 +19,20 @@ export default async function CourseDetailPage({
     await connectDB();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const course: any = await Course.findById(id)
-        .populate('instructors', 'name image teacherBio teacherQualifications')
-        .lean();
+    const course: any = await Course.findById(id).lean();
 
     if (!course) {
         notFound();
     }
+
+    // Manually fetch instructors
+    const Teacher = (await import('@/lib/db/models/Teacher')).default;
+    const instructors = await Teacher.find({ _id: { $in: course.instructors || [] } })
+        .select('_id name image bio qualifications')
+        .lean();
+
+    // Add instructors to course object
+    course.instructors = instructors;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const lessons: any[] = await Lesson.find({ course: id })
@@ -34,7 +41,7 @@ export default async function CourseDetailPage({
         .lean();
 
     // Check if user is enrolled
-    const enrolledUser = await User.findById(user.id).select('enrolledCourses');
+    const enrolledUser = await Student.findById(user.id).select('enrolledCourses');
 
     // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
     const isEnrolled = enrolledUser?.enrolledCourses?.some(
@@ -186,9 +193,9 @@ export default async function CourseDetailPage({
                                         />
                                         <div>
                                             <p className="font-medium">{course.instructors[0]?.name}</p>
-                                            {course.instructors[0]?.teacherQualifications && (
+                                            {course.instructors[0]?.qualifications && (
                                                 <p className="text-sm text-muted-foreground line-clamp-1">
-                                                    {course.instructors[0].teacherQualifications}
+                                                    {course.instructors[0].qualifications}
                                                 </p>
                                             )}
                                         </div>

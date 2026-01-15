@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import connectDB from '@/lib/db/mongodb';
-import User, { UserRole } from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
+import Teacher from '@/lib/db/models/Teacher';
 
 export async function POST(request: NextRequest) {
     try {
-        const { name, email, password, role, gender, fatherName, motherName, mobileNumber, address, teacherQualifications } = await request.json();
+        const {
+            name,
+            email,
+            password,
+            role,
+            gender,
+            fatherName,
+            motherName,
+            mobileNumber,
+            address,
+            qualifications
+        } = await request.json();
 
         // Validation
         if (!name || !email || !password) {
@@ -25,16 +37,18 @@ export async function POST(request: NextRequest) {
         // Gender validation for teachers
         if (role === 'teacher' && !gender) {
             return NextResponse.json(
-                { error: 'লিঙ্গ নির্বাচন করুন' },
+                { error: 'শিক্ষকদের জন্য লিঙ্গ নির্বাচন আবশ্যক' },
                 { status: 400 }
             );
         }
 
         await connectDB();
 
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
+        // Check if user already exists in any model
+        const existingStudent = await Student.findOne({ email });
+        const existingTeacher = await Teacher.findOne({ email });
+
+        if (existingStudent || existingTeacher) {
             return NextResponse.json(
                 { error: 'এই ইমেইল দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট রয়েছে' },
                 { status: 400 }
@@ -44,32 +58,49 @@ export async function POST(request: NextRequest) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user
-        const user = await User.create({
-            name,
-            email,
-            password: hashedPassword,
-            role: role === 'teacher' ? UserRole.TEACHER : UserRole.STUDENT,
-            provider: 'credentials',
-            gender: gender || undefined,
-            isTeacherApproved: false,
-            // Teacher specific fields
-            ...(role === 'teacher' && {
+        // Create user based on role
+        if (role === 'teacher') {
+            // Create Teacher
+            const teacher = await Teacher.create({
+                name,
+                email,
+                password: hashedPassword,
+                gender,
+                provider: 'credentials',
                 fatherName,
                 motherName,
                 mobileNumber,
                 address,
-                teacherQualifications,
-            }),
-        });
+                qualifications,
+                isApproved: false,
+                approvalStatus: 'pending',
+            });
 
-        return NextResponse.json(
-            {
-                message: 'নিবন্ধন সফল হয়েছে',
-                userId: user._id,
-            },
-            { status: 201 }
-        );
+            return NextResponse.json(
+                {
+                    message: 'শিক্ষক নিবন্ধন সফল হয়েছে। অনুমোদনের জন্য অপেক্ষা করুন।',
+                    userId: teacher._id,
+                },
+                { status: 201 }
+            );
+        } else {
+            // Create Student (default)
+            const student = await Student.create({
+                name,
+                email,
+                password: hashedPassword,
+                gender: gender || undefined,
+                provider: 'credentials',
+            });
+
+            return NextResponse.json(
+                {
+                    message: 'নিবন্ধন সফল হয়েছে',
+                    userId: student._id,
+                },
+                { status: 201 }
+            );
+        }
     } catch (error) {
         console.error('Signup error:', error);
         return NextResponse.json(

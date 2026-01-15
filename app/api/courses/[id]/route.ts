@@ -14,7 +14,7 @@ export async function GET(
         await connectDB();
 
         const course = await Course.findById(id)
-            .populate('instructors', 'name image teacherBio teacherQualifications')
+            .populate('instructors', 'name image bio qualifications')
             .lean();
 
         if (!course) {

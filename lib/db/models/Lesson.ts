@@ -57,7 +57,7 @@ const LessonSchema = new Schema<ILesson>(
         },
         instructor: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Teacher',
         },
         instructorGender: {
             type: String,

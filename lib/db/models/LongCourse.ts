@@ -119,11 +119,11 @@ const ProgramSchema = new Schema<IProgram>(
 
         maleInstructors: [{
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Teacher',
         }],
         femaleInstructors: [{
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Teacher',
         }],
 
         status: {
@@ -146,7 +146,7 @@ const ProgramSchema = new Schema<IProgram>(
 
         createdBy: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Admin',
             required: true,
         },
     },

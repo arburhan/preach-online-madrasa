@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Teacher from '@/lib/db/models/Teacher';
 
 export async function POST(request: NextRequest) {
     try {
@@ -20,7 +20,6 @@ export async function POST(request: NextRequest) {
         if (!userId) {
             return NextResponse.json(
                 { error: 'ইউজার আইডি প্রয়োজন' },
-
                 { status: 400 }
             );
         }
@@ -28,7 +27,7 @@ export async function POST(request: NextRequest) {
         await connectDB();
 
         // Find the teacher
-        const teacher = await User.findById(userId);
+        const teacher = await Teacher.findById(userId);
 
         if (!teacher) {
             return NextResponse.json(
@@ -37,17 +36,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (teacher.role !== 'teacher') {
-            return NextResponse.json(
-                { error: 'এই ইউজার শিক্ষক নন' },
-                { status: 400 }
-            );
-        }
-
-        // TODO: Send rejection notification email to teacher
-
         // Delete the teacher account
-        await User.findByIdAndDelete(userId);
+        await Teacher.findByIdAndDelete(userId);
 
         return NextResponse.json({
             message: 'শিক্ষক প্রত্যাখ্যান করা হয়েছে',

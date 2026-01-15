@@ -1,4 +1,6 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
+import './Teacher'; // Ensure Teacher model is registered before Course references it
+import './Admin';   // Ensure Admin model is registered before Course references it
 
 // Course status enum
 export enum CourseStatus {
@@ -78,12 +80,12 @@ const CourseSchema = new Schema<ICourse>(
         },
         instructors: [{
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Teacher',
             required: [true, 'At least one instructor is required'],
         }],
         createdBy: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Admin',
             required: [true, 'Creator (admin) is required'],
         },
         price: {

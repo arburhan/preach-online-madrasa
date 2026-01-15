@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { GraduationCap } from 'lucide-react';
+import { ObjectId } from 'mongoose';
 
 interface Teacher {
     _id: string;

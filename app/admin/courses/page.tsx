@@ -2,12 +2,14 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
+import '@/lib/db/models/Teacher';
 
 import { BookOpen, Users, Video, Calendar, Plus } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ObjectId } from 'mongoose';
 
 interface CourseData {
     _id: { toString: () => string };
@@ -22,7 +24,7 @@ interface CourseData {
     totalLessons: number;
     enrolledCount: number;
     createdAt: Date;
-    instructor?: { name: string; email: string };
+    instructor: { name: string; email: string }[];
 }
 
 export default async function AdminCoursesPage() {
@@ -34,30 +36,47 @@ export default async function AdminCoursesPage() {
 
     await connectDB();
 
-    // Get all courses with instructor data
+    // Get all courses
     const coursesData = await Course.find()
-        .populate('instructors', 'name email')
         .sort({ createdAt: -1 })
         .lean();
 
-    // Serialize courses properly
+    // Manually fetch all teachers to avoid populate issues
+    const Teacher = (await import('@/lib/db/models/Teacher')).default;
+    const allInstructorIds = coursesData.flatMap(c => c.instructors || []);
+    const teachers = await Teacher.find({ _id: { $in: allInstructorIds } })
+        .select('_id name email')
+        .lean();
+
+    // Create a map for quick lookup
+    const teacherMap = new Map(teachers.map(t => [t._id.toString(), t]));
+
+    // Serialize courses with instructor data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const courses: CourseData[] = coursesData.map((course: any) => ({
-        _id: course._id,
-        titleBn: course.titleBn,
-        titleEn: course.titleEn || '',
-        descriptionBn: course.descriptionBn || '',
-        thumbnail: course.thumbnail || '',
-        status: course.status,
-        isFree: course.isFree,
-        price: course.price || 0,
-        level: course.level || 'beginner',
-        language: course.language || 'bn',
-        totalLessons: course.totalLessons || 0,
-        enrolledCount: course.enrolledCount || 0,
-        createdAt: course.createdAt,
-        instructor: course.instructors || [],
-    }));
+    const courses: CourseData[] = coursesData.map((course: any) => {
+        // Get instructor details from map
+        const instructorDetails = (course.instructors || [])
+            .map((id: ObjectId) => teacherMap.get(id.toString()))
+            .filter(Boolean);
+
+        return {
+            _id: course._id,
+            titleBn: course.titleBn,
+            titleEn: course.titleEn || '',
+            descriptionBn: course.descriptionBn || '',
+            thumbnail: course.thumbnail || '',
+            status: course.status,
+            isFree: course.isFree,
+            price: course.price || 0,
+            level: course.level || 'beginner',
+            language: course.language || 'bn',
+            totalLessons: course.totalLessons || 0,
+            enrolledCount: course.enrolledCount || 0,
+            createdAt: course.createdAt,
+            instructor: instructorDetails,
+        };
+    });
+
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
@@ -157,7 +176,7 @@ export default async function AdminCoursesPage() {
                                 <p className="text-sm text-muted-foreground mb-3">
                                     উস্তায: {Array.isArray(course.instructor)
                                         ? course.instructor.map((i: any) => i?.name).filter(Boolean).join(', ') || 'Unknown' // eslint-disable-line
-                                        : course.instructor?.name || 'Unknown'}
+                                        : course?.instructor || 'Unknown'}
                                 </p>
 
                                 {/* Meta Info */}

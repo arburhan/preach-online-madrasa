@@ -79,6 +79,7 @@ export default function TeacherSearchSelect({ selectedTeachers, onTeachersChange
                             <span className="mr-2">{teacher.name}</span>
                             <span className="text-xs text-muted-foreground">({teacher.email})</span>
                             <Button
+                                type="button"
                                 variant="ghost"
                                 size="sm"
                                 className="h-4 w-4 p-0 ml-2 hover:bg-purple-200 dark:hover:bg-purple-800"
@@ -113,6 +114,7 @@ export default function TeacherSearchSelect({ selectedTeachers, onTeachersChange
                     <div className="absolute z-10 w-full mt-2 bg-card border rounded-lg shadow-lg max-h-64 overflow-y-auto">
                         {searchResults.map((teacher) => (
                             <button
+                                type="button"
                                 key={teacher._id}
                                 onClick={() => handleSelectTeacher(teacher)}
                                 className="w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b last:border-b-0"

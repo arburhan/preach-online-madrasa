@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import { UserCircle, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default async function StudentProfilePage() {
@@ -14,7 +15,7 @@ export default async function StudentProfilePage() {
 
     await connectDB();
 
-    const user = await User.findById(session.user.id).lean();
+    const user = await Student.findById(session.user.id).lean();
 
     if (!user) {
         redirect('/auth/signin');
@@ -40,14 +41,17 @@ export default async function StudentProfilePage() {
                 {/* Profile Card */}
                 <div className="bg-card border rounded-xl overflow-hidden">
                     {/* Header Section with Avatar */}
-                    <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-8">
+                    <div className="bg-linear-to-r from-purple-600 to-blue-600 p-8">
                         <div className="flex items-center gap-6">
                             <div className="h-24 w-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-4 border-white/30">
                                 {user.image ? (
-                                    <img
+                                    <Image
                                         src={user.image}
                                         alt={user.name || ''}
-                                        className="h-full w-full rounded-full object-cover"
+                                        width={96}
+                                        height={96}
+                                        className="rounded-full object-cover"
+                                        unoptimized
                                     />
                                 ) : (
                                     <UserCircle className="h-16 w-16 text-white" />
@@ -57,7 +61,7 @@ export default async function StudentProfilePage() {
                                 <h2 className="text-2xl font-bold">{user.name || 'নাম যোগ করুন'}</h2>
                                 <p className="text-white/80 mt-1">{user.email}</p>
                                 <div className="mt-2 inline-flex px-3 py-1 rounded-full text-sm bg-white/20 backdrop-blur-sm">
-                                    {user.role === 'student' ? 'শিক্ষার্থী' : user.role === 'teacher' ? 'উস্তায' : 'অ্যাডমিন'}
+                                    শিক্ষার্থী
                                 </div>
                             </div>
                         </div>
@@ -130,23 +134,22 @@ export default async function StudentProfilePage() {
                     </div>
                 </div>
 
-                {/* Stats Cards - For Students */}
-                {user.role === 'student' && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-card border rounded-xl p-6">
-                            <p className="text-sm text-muted-foreground mb-1">Enrolled Courses</p>
-                            <p className="text-3xl font-bold">{user.enrolledCourses?.length || 0}</p>
-                        </div>
-                        <div className="bg-card border rounded-xl p-6">
-                            <p className="text-sm text-muted-foreground mb-1">Certificates</p>
-                            <p className="text-3xl font-bold">0</p>
-                        </div>
-                        <div className="bg-card border rounded-xl p-6">
-                            <p className="text-sm text-muted-foreground mb-1">Total Progress</p>
-                            <p className="text-3xl font-bold">--</p>
-                        </div>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-card border rounded-xl p-6">
+                        <p className="text-sm text-muted-foreground mb-1">Enrolled Courses</p>
+                        <p className="text-3xl font-bold">{user.enrolledCourses?.length || 0}</p>
                     </div>
-                )}
+                    <div className="bg-card border rounded-xl p-6">
+                        <p className="text-sm text-muted-foreground mb-1">Certificates</p>
+                        <p className="text-3xl font-bold">0</p>
+                    </div>
+                    <div className="bg-card border rounded-xl p-6">
+                        <p className="text-sm text-muted-foreground mb-1">Total Progress</p>
+                        <p className="text-3xl font-bold">--</p>
+                    </div>
+                </div>
+
             </div>
         </div>
     );

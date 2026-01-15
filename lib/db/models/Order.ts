@@ -44,7 +44,7 @@ const OrderSchema = new Schema<IOrder>(
     {
         user: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'Student',
             required: [true, 'User reference is required'],
         },
         course: {

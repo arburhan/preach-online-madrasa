@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import Progress from '@/lib/db/models/Progress';
 import Lesson from '@/lib/db/models/Lesson';
 import { ArrowLeft, Users, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
@@ -75,8 +75,8 @@ export default async function CourseAnalyticsPage({ params }: PageProps) {
     const totalLessons = lessons.length;
 
     // Get enrolled students
-    const enrolledUsers = await User.find({
-        enrolledCourses: courseId
+    const enrolledUsers = await Student.find({
+        'enrolledCourses.course': courseId
     }).select('_id name email createdAt').lean();
 
     // Calculate progress for each student

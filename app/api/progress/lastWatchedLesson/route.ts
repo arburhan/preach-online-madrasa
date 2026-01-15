@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 
 export async function POST(request: NextRequest) {
     try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         await connectDB();
 
         // Update the user's last watched lesson for this course
-        await User.findByIdAndUpdate(
+        await Student.findByIdAndUpdate(
             session.user.id,
             {
                 $set: {
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
 
         await connectDB();
 
-        const user = await User.findById(session.user.id)
+        const user = await Student.findById(session.user.id)
             .select('enrolledCourses')
             .lean();
 

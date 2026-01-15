@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
 import Lesson from '@/lib/db/models/Lesson';
-import User from '@/lib/db/models/User';
+import Student from '@/lib/db/models/Student';
 import { auth } from '@/lib/auth/auth.config';
 
 // GET - Get lessons for a subject with gender filtering
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Get user's gender
-        const user = await User.findById(session.user.id).select('gender');
+        const user = await Student.findById(session.user.id).select('gender');
         const userGender = user?.gender;
 
         // Build query based on gender

@@ -1,5 +1,5 @@
 import connectDB from '@/lib/db/mongodb';
-import User from '@/lib/db/models/User';
+import Teacher from '@/lib/db/models/Teacher';
 import Course from '@/lib/db/models/Course';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -18,17 +18,11 @@ export default async function TeacherDetailPage({ params }: PageProps) {
     await connectDB();
 
     // Fetch teacher details
-    const teacher = await User.findById(id)
-        .select('name email image teacherBio teacherQualifications role approvalStatus isTeacherApproved')
+    const teacher = await Teacher.findById(id)
+        .select('name email image bio qualifications gender isApproved')
         .lean();
 
-    if (!teacher || teacher.role !== 'teacher') {
-        notFound();
-    }
-
-    // Check if teacher is approved (support both old and new approval system)
-    const isApproved = teacher.approvalStatus === 'approved' || teacher.isTeacherApproved === true;
-    if (!isApproved) {
+    if (!teacher || !teacher.isApproved) {
         notFound();
     }
 
@@ -91,9 +85,9 @@ export default async function TeacherDetailPage({ params }: PageProps) {
                             <h1 className="text-3xl md:text-4xl font-bold mb-2">
                                 {serializedTeacher.name}
                             </h1>
-                            {serializedTeacher.teacherQualifications && (
+                            {serializedTeacher.qualifications && (
                                 <p className="text-lg text-white/90 mb-3">
-                                    {serializedTeacher.teacherQualifications}
+                                    {serializedTeacher.qualifications}
                                 </p>
                             )}
                             {serializedTeacher.email && (
@@ -110,14 +104,14 @@ export default async function TeacherDetailPage({ params }: PageProps) {
             <div className="container mx-auto px-4 py-12">
                 <div className="max-w-4xl mx-auto space-y-8">
                     {/* Bio Section */}
-                    {serializedTeacher.teacherBio && (
+                    {serializedTeacher.bio && (
                         <div className="bg-card border rounded-xl p-6">
                             <div className="flex items-center gap-2 mb-4">
                                 <GraduationCap className="h-5 w-5 text-purple-600" />
                                 <h2 className="text-2xl font-bold">পরিচিতি</h2>
                             </div>
                             <p className="text-muted-foreground whitespace-pre-wrap">
-                                {serializedTeacher.teacherBio}
+                                {serializedTeacher.bio}
                             </p>
                         </div>
                     )}

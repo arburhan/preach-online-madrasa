@@ -4,20 +4,16 @@ import CoursesSection from "@/components/home/CoursesSection";
 import TeachersSection from "@/components/home/TeachersSection";
 import CTASection from "@/components/home/CTASection";
 import connectDB from "@/lib/db/mongodb";
-import User from "@/lib/db/models/User";
+import Teacher from "@/lib/db/models/Teacher";
 
 export default async function HomePage() {
   await connectDB();
 
-  // Fetch approved teachers (support both old and new data)
-  const teachers = await User.find({
-    role: 'teacher',
-    $or: [
-      { approvalStatus: 'approved' },
-      { isTeacherApproved: true }
-    ]
+  // Fetch approved teachers from new Teacher model
+  const teachers = await Teacher.find({
+    isApproved: true
   })
-    .select('name image teacherQualifications')
+    .select('name image qualifications')
     .limit(6)
     .lean();
 
@@ -27,7 +23,7 @@ export default async function HomePage() {
     _id: teacher._id.toString(),
     name: teacher.name,
     image: teacher.image,
-    teacherQualifications: teacher.teacherQualifications,
+    teacherQualifications: teacher.qualifications,
   }));
 
   return (
