@@ -2,8 +2,16 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 
 // Lesson interface
 export interface ILesson extends Document {
-    // Course reference
-    course: mongoose.Types.ObjectId;
+    // Course reference (backward compatibility)
+    course?: mongoose.Types.ObjectId;
+
+    // New semester-based references
+    subject?: mongoose.Types.ObjectId;
+    semester?: mongoose.Types.ObjectId;
+
+    // Instructor info for gender-based filtering
+    instructor?: mongoose.Types.ObjectId;
+    instructorGender?: 'male' | 'female';
 
     // Basic info
     titleBn: string;
@@ -12,19 +20,19 @@ export interface ILesson extends Document {
     descriptionEn?: string;
 
     // Video details
-    videoUrl: string; // Cloudflare R2 URL
-    videoKey: string; // Storage key for generating signed URLs
-    duration: number; // Duration in seconds
+    videoUrl: string;
+    videoKey: string;
+    duration: number;
 
     // Order and access
-    order: number; // Lesson order within the course
-    isFree: boolean; // Free preview lesson
+    order: number;
+    isFree: boolean;
 
     // Resources
     attachments: Array<{
         name: string;
         url: string;
-        type: string; // pdf, doc, etc.
+        type: string;
     }>;
 
     // Timestamps
@@ -38,7 +46,22 @@ const LessonSchema = new Schema<ILesson>(
         course: {
             type: Schema.Types.ObjectId,
             ref: 'Course',
-            required: [true, 'Course reference is required'],
+        },
+        subject: {
+            type: Schema.Types.ObjectId,
+            ref: 'Subject',
+        },
+        semester: {
+            type: Schema.Types.ObjectId,
+            ref: 'Semester',
+        },
+        instructor: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        instructorGender: {
+            type: String,
+            enum: ['male', 'female'],
         },
         titleBn: {
             type: String,
@@ -92,9 +115,10 @@ const LessonSchema = new Schema<ILesson>(
 // Indexes
 LessonSchema.index({ course: 1, order: 1 });
 LessonSchema.index({ course: 1 });
-
-// Ensure unique order within a course
-LessonSchema.index({ course: 1, order: 1 }, { unique: true });
+LessonSchema.index({ subject: 1, order: 1 });
+LessonSchema.index({ subject: 1 });
+LessonSchema.index({ semester: 1 });
+LessonSchema.index({ instructorGender: 1 });
 
 // Create or retrieve the model
 const Lesson: Model<ILesson> =
