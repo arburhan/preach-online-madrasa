@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
-import Program from '@/lib/db/models/Program';
+import Program from '@/lib/db/models/LongCourse';
 import { auth } from '@/lib/auth/auth.config';
 
 // GET - Get all programs (public gets published, admin gets all)

@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
-import Program from '@/lib/db/models/Program';
+import Program from '@/lib/db/models/LongCourse';
 import '@/lib/db/models/Semester'; // Register for populate
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -58,8 +58,8 @@ export default async function ProgramDetailPage({
                             <div className="flex items-center gap-3 mb-2">
                                 <h1 className="text-3xl font-bold">{program.titleBn}</h1>
                                 <span className={`px-3 py-1 rounded-full text-sm ${program.status === 'published'
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-amber-100 text-amber-700'
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-amber-100 text-amber-700'
                                     }`}>
                                     {program.status === 'published' ? 'প্রকাশিত' : 'ড্রাফট'}
                                 </span>
@@ -142,8 +142,8 @@ export default async function ProgramDetailPage({
                                                 </div>
                                             </div>
                                             <span className={`px-2 py-1 rounded text-xs ${semester.status === 'active'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-gray-100 text-gray-700'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-gray-100 text-gray-700'
                                                 }`}>
                                                 {semester.status === 'active' ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
                                             </span>

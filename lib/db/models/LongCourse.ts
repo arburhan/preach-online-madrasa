@@ -161,7 +161,7 @@ ProgramSchema.index({ status: 1 });
 ProgramSchema.index({ isPopular: 1, isFeatured: 1 });
 ProgramSchema.index({ createdAt: -1 });
 
-const Program: Model<IProgram> =
-    mongoose.models.Program || mongoose.model<IProgram>('Program', ProgramSchema);
+const LongCourse: Model<IProgram> =
+    mongoose.models.LongCourse || mongoose.model<IProgram>('LongCourse', ProgramSchema);
 
-export default Program;
+export default LongCourse;

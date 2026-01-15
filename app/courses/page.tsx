@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
-import Program from '@/lib/db/models/Program';
+import Program from '@/lib/db/models/LongCourse';
 import '@/lib/db/models/User'; // For populate
 import { BookOpen, GraduationCap, Clock, Tag, Users, ArrowRight, Star } from 'lucide-react';
 import CourseCard from '@/components/courses/CourseCard';
