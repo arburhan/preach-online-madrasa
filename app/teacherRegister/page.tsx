@@ -16,6 +16,7 @@ export default function TeacherRegisterPage() {
         email: '',
         mobileNumber: '',
         address: '',
+        gender: '' as 'male' | 'female' | '',
         teacherQualifications: '',
         password: '',
         confirmPassword: '',
@@ -42,6 +43,11 @@ export default function TeacherRegisterPage() {
             return;
         }
 
+        if (!formData.gender) {
+            toast.error('লিঙ্গ নির্বাচন করুন');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -55,6 +61,7 @@ export default function TeacherRegisterPage() {
                     email: formData.email,
                     mobileNumber: formData.mobileNumber,
                     address: formData.address,
+                    gender: formData.gender,
                     teacherQualifications: formData.teacherQualifications,
                     password: formData.password,
                     role: 'teacher',
@@ -168,6 +175,37 @@ export default function TeacherRegisterPage() {
                                     className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                     placeholder="01XXXXXXXXX"
                                 />
+                            </div>
+                        </div>
+
+                        {/* Gender Selection */}
+                        <div>
+                            <label className="block text-sm font-medium mb-3">
+                                লিঙ্গ *
+                            </label>
+                            <div className="flex gap-6">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="gender"
+                                        value="male"
+                                        checked={formData.gender === 'male'}
+                                        onChange={handleChange}
+                                        className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                                    />
+                                    <span className="text-sm">পুরুষ</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="gender"
+                                        value="female"
+                                        checked={formData.gender === 'female'}
+                                        onChange={handleChange}
+                                        className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                                    />
+                                    <span className="text-sm">মহিলা</span>
+                                </label>
                             </div>
                         </div>
 

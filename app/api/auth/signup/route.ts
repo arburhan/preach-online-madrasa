@@ -5,7 +5,7 @@ import User, { UserRole } from '@/lib/db/models/User';
 
 export async function POST(request: NextRequest) {
     try {
-        const { name, email, password, role } = await request.json();
+        const { name, email, password, role, gender, fatherName, motherName, mobileNumber, address, teacherQualifications } = await request.json();
 
         // Validation
         if (!name || !email || !password) {
@@ -18,6 +18,14 @@ export async function POST(request: NextRequest) {
         if (password.length < 6) {
             return NextResponse.json(
                 { error: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে' },
+                { status: 400 }
+            );
+        }
+
+        // Gender validation for teachers
+        if (role === 'teacher' && !gender) {
+            return NextResponse.json(
+                { error: 'লিঙ্গ নির্বাচন করুন' },
                 { status: 400 }
             );
         }
@@ -43,7 +51,16 @@ export async function POST(request: NextRequest) {
             password: hashedPassword,
             role: role === 'teacher' ? UserRole.TEACHER : UserRole.STUDENT,
             provider: 'credentials',
-            isTeacherApproved: false, // Teacher accounts need approval
+            gender: gender || undefined,
+            isTeacherApproved: false,
+            // Teacher specific fields
+            ...(role === 'teacher' && {
+                fatherName,
+                motherName,
+                mobileNumber,
+                address,
+                teacherQualifications,
+            }),
         });
 
         return NextResponse.json(
