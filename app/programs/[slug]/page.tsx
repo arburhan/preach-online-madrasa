@@ -4,7 +4,8 @@ import Program from '@/lib/db/models/LongCourse';
 import '@/lib/db/models/Semester';
 import '@/lib/db/models/Teacher';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { EnrollButton } from '@/components/programs/EnrollButton';
 import {
     GraduationCap,
     Clock,
@@ -20,11 +21,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const { slug } = await params;
     await connectDB();
 
+    // Check if slug looks like a MongoDB ObjectId (24 hex chars)
+    const isValidObjectId = /^[a-f\d]{24}$/i.test(slug);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const program: any = await Program.findOne({
-        $or: [{ slug }, { _id: slug }],
-        status: 'published'
-    }).lean();
+    const query: any = { status: 'published' };
+    if (isValidObjectId) {
+        query.$or = [{ slug }, { _id: slug }];
+    } else {
+        query.slug = slug;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const program: any = await Program.findOne(query).lean();
 
     if (!program) {
         return { title: 'প্রোগ্রাম পাওয়া যায়নি' };
@@ -83,13 +92,14 @@ export default async function ProgramDetailPage({
                     <div className="flex flex-col md:flex-row gap-8">
                         {/* Thumbnail */}
                         <div className="w-full md:w-1/3">
-                            <div className="aspect-video rounded-xl overflow-hidden bg-purple-500/30">
+                            <div className="aspect-video rounded-xl overflow-hidden bg-purple-500/30 relative" suppressHydrationWarning>
                                 {program.thumbnail ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
+                                    <Image
                                         src={program.thumbnail}
                                         alt={program.titleBn}
-                                        className="w-full h-full object-cover"
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
@@ -256,9 +266,10 @@ export default async function ProgramDetailPage({
                                 )}
                             </div>
 
-                            <Button className="w-full mb-4" size="lg">
-                                এনরোল করুন
-                            </Button>
+                            <EnrollButton
+                                programId={program._id.toString()}
+                                programTitle={program.titleBn}
+                            />
 
                             <div className="space-y-3 text-sm">
                                 <div className="flex justify-between">

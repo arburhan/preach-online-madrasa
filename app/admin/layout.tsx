@@ -46,7 +46,7 @@ export default function AdminLayout({
                         <div className="flex items-center shrink-0 px-4 mb-6">
                             <div className="w-full">
                                 <h1 className="text-xl font-bold text-purple-600">অ্যাডমিন প্যানেল</h1>
-                                <p className="text-sm text-muted-foreground">প্রিচ অনলাইন মাদ্রাসা</p>
+                                <p className="text-sm text-muted-foreground">অনলাইন ইসলামিক একাডেমি</p>
                             </div>
                         </div>
 

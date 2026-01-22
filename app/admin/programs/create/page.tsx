@@ -91,25 +91,56 @@ export default function CreateProgramPage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            toast.error('শুধুমাত্র ছবি ফাইল আপলোড করুন');
+            return;
+        }
+
+        // Validate file size (5MB)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            toast.error('ফাইল সাইজ ৫MB এর বেশি হতে পারবে না');
+            return;
+        }
+
         setUploading(true);
-        const uploadData = new FormData();
-        uploadData.append('file', file);
-        uploadData.append('folder', 'programs');
 
         try {
-            const res = await fetch('/api/upload', {
+            // Step 1: Get presigned URL from our API
+            const response = await fetch('/api/r2/upload', {
                 method: 'POST',
-                body: uploadData,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fileName: file.name,
+                    fileType: file.type,
+                }),
             });
 
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'প্রিসাইন URL পেতে সমস্যা হয়েছে');
+            }
 
-            setFormData(prev => ({ ...prev, thumbnail: data.url }));
+            const { uploadUrl, publicUrl } = await response.json();
+
+            // Step 2: Upload directly to R2
+            const uploadResponse = await fetch(uploadUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': file.type },
+                body: file,
+            });
+
+            if (!uploadResponse.ok) {
+                throw new Error('R2 এ আপলোড করতে সমস্যা হয়েছে');
+            }
+
+            setFormData(prev => ({ ...prev, thumbnail: publicUrl }));
             toast.success('ছবি আপলোড হয়েছে!');
         } catch (error) {
             console.error(error);
-            toast.error('ছবি আপলোড করতে সমস্যা হয়েছে');
+            const errorMessage = error instanceof Error ? error.message : 'ছবি আপলোড করতে সমস্যা হয়েছে';
+            toast.error(errorMessage);
         } finally {
             setUploading(false);
         }
