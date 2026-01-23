@@ -2,10 +2,11 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 
 // Lesson interface
 export interface ILesson extends Document {
-    // Course reference (backward compatibility)
-    course?: mongoose.Types.ObjectId;
+    // Section reference (NEW - primary organization)
+    section?: mongoose.Types.ObjectId;
 
-    // New semester-based references
+    // Backward compatibility references
+    course?: mongoose.Types.ObjectId;
     subject?: mongoose.Types.ObjectId;
     semester?: mongoose.Types.ObjectId;
 
@@ -19,16 +20,24 @@ export interface ILesson extends Document {
     descriptionBn?: string;
     descriptionEn?: string;
 
-    // Video details
-    videoUrl: string;
-    videoKey: string;
-    duration: number;
+    // Video details (NEW structure)
+    videoSource: 'r2' | 'youtube';  // Teacher chooses source
+    videoUrl: string;               // YouTube URL or R2 signed URL
+    videoKey?: string;              // R2 key (only if source is R2)
+    duration: number;               // Duration in minutes
 
     // Order and access
     order: number;
     isFree: boolean;
 
-    // Resources
+    // Resources (NEW - improved structure)
+    resources: Array<{
+        type: 'pdf' | 'link' | 'other';
+        title: string;
+        url: string;
+    }>;
+
+    // Legacy field (keep for compatibility)
     attachments: Array<{
         name: string;
         url: string;
@@ -43,6 +52,10 @@ export interface ILesson extends Document {
 // Lesson schema
 const LessonSchema = new Schema<ILesson>(
     {
+        section: {
+            type: Schema.Types.ObjectId,
+            ref: 'Section',
+        },
         course: {
             type: Schema.Types.ObjectId,
             ref: 'Course',
@@ -78,13 +91,18 @@ const LessonSchema = new Schema<ILesson>(
         descriptionEn: {
             type: String,
         },
+        videoSource: {
+            type: String,
+            enum: ['r2', 'youtube'],
+            required: [true, 'Video source is required'],
+        },
         videoUrl: {
             type: String,
             required: [true, 'Video URL is required'],
         },
         videoKey: {
             type: String,
-            required: [true, 'Video key is required'],
+            // Optional - only needed for R2 uploads
         },
         duration: {
             type: Number,
@@ -99,6 +117,16 @@ const LessonSchema = new Schema<ILesson>(
             type: Boolean,
             default: false,
         },
+        resources: [
+            {
+                type: {
+                    type: String,
+                    enum: ['pdf', 'link', 'other'],
+                },
+                title: String,
+                url: String,
+            },
+        ],
         attachments: [
             {
                 name: String,
@@ -113,6 +141,7 @@ const LessonSchema = new Schema<ILesson>(
 );
 
 // Indexes
+LessonSchema.index({ section: 1, order: 1 });
 LessonSchema.index({ course: 1, order: 1 });
 LessonSchema.index({ course: 1 });
 LessonSchema.index({ subject: 1, order: 1 });

@@ -22,7 +22,11 @@ export interface IProgram extends Document {
     discountPrice?: number; // ছাড়কৃত মূল্য
     isFree: boolean;        // বিনামূল্যে কিনা
 
+    // Content (NEW - Lexical JSON)
+    contentBn?: string;  // Lexical JSON for "কি কি থাকবে"
+
     // Enrollment
+    hasEnrollmentPeriod: boolean;  // NEW
     enrollmentStartDate?: Date;  // এনরোলমেন্ট শুরু
     enrollmentEndDate?: Date;    // এনরোলমেন্ট শেষ
     maxStudents?: number;        // সর্বোচ্চ শিক্ষার্থী
@@ -103,6 +107,14 @@ const ProgramSchema = new Schema<IProgram>(
             default: false,
         },
 
+        contentBn: {
+            type: String,
+        },
+
+        hasEnrollmentPeriod: {
+            type: Boolean,
+            default: false,
+        },
         enrollmentStartDate: Date,
         enrollmentEndDate: Date,
         maxStudents: Number,

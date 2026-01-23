@@ -49,6 +49,18 @@ export interface ICourse extends Document {
     whatYouWillLearn: string[];
     requirements: string[];
 
+    // Course content (NEW - Lexical JSON)
+    contentBn?: string;  // Lexical JSON for "কি কি থাকবে"
+    contentEn?: string;  // Lexical JSON (optional)
+
+    // Sections (NEW - organize lessons)
+    sections: mongoose.Types.ObjectId[];
+
+    // Enrollment period (NEW - optional)
+    hasEnrollmentPeriod: boolean;
+    enrollmentStartDate?: Date;
+    enrollmentEndDate?: Date;
+
     // Stats
     enrolledCount: number;
     totalLessons: number;
@@ -78,24 +90,27 @@ const CourseSchema = new Schema<ICourse>(
         descriptionEn: {
             type: String,
         },
-        instructors: [{
-            type: Schema.Types.ObjectId,
-            ref: 'Teacher',
-            required: [true, 'At least one instructor is required'],
-        }],
+        instructors: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'Teacher',
+                required: true,
+            },
+        ],
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: 'Admin',
-            required: [true, 'Creator (admin) is required'],
+            required: true,
         },
         price: {
             type: Number,
-            default: 0,
+            required: [true, 'Price is required'],
             min: 0,
+            default: 0,
         },
         isFree: {
             type: Boolean,
-            default: true,
+            default: false,
         },
         thumbnail: {
             type: String,
@@ -106,7 +121,7 @@ const CourseSchema = new Schema<ICourse>(
         level: {
             type: String,
             enum: Object.values(CourseLevel),
-            default: CourseLevel.BEGINNER,
+            required: [true, 'Course level is required'],
         },
         duration: {
             type: Number,
@@ -134,6 +149,26 @@ const CourseSchema = new Schema<ICourse>(
                 type: String,
             },
         ],
+        contentBn: {
+            type: String,
+        },
+        contentEn: {
+            type: String,
+        },
+        sections: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Section',
+        }],
+        hasEnrollmentPeriod: {
+            type: Boolean,
+            default: false,
+        },
+        enrollmentStartDate: {
+            type: Date,
+        },
+        enrollmentEndDate: {
+            type: Date,
+        },
         enrolledCount: {
             type: Number,
             default: 0,

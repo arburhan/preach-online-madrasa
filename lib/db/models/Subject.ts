@@ -24,6 +24,12 @@ export interface ISubject extends Document {
     order: number; // সেমিস্টারে ক্রম
     isActive: boolean;
 
+    // Content (NEW - Lexical JSON)
+    contentBn?: string;
+
+    // Sections (NEW - organize lessons)
+    sections: mongoose.Types.ObjectId[];
+
     // লাইভ ক্লাস লিঙ্ক (শিক্ষার্থীর জেন্ডার অনুযায়ী)
     liveClassLinks?: {
         male: string;   // ছেলে শিক্ষার্থীদের জন্য
@@ -87,6 +93,13 @@ const SubjectSchema = new Schema<ISubject>(
             type: Boolean,
             default: true,
         },
+        contentBn: {
+            type: String,
+        },
+        sections: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Section',
+        }],
         liveClassLinks: {
             male: { type: String },
             female: { type: String },

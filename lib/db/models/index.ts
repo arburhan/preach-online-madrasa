@@ -21,6 +21,9 @@ export type { ICourse } from './Course';
 export { default as Lesson } from './Lesson';
 export type { ILesson } from './Lesson';
 
+export { default as Section } from './Section';
+export type { ISection } from './Section';
+
 export { default as Progress } from './Progress';
 export type { IProgress } from './Progress';
 
