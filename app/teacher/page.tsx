@@ -151,7 +151,7 @@ export default async function TeacherDashboard() {
                                             <Link href={`/teacher/courses/${course._id}`}>
                                                 <Button variant="outline">সম্পাদনা</Button>
                                             </Link>
-                                            <Link href={`/student/browse/${course._id}`}>
+                                            <Link href={`/student/browse/${course.slug || course._id}`}>
                                                 <Button variant="ghost">দেখুন</Button>
                                             </Link>
                                         </div>

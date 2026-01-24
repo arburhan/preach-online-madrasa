@@ -60,7 +60,7 @@ export default function NewCoursePage() {
             }
 
             toast.success('কোর্স তৈরি হয়েছে!');
-            router.push(`/teacher/courses/${data.course._id}`);
+            router.push(`/teacher/courses/${data.course.slug || data.course._id}`);
             router.refresh();
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'কোর্স তৈরি করতে সমস্যা হয়েছে';

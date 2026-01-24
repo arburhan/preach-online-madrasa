@@ -4,12 +4,17 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Loader2, Save } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import TeacherSearchSelect from '@/components/admin/TeacherSearchSelect';
 import { DirectR2ImageUpload } from '@/components/upload/DirectR2ImageUpload';
+import dynamic from 'next/dynamic';
+
+const LexicalEditor = dynamic(() => import('@/components/editor/LexicalEditor'), {
+    ssr: false,
+    loading: () => <div className="h-[300px] w-full bg-muted animate-pulse rounded-lg" />,
+});
 
 interface Teacher {
     _id: string;
@@ -27,7 +32,7 @@ export default function NewCoursePage() {
         titleBn: '',
         titleEn: '',
         descriptionBn: '',
-        descriptionEn: '',
+        // descriptionEn removed
         courseDuration: '',
         price: '0',
         isFree: true,
@@ -65,8 +70,13 @@ export default function NewCoursePage() {
             return;
         }
 
-        if (!formData.descriptionBn.trim()) {
+        if (!formData.descriptionBn.trim() || formData.descriptionBn === '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}') {
             toast.error('কোর্সের বিবরণ (বাংলা) আবশ্যক');
+            return;
+        }
+
+        if (!formData.titleEn.trim()) {
+            toast.error('কোর্সের শিরোনাম (ইংরেজি) আবশ্যক (URL এর জন্য)');
             return;
         }
 
@@ -182,9 +192,10 @@ export default function NewCoursePage() {
                                 id="titleEn"
                                 name="titleEn"
                                 type="text"
+                                required
                                 value={formData.titleEn}
                                 onChange={handleChange}
-                                placeholder="e.g., Quran Recitation Course"
+                                placeholder="e.g., Quran Recitation Course (Used for URL slug)"
                             />
                         </div>
 
@@ -193,29 +204,13 @@ export default function NewCoursePage() {
                             <label htmlFor="descriptionBn" className="block text-sm font-medium mb-2">
                                 কোর্সের বিবরণ (বাংলা) *
                             </label>
-                            <Textarea
-                                id="descriptionBn"
-                                name="descriptionBn"
-                                rows={4}
-                                required
-                                value={formData.descriptionBn}
-                                onChange={handleChange}
-                                placeholder="কোর্স সম্পর্কে বিস্তারিত লিখুন..."
-                            />
-                        </div>
-
-                        {/* English Description */}
-                        <div>
-                            <label htmlFor="descriptionEn" className="block text-sm font-medium mb-2">
-                                কোর্সের বিবরণ (ইংরেজি)
-                            </label>
-                            <Textarea
-                                id="descriptionEn"
-                                name="descriptionEn"
-                                rows={4}
-                                value={formData.descriptionEn}
-                                onChange={handleChange}
-                                placeholder="Course description in English..."
+                            <LexicalEditor
+                                onChange={(json) =>
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        descriptionBn: json,
+                                    }))
+                                }
                             />
                         </div>
 

@@ -9,17 +9,21 @@ import { toast } from 'sonner';
 
 interface EnrollButtonProps {
     courseId: string;
+    slug?: string;
     isEnrolled: boolean;
     isLoggedIn?: boolean; // Keep for backwards compatibility but won't use
     isFree: boolean;
     price: number;
+    hasLessons?: boolean;
 }
 
 export default function EnrollButton({
     courseId,
+    slug,
     isEnrolled,
     isFree,
     price,
+    hasLessons = true,
 }: EnrollButtonProps) {
     const router = useRouter();
     const { data: session, status } = useSession();
@@ -33,7 +37,7 @@ export default function EnrollButton({
 
         if (status === 'unauthenticated' || !session) {
             toast.info('দয়া করে লগইন করুন');
-            router.push(`/auth/signin?callbackUrl=/courses/${courseId}`);
+            router.push(`/auth/signin?callbackUrl=/courses/${slug || courseId}`);
             return;
         }
 
@@ -76,6 +80,13 @@ export default function EnrollButton({
         // Only students can access enrolled courses
         if (session && session.user.role === 'student') {
             const handleGoToCourse = async () => {
+                if (!hasLessons) {
+                    toast.error('ক্লাস ভিডিও আপলোড করা হয়নি অপেক্ষা করুন', {
+                        duration: 4000,
+                    });
+                    return;
+                }
+
                 setLoading(true);
                 try {
                     // Fetch last watched lesson
@@ -91,10 +102,12 @@ export default function EnrollButton({
                         const lessonsData = await lessonsResponse.json();
 
                         if (lessonsData.lessons && lessonsData.lessons.length > 0) {
-                            router.push(`/student/watch/${courseId}/${lessonsData.lessons[0]._id}`);
+                            router.push(`/student/watch/${slug || courseId}/${lessonsData.lessons[0]._id}`);
                         } else {
-                            // Fallback to course detail page if no lessons
-                            router.push(`/student/browse/${courseId}`);
+                            // Should not reach here if hasLessons is passed correctly, but as fallback:
+                            toast.error('ক্লাস ভিডিও আপলোড করা হয়নি অপেক্ষা করুন', {
+                                duration: 4000,
+                            });
                         }
                     }
                 } catch (error) {

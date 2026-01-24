@@ -47,6 +47,7 @@ export default async function PublicCoursesPage() {
             _id: course._id.toString(),
             titleBn: course.titleBn,
             titleEn: course.titleEn,
+            slug: course.slug,
             descriptionBn: course.descriptionBn,
             thumbnailUrl: course.thumbnail,
             price: course.price,

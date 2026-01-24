@@ -88,7 +88,6 @@ export async function POST(request: NextRequest) {
             titleBn,
             titleEn,
             descriptionBn,
-            descriptionEn,
             price,
             level,
             language,
@@ -107,11 +106,28 @@ export async function POST(request: NextRequest) {
 
         await connectDB();
 
+        // Generate slug
+        let slug = (titleEn || titleBn)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+
+        // If English title is missing (though it shouldn't be for slug), fallback or random
+        if (!slug) {
+            slug = `course-${Date.now()}`;
+        }
+
+        // Check for existing slug
+        const existingCourse = await Course.findOne({ slug });
+        if (existingCourse) {
+            slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+        }
+
         const course = await Course.create({
             titleBn,
             titleEn,
+            slug,
             descriptionBn,
-            descriptionEn,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             instructors: [user.id as any],
             price: price || 0,

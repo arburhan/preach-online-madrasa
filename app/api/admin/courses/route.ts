@@ -20,7 +20,6 @@ export async function POST(request: NextRequest) {
             titleBn,
             titleEn,
             descriptionBn,
-            descriptionEn,
             courseDuration,
             price,
             isFree,
@@ -34,6 +33,13 @@ export async function POST(request: NextRequest) {
         if (!titleBn || !descriptionBn) {
             return NextResponse.json(
                 { error: 'শিরোনাম এবং বিবরণ আবশ্যক' },
+                { status: 400 }
+            );
+        }
+
+        if (!titleEn) {
+            return NextResponse.json(
+                { error: 'ইংরেজি শিরোনাম আবশ্যক' },
                 { status: 400 }
             );
         }
@@ -54,12 +60,25 @@ export async function POST(request: NextRequest) {
 
         await connectDB();
 
+        let slug = titleEn
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+
+
+        // Check for existing slug
+        const existingCourse = await Course.findOne({ slug });
+        if (existingCourse) {
+            // Append random string to make unique
+            slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+        }
+
         // Create course
         const course = await Course.create({
             titleBn,
             titleEn,
+            slug,
             descriptionBn,
-            descriptionEn,
             courseDuration,
             price: isFree ? 0 : price,
             isFree,

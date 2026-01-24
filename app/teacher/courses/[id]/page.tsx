@@ -50,6 +50,7 @@ export default async function EditCoursePage({
         _id: course._id.toString(),
         titleBn: course.titleBn,
         titleEn: course.titleEn,
+        slug: course.slug,
         descriptionBn: course.descriptionBn,
         descriptionEn: course.descriptionEn,
         thumbnailUrl: course.thumbnailUrl,
@@ -102,7 +103,7 @@ export default async function EditCoursePage({
                             </p>
                         </div>
                         <div className="flex gap-2">
-                            <Link href={`/student/browse/${id}`}>
+                            <Link href={`/courses/${serializedCourse.slug}`} target="_blank">
                                 <Button variant="outline">প্রিভিউ</Button>
                             </Link>
                         </div>

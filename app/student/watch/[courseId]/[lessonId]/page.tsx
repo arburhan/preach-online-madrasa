@@ -28,22 +28,36 @@ export default async function WatchLessonPage({ params }: PageProps) {
         redirect('/auth/signin');
     }
 
-    const { courseId, lessonId } = await params;
+    const { courseId: paramCourseId, lessonId } = await params;
 
     await connectDB();
 
-    // Check if user is enrolled or lesson is free
+    // Check if user is enrolled (Fetch user data)
     const user = await Student.findById(session.user.id)
         .select('enrolledCourses role')
         .lean();
 
-    const course = await Course.findById(courseId)
-        .populate('instructors', 'name')
-        .lean();
+    // Try to find course by ID or Slug
+    let course = null;
+    const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
+
+    if (isValidObjectId(paramCourseId)) {
+        course = await Course.findById(paramCourseId)
+            .populate('instructors', 'name')
+            .lean();
+    }
+
+    if (!course) {
+        course = await Course.findOne({ slug: paramCourseId })
+            .populate('instructors', 'name')
+            .lean();
+    }
 
     if (!course) {
         redirect('/student/browse');
     }
+
+    const courseId = course._id.toString();
 
     // Check access
     // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})

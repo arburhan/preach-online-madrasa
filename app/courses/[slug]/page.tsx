@@ -8,19 +8,29 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { BookOpen, Clock, Users, Award } from 'lucide-react';
 import EnrollButton from '@/components/courses/EnrollButton';
+import LexicalRenderer from '@/components/editor/LexicalRenderer';
 
 interface PageProps {
-    params: Promise<{ id: string }>;
+    params: Promise<{ slug: string }>;
 }
 
 export default async function CourseDetailPage({ params }: PageProps) {
-    const { id } = await params;
+    const { slug } = await params;
     const session = await auth();
 
     await connectDB();
 
-    // Fetch course details
-    const course = await Course.findById(id).lean();
+    // Fetch course details by slug
+    let course = await Course.findOne({ slug }).lean();
+
+    // Fallback: If not found by slug, try finding by ID (for legacy support)
+    if (!course) {
+        // Check if slug is a valid ObjectId
+        const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
+        if (isValidObjectId(slug)) {
+            course = await Course.findById(slug).lean();
+        }
+    }
 
     if (!course || course.status !== 'published') {
         notFound();
@@ -39,7 +49,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
     }));
 
     // Fetch lessons count
-    const lessonsCount = await Lesson.countDocuments({ course: id });
+    const lessonsCount = await Lesson.countDocuments({ course: course._id });
 
     // Check if user is enrolled
     let isEnrolled = false;
@@ -112,9 +122,6 @@ export default async function CourseDetailPage({ params }: PageProps) {
                                 {serializedCourse.titleEn}
                             </p>
                         )}
-                        <p className="text-lg opacity-90 mb-6">
-                            {serializedCourse.descriptionBn}
-                        </p>
 
                         {/* Meta */}
                         <div className="flex flex-wrap gap-4 text-sm">
@@ -150,10 +157,8 @@ export default async function CourseDetailPage({ params }: PageProps) {
                     <div className="lg:col-span-2 space-y-8">
                         {/* About Course */}
                         <div className="bg-card border rounded-xl p-6">
-                            <h2 className="text-2xl font-bold mb-4">কোর্স সম্পর্কে</h2>
-                            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                                {serializedCourse.descriptionBn}
-                            </p>
+                            <h2 className="text-2xl font-bold mb-4 text-yellow-600">কোর্স সম্পর্কে</h2>
+                            <LexicalRenderer content={serializedCourse.descriptionBn} />
                             {serializedCourse.descriptionEn && (
                                 <p className="text-muted-foreground leading-relaxed mt-4">
                                     {serializedCourse.descriptionEn}

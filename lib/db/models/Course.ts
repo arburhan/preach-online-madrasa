@@ -19,10 +19,12 @@ export enum CourseLevel {
 // Course interface
 export interface ICourse extends Document {
     // Basic info
+    // Basic info
     titleBn: string; // Bengali title
-    titleEn?: string; // English title (optional)
+    titleEn: string; // English title (required for slug)
+    slug: string;    // URL friendly slug (unique)
     descriptionBn: string;
-    descriptionEn?: string;
+    // descriptionEn removed as per request
 
     // Instructors (multi-teacher support)
     instructors: mongoose.Types.ObjectId[]; // References to Users (teachers)
@@ -81,15 +83,21 @@ const CourseSchema = new Schema<ICourse>(
         },
         titleEn: {
             type: String,
+            required: [true, 'English title is required'],
             trim: true,
+        },
+        slug: {
+            type: String,
+            required: [true, 'Slug is required'],
+            unique: true,
+            trim: true,
+            lowercase: true,
         },
         descriptionBn: {
             type: String,
             required: [true, 'Bengali description is required'],
         },
-        descriptionEn: {
-            type: String,
-        },
+        // descriptionEn removed
         instructors: [
             {
                 type: Schema.Types.ObjectId,
@@ -187,6 +195,7 @@ const CourseSchema = new Schema<ICourse>(
 );
 
 // Indexes
+CourseSchema.index({ slug: 1 });
 CourseSchema.index({ instructors: 1 });
 CourseSchema.index({ createdBy: 1 });
 CourseSchema.index({ status: 1 });

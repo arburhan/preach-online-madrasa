@@ -39,7 +39,7 @@ export default async function StudentDashboard() {
     const enrolledCourses: any[] = await Course.find({
         _id: { $in: enrolledCourseIds }
     })
-        .select('titleBn titleEn thumbnail level descriptionBn instructors')
+        .select('titleBn titleEn thumbnail level descriptionBn instructors slug')
         .lean();
 
     // Get recent published courses
@@ -153,7 +153,7 @@ export default async function StudentDashboard() {
                             {enrolledCourses.map((course) => (
                                 <Link
                                     key={course._id.toString()}
-                                    href={`/student/courses/${course._id}`}
+                                    href={`/student/courses/${course.slug || course._id}`}
                                     className="group"
                                 >
                                     <div className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
@@ -170,9 +170,6 @@ export default async function StudentDashboard() {
                                             <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
                                                 {course.titleBn}
                                             </h3>
-                                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                                                {course.descriptionBn}
-                                            </p>
                                             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                                                 <Image
                                                     src={(course.instructors?.[0] && teacherMap.get(course.instructors[0].toString())?.image) || '/placeholder-avatar.png'}
@@ -209,7 +206,7 @@ export default async function StudentDashboard() {
                         {recentCourses.map((course) => (
                             <Link
                                 key={course._id.toString()}
-                                href={`/student/browse/${course._id}`}
+                                href={`/student/browse/${course.slug || course._id}`}
                                 className="group"
                             >
                                 <div className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">

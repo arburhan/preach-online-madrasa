@@ -7,23 +7,35 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { BookOpen, Users, Award, CheckCircle2 } from 'lucide-react';
 import EnrollButton from '@/components/courses/EnrollButton';
+import CourseToastHandler from '@/components/courses/CourseToastHandler';
 
 export default async function CourseDetailPage({
     params,
 }: {
-    params: Promise<{ id: string }>;
+    params: Promise<{ slug: string }>;
 }) {
     const user = await requireAuth();
-    const { id } = await params;
+    const { slug } = await params;
 
     await connectDB();
 
+    // Resolve slug to course ID
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const course: any = await Course.findById(id).lean();
+    let course: any = await Course.findOne({ slug }).lean();
+
+    // Fallback if not found by slug
+    if (!course) {
+        const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
+        if (isValidObjectId(slug)) {
+            course = await Course.findById(slug).lean();
+        }
+    }
 
     if (!course) {
         notFound();
     }
+
+    const id = course._id.toString();
 
     // Manually fetch instructors
     const Teacher = (await import('@/lib/db/models/Teacher')).default;
@@ -58,6 +70,7 @@ export default async function CourseDetailPage({
 
     return (
         <div className="min-h-screen bg-background">
+            <CourseToastHandler />
             <div className="container mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
@@ -77,7 +90,6 @@ export default async function CourseDetailPage({
                             {course.titleEn && (
                                 <h2 className="text-xl text-muted-foreground mb-4">{course.titleEn}</h2>
                             )}
-                            <p className="text-lg text-muted-foreground">{course.descriptionBn}</p>
                         </div>
 
                         {/* What You'll Learn */}
@@ -158,9 +170,11 @@ export default async function CourseDetailPage({
                             {/* Enroll Button */}
                             <EnrollButton
                                 courseId={id}
+                                slug={course.slug}
                                 isEnrolled={isEnrolled}
                                 isFree={course.isFree}
                                 price={course.price}
+                                hasLessons={lessons.length > 0}
                             />
 
                             {/* Course Stats */}

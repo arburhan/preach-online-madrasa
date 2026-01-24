@@ -57,8 +57,23 @@ export async function POST(
             );
         }
 
+        let { videoSource } = body;
+
+        // If videoSource is missing, infer it
+        if (!videoSource) {
+            if (videoKey) {
+                videoSource = 'r2';
+            } else if (videoUrl && (videoUrl.includes('youtube') || videoUrl.includes('youtu.be'))) {
+                videoSource = 'youtube';
+            } else {
+                // Default fallback if unable to determine
+                videoSource = 'r2';
+            }
+        }
+
         const lesson = await Lesson.create({
             ...body,
+            videoSource,
             course: id,
         });
 

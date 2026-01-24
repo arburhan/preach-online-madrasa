@@ -36,6 +36,7 @@ export default async function CoursesSection() {
             _id: course._id.toString(),
             titleBn: course.titleBn,
             titleEn: course.titleEn,
+            slug: course.slug || course._id.toString(),
             descriptionBn: course.descriptionBn,
             thumbnailUrl: course.thumbnail,
             price: course.price,
