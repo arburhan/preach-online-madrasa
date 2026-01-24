@@ -38,10 +38,8 @@ export async function POST(request: NextRequest) {
             // Videos go to videos/
             key = `videos/${timestamp}-${randomString}-${sanitizedFileName}`;
         } else {
-            return NextResponse.json(
-                { error: 'অসমর্থিত ফাইল টাইপ' },
-                { status: 400 }
-            );
+            // General files (docs, pdfs, etc)
+            key = `files/${timestamp}-${randomString}-${sanitizedFileName}`;
         }
 
         // Create presigned URL (valid for 1 hour)

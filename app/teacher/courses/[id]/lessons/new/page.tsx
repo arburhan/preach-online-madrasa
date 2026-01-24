@@ -8,20 +8,23 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { DirectR2VideoUpload } from '@/components/upload/DirectR2Upload';
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DirectR2FileUpload } from "@/components/upload/DirectR2FileUploader";
+
 export default function NewLessonPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [videoData, setVideoData] = useState<{ url: string; key: string } | null>(null);
+    const [sourceType, setSourceType] = useState<'r2' | 'youtube' | 'file'>('r2');
+    const [videoData, setVideoData] = useState<{ url: string; key?: string } | null>(null);
     const [formData, setFormData] = useState({
         titleBn: '',
         titleEn: '',
         descriptionBn: '',
         descriptionEn: '',
-        duration: '0',
-        order: '0',
         isFree: false,
     });
+    const [attachments, setAttachments] = useState<Array<{ name: string; url: string; key: string; type: string }>>([]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -36,14 +39,32 @@ export default function NewLessonPage({ params }: { params: Promise<{ id: string
 
     const handleVideoUpload = (url: string, key: string) => {
         setVideoData({ url, key });
-        toast.success('ভিডিও আপলোড সফল হয়েছে!');
+        toast.success('আপলোড সফল হয়েছে!');
+    };
+
+    const handleAttachmentUpload = (url: string, key: string, name: string) => {
+        setAttachments(prev => [...prev, {
+            name: name || 'Attached File',
+            url,
+            key,
+            type: 'file' // Generic type for now
+        }]);
+        toast.success('ফাইল সংযুক্ত করা হয়েছে!');
+    };
+
+    const removeAttachment = (indexToRemove: number) => {
+        setAttachments(prev => prev.filter((_, index) => index !== indexToRemove));
+    };
+
+    const handleYouTubeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setVideoData({ url: e.target.value });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!videoData) {
-            toast.error('দয়া করে একটি ভিডিও আপলোড করুন');
+        if (!videoData?.url) {
+            toast.error('দয়া করে বিষয়বস্তু যোগ করুন');
             return;
         }
 
@@ -55,10 +76,10 @@ export default function NewLessonPage({ params }: { params: Promise<{ id: string
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
+                    videoSource: sourceType,
                     videoUrl: videoData.url,
                     videoKey: videoData.key,
-                    duration: parseInt(formData.duration),
-                    order: parseInt(formData.order),
+                    attachments: attachments,
                 }),
             });
 
@@ -92,27 +113,92 @@ export default function NewLessonPage({ params }: { params: Promise<{ id: string
                     </Link>
                     <h1 className="text-3xl font-bold">নতুন পাঠ যোগ করুন</h1>
                     <p className="text-muted-foreground mt-2">
-                        আপনার কোর্সে একটি নতুন ভিডিও পাঠ যোগ করুন
+                        আপনার কোর্সে একটি নতুন ভিডিও বা ফাইল যোগ করুন
                     </p>
                 </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Video Upload */}
+                    {/* Content Upload Section */}
                     <div className="bg-card p-6 rounded-xl border">
-                        <h2 className="text-lg font-semibold mb-4">ভিডিও আপলোড করুন *</h2>
-                        {videoData ? (
-                            <div className="p-4 rounded-lg border bg-green-500/10 border-green-500/20">
-                                <p className="text-sm text-green-600 font-medium">
-                                    ✓ ভিডিও আপলোড সফল হয়েছে
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {videoData.key}
-                                </p>
-                            </div>
-                        ) : (
-                            <DirectR2VideoUpload onUploadComplete={handleVideoUpload} />
-                        )}
+                        <h2 className="text-lg font-semibold mb-4">বিষয়বস্তু ধরণ *</h2>
+
+                        <Tabs defaultValue="r2" onValueChange={(v) => {
+                            setSourceType(v as 'r2' | 'youtube' | 'file');
+                            setVideoData(null); // Reset on switch
+                        }}>
+                            <TabsList className="grid w-full grid-cols-3 mb-4">
+                                <TabsTrigger value="r2">ভিডিও আপলোড</TabsTrigger>
+                                <TabsTrigger value="youtube">YouTube URL</TabsTrigger>
+                                <TabsTrigger value="file">ফাইল আপলোড</TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="r2">
+                                {videoData ? (
+                                    <div className="p-4 rounded-lg border bg-green-500/10 border-green-500/20 flex justify-between items-center">
+                                        <div>
+                                            <p className="text-sm text-green-600 font-medium">
+                                                ✓ ভিডিও আপলোড সফল হয়েছে
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-1 break-all">
+                                                {videoData.key}
+                                            </p>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setVideoData(null)}
+                                        >
+                                            পরিবর্তন
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <DirectR2VideoUpload onUploadComplete={handleVideoUpload} />
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="youtube">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">YouTube Video URL</label>
+                                    <input
+                                        type="url"
+                                        className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                        value={videoData?.url || ''}
+                                        onChange={handleYouTubeChange}
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        YouTube ভিডিওর লিংক এখানে পেস্ট করুন
+                                    </p>
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="file">
+                                {videoData ? (
+                                    <div className="p-4 rounded-lg border bg-blue-500/10 border-blue-500/20 flex justify-between items-center">
+                                        <div>
+                                            <p className="text-sm text-blue-600 font-medium">
+                                                ✓ ফাইল আপলোড সফল হয়েছে
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-1 break-all">
+                                                {videoData.key}
+                                            </p>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setVideoData(null)}
+                                        >
+                                            পরিবর্তন
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <DirectR2FileUpload onUploadComplete={handleVideoUpload} />
+                                )}
+                            </TabsContent>
+                        </Tabs>
                     </div>
 
                     {/* Lesson Details */}
@@ -168,42 +254,6 @@ export default function NewLessonPage({ params }: { params: Promise<{ id: string
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Duration */}
-                            <div>
-                                <label htmlFor="duration" className="block text-sm font-medium mb-2">
-                                    সময়কাল (সেকেন্ড)
-                                </label>
-                                <input
-                                    id="duration"
-                                    name="duration"
-                                    type="number"
-                                    min="0"
-                                    value={formData.duration}
-                                    onChange={handleChange}
-                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                    placeholder="600"
-                                />
-                            </div>
-
-                            {/* Order */}
-                            <div>
-                                <label htmlFor="order" className="block text-sm font-medium mb-2">
-                                    ক্রম নম্বর
-                                </label>
-                                <input
-                                    id="order"
-                                    name="order"
-                                    type="number"
-                                    min="0"
-                                    value={formData.order}
-                                    onChange={handleChange}
-                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                    placeholder="0"
-                                />
-                            </div>
-                        </div>
-
                         {/* Free Checkbox */}
                         <div className="flex items-center gap-2">
                             <input
@@ -218,6 +268,52 @@ export default function NewLessonPage({ params }: { params: Promise<{ id: string
                                 এটি একটি বিনামূল্যে পাঠ (প্রিভিউ)
                             </label>
                         </div>
+                    </div>
+
+                    {/* Attachments Section */}
+                    <div className="bg-card p-6 rounded-xl border space-y-4">
+                        <h2 className="text-lg font-semibold mb-4">সংযুক্ত ফাইল (Attachments)</h2>
+
+                        {/* File Upload Area */}
+                        <div className="mb-4">
+                            <DirectR2FileUpload
+                                onUploadComplete={(url, key, name) => handleAttachmentUpload(url, key, name)}
+                                label="ফাইল সংযুক্ত করুন"
+                            />
+                        </div>
+
+                        {/* Attachments List */}
+                        {attachments.length > 0 && (
+                            <div className="space-y-2">
+                                {attachments.map((file, index) => (
+                                    <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg border">
+                                        <div className="flex items-center gap-3 overflow-hidden">
+                                            <div className="bg-primary/10 p-2 rounded">
+                                                <Upload className="h-4 w-4 text-primary" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-medium truncate">{file.name}</p>
+                                                <p className="text-xs text-muted-foreground truncate w-48">{file.key}</p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeAttachment(index)}
+                                            className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                                        >
+                                            সরান
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {attachments.length === 0 && (
+                            <p className="text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg">
+                                কোনো ফাইল সংযুক্ত করা হয়নি
+                            </p>
+                        )}
                     </div>
 
                     {/* Actions */}

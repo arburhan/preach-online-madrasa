@@ -48,11 +48,12 @@ export async function POST(
             titleBn,
             videoUrl,
             videoKey,
+            attachments, // New field
         } = body;
 
-        if (!titleBn || !videoUrl || !videoKey) {
+        if (!titleBn || !videoUrl) {
             return NextResponse.json(
-                { error: 'পাঠের শিরোনাম এবং ভিডিও আবশ্যক' },
+                { error: 'পাঠের শিরোনাম এবং বিষয়বস্তু আবশ্যক' },
                 { status: 400 }
             );
         }
@@ -71,10 +72,28 @@ export async function POST(
             }
         }
 
+        // Validate R2 requirement
+        if ((videoSource === 'r2' || videoSource === 'file') && !videoKey) {
+            return NextResponse.json(
+                { error: 'R2 Key is required for uploaded content' },
+                { status: 400 }
+            );
+        }
+
+        // Auto-increment order logic
+        const lastLesson = await Lesson.findOne({ course: id })
+            .sort({ order: -1 })
+            .select('order');
+
+        const newOrder = (lastLesson?.order || 0) + 1;
+
         const lesson = await Lesson.create({
             ...body,
             videoSource,
             course: id,
+            order: newOrder, // Auto-assigned
+            duration: body.duration || 0, // Default to 0 if not provided
+            attachments: attachments || [], // Save attachments
         });
 
         // Update course total lessons count

@@ -93,7 +93,7 @@ const LessonSchema = new Schema<ILesson>(
         },
         videoSource: {
             type: String,
-            enum: ['r2', 'youtube'],
+            enum: ['r2', 'youtube', 'file'],
             required: [true, 'Video source is required'],
         },
         videoUrl: {
@@ -131,7 +131,7 @@ const LessonSchema = new Schema<ILesson>(
             {
                 name: String,
                 url: String,
-                type: String,
+                type: { type: String },
             },
         ],
     },

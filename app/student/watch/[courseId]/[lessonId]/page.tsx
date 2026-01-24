@@ -134,17 +134,40 @@ export default async function WatchLessonPage({ params }: PageProps) {
         ? serializedLessons[currentLessonIndex + 1]._id
         : null;
 
-    // Track this lesson as last watched (don't await to avoid blocking page load)
-    fetch('/api/progress/lastWatchedLesson', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            courseId,
-            lessonId,
-        }),
-    }).catch(error => {
-        console.error('Failed to update last watched lesson:', error);
-    });
+    // Track this lesson as last watched (direct DB update)
+    if (session?.user?.id && isEnrolled) {
+        try {
+            await Student.findByIdAndUpdate(
+                session.user.id,
+                {
+                    $set: {
+                        'enrolledCourses.$[elem].lastWatchedLesson': lessonId,
+                    },
+                },
+                {
+                    arrayFilters: [{ 'elem.course': courseId }],
+                }
+            );
+        } catch (err) {
+            console.error('Failed to update last watched lesson directly:', err);
+        }
+    }
+
+    // Infer or correct video source
+    let videoSource = lesson.videoSource;
+    const isYoutube = lesson.videoUrl && (lesson.videoUrl.includes('youtube.com') || lesson.videoUrl.includes('youtu.be'));
+
+    if (isYoutube) {
+        videoSource = 'youtube';
+    } else if (!videoSource) {
+        // Default to r2 only if not youtube and no source specified
+        if (lesson.videoKey) {
+            videoSource = 'r2';
+        } else {
+            // Fallback logic could be refined, but 'r2' is the safe default for now as per original logic
+            videoSource = 'r2';
+        }
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -166,6 +189,7 @@ export default async function WatchLessonPage({ params }: PageProps) {
                                 lessonId={lessonId}
                                 courseId={courseId}
                                 videoUrl={lesson.videoUrl || ''}
+                                videoSource={videoSource || 'r2'}
                                 previousLessonId={previousLessonId}
                                 nextLessonId={nextLessonId}
                             />
@@ -194,6 +218,41 @@ export default async function WatchLessonPage({ params }: PageProps) {
                                     <p className="text-muted-foreground whitespace-pre-wrap">
                                         {lesson.descriptionBn}
                                     </p>
+                                </div>
+                            )}
+
+                            {/* Attachments Section */}
+                            {lesson.attachments && lesson.attachments.length > 0 && (
+                                <div className="mt-6 pt-6 border-t">
+                                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                                        <FileText className="h-4 w-4" />
+                                        সংযুক্ত ফাইল
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                        {lesson.attachments.map((file: any, index: number) => (
+                                            <a
+                                                key={index}
+                                                href={file.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                className="flex items-center gap-3 p-3 rounded-lg border bg-muted/50 hover:bg-muted transition-colors group"
+                                            >
+                                                <div className="bg-primary/10 p-2 rounded group-hover:bg-primary/20 transition-colors">
+                                                    <FileText className="h-4 w-4 text-primary" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-sm font-medium truncate">
+                                                        {file.name || 'সংযুক্ত ফাইল'}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        ডাউনলোড করতে ক্লিক করুন
+                                                    </p>
+                                                </div>
+                                            </a>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>

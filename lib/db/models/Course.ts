@@ -195,7 +195,7 @@ const CourseSchema = new Schema<ICourse>(
 );
 
 // Indexes
-CourseSchema.index({ slug: 1 });
+// CourseSchema.index({ slug: 1 }); // Already indexed by unique: true
 CourseSchema.index({ instructors: 1 });
 CourseSchema.index({ createdBy: 1 });
 CourseSchema.index({ status: 1 });

@@ -2,20 +2,31 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Play, Pause, Volume2, VolumeX, Maximize, Gauge, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, Gauge, ChevronLeft, ChevronRight, Download, FileText, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { Button } from '../ui/button';
+
+// Dynamically import ReactPlayer to avoid SSR issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// Dynamically import ReactPlayer to avoid SSR issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any;
 
 interface VideoPlayerProps {
     lessonId: string;
     courseId: string;
     videoUrl: string;
+    videoSource?: 'r2' | 'youtube' | 'file';
     currentIndex?: number;
     totalLessons?: number;
     previousLessonId?: string | null;
     nextLessonId?: string | null;
 }
 
-export function VideoPlayer({ lessonId, courseId, videoUrl, previousLessonId, nextLessonId }: VideoPlayerProps) {
+
+
+export function VideoPlayer({ lessonId, courseId, videoUrl, videoSource = 'r2', previousLessonId, nextLessonId }: VideoPlayerProps) {
     const router = useRouter();
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -37,9 +48,10 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, previousLessonId, ne
                 const response = await fetch(`/api/progress?lessonId=${lessonId}&courseId=${courseId}`);
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.progress && videoRef.current) {
+                    if (data.progress && videoRef.current && videoSource === 'r2') {
                         videoRef.current.currentTime = data.progress.lastWatchedPosition || 0;
                     }
+                    // For YouTube, we might need to seek onReady, but ReactPlayer handles url changes well.
                 }
             } catch (error) {
                 console.error('Failed to load progress:', error);
@@ -47,44 +59,55 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, previousLessonId, ne
         };
 
         loadProgress();
-    }, [lessonId, courseId]);
+    }, [lessonId, courseId, videoSource]);
 
-    // Auto-save progress every 10 seconds
+    const updateProgress = async (progress: number, lastWatchedPosition: number, watchedDuration: number, totalDuration: number) => {
+        await fetch('/api/progress/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                lessonId,
+                courseId,
+                progress,
+                lastWatchedPosition,
+                watchedDuration,
+                totalDuration
+            })
+        });
+
+        // Mark as complete if 90% watched
+        if (progress >= 90) {
+            completeLesson();
+        }
+    };
+
+    const completeLesson = async () => {
+        await fetch('/api/progress/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lessonId, courseId })
+        });
+    };
+
+    // Auto-save progress every 10 seconds (Only for R2 for now, YouTube has its own event loop we can hook into but for simplicity using same interval if we can get time)
     useEffect(() => {
+        if (videoSource !== 'r2') return;
+
         const interval = setInterval(async () => {
             if (!videoRef.current || videoRef.current.paused) return;
 
-            const progress = (currentTime / duration) * 100;
+            const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
             try {
-                await fetch('/api/progress/update', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        lessonId,
-                        courseId,
-                        progress,
-                        lastWatchedPosition: currentTime,
-                        watchedDuration: currentTime,
-                        totalDuration: duration
-                    })
-                });
-
-                // Mark as complete if 90% watched
-                if (progress >= 90) {
-                    await fetch('/api/progress/complete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ lessonId, courseId })
-                    });
-                }
+                await updateProgress(progress, currentTime, currentTime, duration);
             } catch (error) {
                 console.error('Failed to save progress:', error);
             }
         }, 10000); // Save every 10 seconds
 
         return () => clearInterval(interval);
-    }, [lessonId, courseId, currentTime, duration]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lessonId, courseId, currentTime, duration, videoSource]);
 
     // Video event handlers
     const handlePlayPause = () => {
@@ -152,18 +175,72 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, previousLessonId, ne
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    if (!videoUrl) {
-        return (
-            <div className="aspect-video bg-black flex items-center justify-center">
-                <p className="text-white">ভিডিও উপলব্ধ নেই</p>
-            </div>
-        );
-    }
+    const getYoutubeId = (url: string) => {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    };
 
-    return (
-        <div className="space-y-4">
+    const renderContent = () => {
+        // Auto-detect YouTube URL to override source if needed
+        const isYoutube = videoUrl && (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be'));
+        const effectiveSource = isYoutube ? 'youtube' : videoSource;
+
+        console.log('VideoPlayer Render:', { videoUrl, videoSource, isYoutube, effectiveSource });
+
+        if (effectiveSource === 'file') {
+            return (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-card text-card-foreground p-8 text-center space-y-6">
+                    <div className="bg-primary/10 p-6 rounded-full">
+                        <FileText className="h-12 w-12 text-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-semibold mb-2">পাঠের ফাইল</h3>
+                        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                            এই পাঠটি একটি ডকুমেন্ট ফাইল। আপনি নিচে ডাউনলোড করে পড়তে পারেন।
+                        </p>
+                        <div className="flex gap-4 justify-center">
+                            <a href={videoUrl} target="_blank" rel="noopener noreferrer" download>
+                                <Button className="gap-2">
+                                    <Download className="h-4 w-4" />
+                                    ফাইল ডাউনলোড করুন
+                                </Button>
+                            </a>
+                            <Button variant="outline" onClick={() => completeLesson()} className="gap-2">
+                                <CheckCircle2 className="h-4 w-4" />
+                                সম্পন্ন হিসেবে মার্ক করুন
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        if (effectiveSource === 'youtube') {
+            const videoId = getYoutubeId(videoUrl);
+            // If we can't extract ID, try generic fallback. But with valid URL it should work.
+            // If videoId is null, iframe will fail gracefully or show error, better than black screen.
+            return (
+                <div className="relative w-full h-full bg-black">
+                    <iframe
+                        width="100%"
+                        height="100%"
+                        src={`https://www.youtube.com/embed/${videoId || ''}?rel=0`}
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="absolute inset-0 w-full h-full"
+                    />
+                </div>
+            );
+        }
+
+        // Default R2 Video
+        return (
             <div
-                className="relative aspect-video bg-black group"
+                className="relative w-full h-full bg-black group"
                 onMouseEnter={() => setShowControls(true)}
                 onMouseLeave={() => setShowControls(false)}
             >
@@ -179,7 +256,7 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, previousLessonId, ne
                 />
 
                 {/* Loading Overlay */}
-                {isLoading && (
+                {isLoading && videoSource === 'r2' && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                         <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
                     </div>
@@ -283,6 +360,22 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, previousLessonId, ne
                     </div>
                 </div>
             </div>
+        );
+    };
+
+    if (!videoUrl) {
+        return (
+            <div className="aspect-video bg-black flex items-center justify-center">
+                <p className="text-white">ভিডিও উপলব্ধ নেই</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
+                {renderContent()}
+            </div>
 
             {/* Navigation Buttons */}
             <div className="flex gap-3">
@@ -307,11 +400,7 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, previousLessonId, ne
                     <button
                         onClick={() => {
                             // Mark current lesson as complete (fire and forget - don't wait)
-                            fetch('/api/progress/complete', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ lessonId, courseId })
-                            }).catch(error => console.error('Failed to mark as complete:', error));
+                            completeLesson().catch(error => console.error('Failed to mark as complete:', error));
 
                             // Navigate immediately using Next.js router (no page reload)
                             router.push(`/student/watch/${courseId}/${nextLessonId}`);

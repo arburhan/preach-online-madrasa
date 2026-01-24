@@ -134,9 +134,6 @@ export default async function TeacherDashboard() {
                                                     {course.status === 'published' ? 'প্রকাশিত' : 'খসড়া'}
                                                 </span>
                                             </div>
-                                            <p className="text-muted-foreground mb-4 line-clamp-2">
-                                                {course.descriptionBn}
-                                            </p>
                                             <div className="flex items-center gap-6 text-sm text-muted-foreground">
                                                 <span>{course.totalLessons || 0} টি পাঠ</span>
                                                 <span>{course.enrolledCount || 0} জন শিক্ষার্থী</span>
