@@ -64,7 +64,6 @@ export default async function ProgramDetailPage({
                                     {program.status === 'published' ? 'প্রকাশিত' : 'ড্রাফট'}
                                 </span>
                             </div>
-                            <p className="text-muted-foreground">{program.descriptionBn}</p>
                         </div>
                         <Link href={`/admin/programs/${programId}/edit`}>
                             <Button>

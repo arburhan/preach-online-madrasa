@@ -6,13 +6,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, Plus, X, Upload } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface Semester {
-    _id: string;
-    number: number;
-    titleBn: string;
-    level: string;
-}
+// import LexicalEditor
+import LexicalEditor from '@/components/editor/LexicalEditor';
 
 interface Teacher {
     _id: string;
@@ -43,29 +38,22 @@ export default function CreateProgramPage() {
     });
 
     const [features, setFeatures] = useState<string[]>(['']);
-    const [selectedSemesters, setSelectedSemesters] = useState<string[]>([]);
+    // Removed semester state
     const [selectedMaleTeachers, setSelectedMaleTeachers] = useState<string[]>([]);
     const [selectedFemaleTeachers, setSelectedFemaleTeachers] = useState<string[]>([]);
-    const [semesters, setSemesters] = useState<Semester[]>([]);
     const [maleTeachers, setMaleTeachers] = useState<Teacher[]>([]);
     const [femaleTeachers, setFemaleTeachers] = useState<Teacher[]>([]);
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
     const [uploading, setUploading] = useState(false);
 
-    // Load semesters and teachers
+    // Load teachers only
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [semesterRes, teacherRes] = await Promise.all([
-                    fetch('/api/semesters'),
-                    fetch('/api/admin/teachers?status=approved')
-                ]);
-
-                const semesterData = await semesterRes.json();
+                const teacherRes = await fetch('/api/admin/teachers?status=approved');
                 const teacherData = await teacherRes.json();
 
-                if (Array.isArray(semesterData)) setSemesters(semesterData);
                 if (Array.isArray(teacherData)) {
                     setMaleTeachers(teacherData.filter((t: Teacher) => t.gender === 'male'));
                     setFemaleTeachers(teacherData.filter((t: Teacher) => t.gender === 'female'));
@@ -161,7 +149,6 @@ export default function CreateProgramPage() {
                     price: parseInt(formData.price),
                     discountPrice: formData.discountPrice ? parseInt(formData.discountPrice) : undefined,
                     maxStudents: formData.maxStudents ? parseInt(formData.maxStudents) : undefined,
-                    semesters: selectedSemesters,
                     features: features.filter(f => f.trim()),
                     maleInstructors: selectedMaleTeachers,
                     femaleInstructors: selectedFemaleTeachers,
@@ -286,14 +273,10 @@ export default function CreateProgramPage() {
 
                         <div>
                             <label className="block text-sm font-medium mb-2">বিবরণ (বাংলা) *</label>
-                            <textarea
-                                name="descriptionBn"
-                                value={formData.descriptionBn}
-                                onChange={handleChange}
-                                required
-                                rows={4}
+                            <LexicalEditor
+                                initialContent={formData.descriptionBn}
+                                onChange={(json) => setFormData(prev => ({ ...prev, descriptionBn: json }))}
                                 placeholder="প্রোগ্রামের বিস্তারিত বিবরণ লিখুন..."
-                                className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
                             />
                         </div>
 
@@ -401,51 +384,6 @@ export default function CreateProgramPage() {
                         )}
                     </div>
 
-                    {/* Semesters Selection */}
-                    <div className="bg-card rounded-xl border p-6 space-y-4">
-                        <h2 className="text-xl font-semibold border-b pb-2">সেমিস্টার নির্বাচন</h2>
-                        <p className="text-sm text-muted-foreground">
-                            এই প্রোগ্রামে যে সেমিস্টারগুলো অন্তর্ভুক্ত থাকবে সেগুলো নির্বাচন করুন
-                        </p>
-
-                        {loadingData ? (
-                            <div className="text-center py-4">সেমিস্টার লোড হচ্ছে...</div>
-                        ) : semesters.length === 0 ? (
-                            <div className="text-center py-4 text-muted-foreground">
-                                কোনো সেমিস্টার পাওয়া যায়নি। আগে সেমিস্টার তৈরি করুন।
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                {semesters.map(semester => (
-                                    <label
-                                        key={semester._id}
-                                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedSemesters.includes(semester._id)
-                                            ? 'border-primary bg-primary/5'
-                                            : 'hover:bg-muted'
-                                            }`}
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedSemesters.includes(semester._id)}
-                                            onChange={() => setSelectedSemesters(prev =>
-                                                prev.includes(semester._id)
-                                                    ? prev.filter(id => id !== semester._id)
-                                                    : [...prev, semester._id]
-                                            )}
-                                            className="rounded"
-                                        />
-                                        <div>
-                                            <p className="font-medium text-sm">{semester.titleBn}</p>
-                                            <p className="text-xs text-muted-foreground">{semester.level}</p>
-                                        </div>
-                                    </label>
-                                ))}
-                            </div>
-                        )}
-                        <p className="text-sm text-muted-foreground">
-                            নির্বাচিত: {selectedSemesters.length}টি সেমিস্টার
-                        </p>
-                    </div>
 
                     {/* Pricing */}
                     <div className="bg-card rounded-xl border p-6 space-y-6">
