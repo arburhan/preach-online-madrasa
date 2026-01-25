@@ -15,6 +15,7 @@ interface Teacher {
 interface TeacherSearchSelectProps {
     selectedTeachers: Teacher[];
     onTeachersChange: (teachers: Teacher[]) => void;
+    placeholder?: string;
 }
 
 export default function TeacherSearchSelect({ selectedTeachers, onTeachersChange }: TeacherSearchSelectProps) {

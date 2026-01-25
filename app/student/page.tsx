@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth/rbac';
 import connectDB from '@/lib/db/mongodb';
 import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
+import LongCourse from '@/lib/db/models/LongCourse';
 import { BookOpen, GraduationCap, Clock, Award } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -18,9 +19,9 @@ export default async function StudentDashboard() {
 
     await connectDB();
 
-    // Get user's enrolled courses
+    // Get user's enrolled courses AND programs
     const userData = await Student.findById(user.id)
-        .select('enrolledCourses')
+        .select('enrolledCourses enrolledPrograms')
         .lean();
 
     // Extract course IDs from both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
@@ -34,12 +35,29 @@ export default async function StudentDashboard() {
         return e.course;
     }).filter(Boolean) || [];
 
+    // Extract program IDs
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enrolledProgramIds = userData?.enrolledPrograms?.map((e: any) => {
+        if (e?.toString && typeof e.toString === 'function' && !e.program) {
+            return e;
+        }
+        return e.program;
+    }).filter(Boolean) || [];
+
     // Fetch full course data separately to avoid populate issues
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const enrolledCourses: any[] = await Course.find({
         _id: { $in: enrolledCourseIds }
     })
         .select('titleBn titleEn thumbnail level descriptionBn instructors slug')
+        .lean();
+
+    // Fetch enrolled programs
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enrolledPrograms: any[] = await LongCourse.find({
+        _id: { $in: enrolledProgramIds }
+    })
+        .select('titleBn titleEn thumbnail slug durationMonths totalSemesters')
         .lean();
 
     // Get recent published courses
@@ -93,12 +111,12 @@ export default async function StudentDashboard() {
 
                     <div className="bg-card p-6 rounded-xl border shadow-sm">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-green-500/10 rounded-lg">
-                                <GraduationCap className="h-6 w-6 text-green-600" />
+                            <div className="p-3 bg-purple-500/10 rounded-lg">
+                                <GraduationCap className="h-6 w-6 text-purple-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">সম্পন্ন কোর্স</p>
-                                <p className="text-2xl font-bold">0</p>
+                                <p className="text-sm text-muted-foreground">নথিভুক্ত প্রোগ্রাম</p>
+                                <p className="text-2xl font-bold">{enrolledPrograms.length}</p>
                             </div>
                         </div>
                     </div>
@@ -110,7 +128,7 @@ export default async function StudentDashboard() {
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground">চলমান কোর্স</p>
-                                <p className="text-2xl font-bold">{enrolledCourses.length}</p>
+                                <p className="text-2xl font-bold">{enrolledCourses.length + enrolledPrograms.length}</p>
                             </div>
                         </div>
                     </div>
@@ -127,6 +145,61 @@ export default async function StudentDashboard() {
                         </div>
                     </div>
                 </div>
+
+                {/* Enrolled Programs Section */}
+                {enrolledPrograms.length > 0 && (
+                    <section className="mb-12">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold">আমার প্রোগ্রামসমূহ</h2>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {enrolledPrograms.map((program) => (
+                                <Link
+                                    key={program._id.toString()}
+                                    href={`/student/programs/${program.slug || program._id}`}
+                                    className="group"
+                                >
+                                    <div className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
+                                        <div className="relative h-48 bg-gradient-to-r from-purple-600 to-indigo-700">
+                                            {program.thumbnail ? (
+                                                <Image
+                                                    src={program.thumbnail}
+                                                    alt={program.titleBn}
+                                                    width={400}
+                                                    height={192}
+                                                    className="w-full h-48 object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <GraduationCap className="h-16 w-16 text-white/50" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-6">
+                                            <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                                                {program.titleBn}
+                                            </h3>
+                                            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="h-4 w-4" />
+                                                    {program.durationMonths} মাস
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <GraduationCap className="h-4 w-4" />
+                                                    {program.totalSemesters} সেমিস্টার
+                                                </span>
+                                            </div>
+                                            <Button className="w-full" size="sm">
+                                                সেমিস্টার দেখুন
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Enrolled Courses */}
                 <section className="mb-12">

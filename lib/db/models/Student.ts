@@ -26,6 +26,7 @@ export interface IStudent extends Document {
     enrolledPrograms?: Array<{
         program: Types.ObjectId;
         currentSemester?: Types.ObjectId;
+        completedSemesters?: Types.ObjectId[];  // Track completed semesters
         enrolledAt: Date;
     }>;
 
@@ -96,6 +97,10 @@ const StudentSchema = new Schema<IStudent>(
                     type: Schema.Types.ObjectId,
                     ref: 'Semester',
                 },
+                completedSemesters: [{
+                    type: Schema.Types.ObjectId,
+                    ref: 'Semester',
+                }],
                 enrolledAt: {
                     type: Date,
                     default: Date.now,

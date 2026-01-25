@@ -33,10 +33,10 @@ export async function requireAuth() {
 /**
  * Require specific role - redirect if user doesn't have the role
  */
-export async function requireRole(allowedRoles: UserRole[]) {
+export async function requireRole(allowedRoles: Array<'student' | 'teacher' | 'admin'>) {
     const user = await requireAuth();
 
-    if (!allowedRoles.includes(user.role)) {
+    if (!allowedRoles.includes(user.role as 'student' | 'teacher' | 'admin')) {
         redirect('/unauthorized');
     }
 

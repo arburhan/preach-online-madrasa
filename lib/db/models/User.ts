@@ -41,6 +41,12 @@ export interface IUser extends Document {
         enrolledAt: Date;
     }>;
 
+    // Program enrollments
+    enrolledPrograms?: Array<{
+        program: Types.ObjectId;
+        enrolledAt: Date;
+    }>;
+
     createdAt: Date;
     updatedAt: Date;
 }
@@ -114,6 +120,20 @@ const UserSchema = new Schema<IUser>(
                 lastWatchedLesson: {
                     type: Schema.Types.ObjectId,
                     ref: 'Lesson',
+                },
+                enrolledAt: {
+                    type: Date,
+                    default: Date.now,
+                },
+            },
+        ],
+        // Program enrollments
+        enrolledPrograms: [
+            {
+                program: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'LongCourse',
+                    required: true,
                 },
                 enrolledAt: {
                     type: Date,

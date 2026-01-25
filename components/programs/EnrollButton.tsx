@@ -8,37 +8,49 @@ import { toast } from 'sonner';
 
 interface EnrollButtonProps {
     programId: string;
+    programSlug?: string;
     programTitle: string;
+    isEnrolled?: boolean;
 }
 
-export function EnrollButton({ programId, programTitle }: EnrollButtonProps) {
+export function EnrollButton({ programId, programSlug, programTitle: _programTitle, isEnrolled = false }: EnrollButtonProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [enrolled, setEnrolled] = useState(isEnrolled);
 
     const handleEnroll = async () => {
+        if (enrolled) {
+            // Navigate to program page
+            router.push(`/student/programs/${programSlug || programId}`);
+            return;
+        }
+
         setLoading(true);
 
         try {
-            // Check if user is authenticated by calling a protected endpoint
-            const response = await fetch('/api/user');
-
-            if (response.status === 401) {
-                // User is not authenticated, redirect to login
-                toast.info('লগইন করুন');
-                router.push('/login?redirect=/programs/' + programId);
+            // Check auth
+            const authRes = await fetch('/api/user');
+            if (authRes.status === 401) {
+                toast.info('অনুগ্রহ করে লগইন করুন');
+                router.push('/auth/signin?redirect=/programs/' + programId);
                 return;
             }
 
-            // User is authenticated, redirect to student dashboard or enrollment page
-            // For now, just show a message
-            toast.success('এনরোলমেন্ট ফিচার শীঘ্রই আসছে!');
+            // Call enroll API
+            const res = await fetch(`/api/programs/${programId}/enroll`, {
+                method: 'POST',
+            });
 
-            // TODO: Implement program enrollment logic
-            // This would be different from course enrollment as programs have semesters
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || 'Something went wrong');
+
+            toast.success(data.message || 'এনরোলমেন্ট সফল হয়েছে!');
+            setEnrolled(true);
 
         } catch (error) {
             console.error('Enrollment error:', error);
-            toast.error('সমস্যা হয়েছে, আবার চেষ্টা করুন');
+            toast.error('এনরোল করতে সমস্যা হয়েছে');
         } finally {
             setLoading(false);
         }
@@ -50,12 +62,15 @@ export function EnrollButton({ programId, programTitle }: EnrollButtonProps) {
             size="lg"
             onClick={handleEnroll}
             disabled={loading}
+            variant={enrolled ? "default" : "default"}
         >
             {loading ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     অপেক্ষা করুন...
                 </>
+            ) : enrolled ? (
+                'প্রোগ্রামে যান'
             ) : (
                 'এনরোল করুন'
             )}

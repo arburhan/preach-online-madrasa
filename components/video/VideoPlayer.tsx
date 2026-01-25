@@ -22,12 +22,21 @@ interface VideoPlayerProps {
     totalLessons?: number;
     previousLessonId?: string | null;
     nextLessonId?: string | null;
+    basePath?: string; // Custom base path for navigation (e.g., '/student/programs/xyz/semesters/abc?lesson=')
 }
 
 
 
-export function VideoPlayer({ lessonId, courseId, videoUrl, videoSource = 'r2', previousLessonId, nextLessonId }: VideoPlayerProps) {
+export function VideoPlayer({ lessonId, courseId, videoUrl, videoSource = 'r2', previousLessonId, nextLessonId, basePath }: VideoPlayerProps) {
     const router = useRouter();
+
+    // Generate navigation URL
+    const getNavigationUrl = (targetLessonId: string) => {
+        if (basePath) {
+            return `${basePath}${targetLessonId}`;
+        }
+        return `/student/watch/${courseId}/${targetLessonId}`;
+    };
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -380,7 +389,7 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, videoSource = 'r2', 
             {/* Navigation Buttons */}
             <div className="flex gap-3">
                 {previousLessonId ? (
-                    <Link href={`/student/watch/${courseId}/${previousLessonId}`} className="flex-1">
+                    <Link href={getNavigationUrl(previousLessonId)} className="flex-1">
                         <button className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
                             <ChevronLeft className="h-5 w-5" />
                             <span>আগের ভিডিও</span>
@@ -403,7 +412,7 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, videoSource = 'r2', 
                             completeLesson().catch(error => console.error('Failed to mark as complete:', error));
 
                             // Navigate immediately using Next.js router (no page reload)
-                            router.push(`/student/watch/${courseId}/${nextLessonId}`);
+                            router.push(getNavigationUrl(nextLessonId));
                         }}
                         className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
                     >

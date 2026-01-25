@@ -10,7 +10,8 @@ export enum SemesterLevel {
 
 // Semester interface
 export interface ISemester extends Document {
-    number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+    number: number;
+    program: mongoose.Types.ObjectId; // Link to parent program
     level: SemesterLevel;
     titleBn: string;
     titleEn?: string;
@@ -18,6 +19,7 @@ export interface ISemester extends Document {
     descriptionEn?: string;
     duration: number; // মাসে (সাধারণত ৩)
     subjects: mongoose.Types.ObjectId[];
+    sections: mongoose.Types.ObjectId[]; // Direct content
     status: 'active' | 'inactive';
     startDate?: Date;
     endDate?: Date;
@@ -31,8 +33,13 @@ const SemesterSchema = new Schema<ISemester>(
         number: {
             type: Number,
             required: [true, 'সেমিস্টার নম্বর আবশ্যক'],
-            enum: [1, 2, 3, 4, 5, 6, 7, 8],
-            unique: true,
+            // enum removed to allow dynamic semester counts
+            // unique: true constraint removed to allow per-program semesters
+        },
+        program: {
+            type: Schema.Types.ObjectId,
+            ref: 'LongCourse',
+            required: true,
         },
         level: {
             type: String,
@@ -63,6 +70,11 @@ const SemesterSchema = new Schema<ISemester>(
             type: Schema.Types.ObjectId,
             ref: 'Subject',
         }],
+        // Direct content support
+        sections: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Section',
+        }],
         status: {
             type: String,
             enum: ['active', 'inactive'],
@@ -82,6 +94,7 @@ const SemesterSchema = new Schema<ISemester>(
 
 // Indexes
 SemesterSchema.index({ number: 1 });
+SemesterSchema.index({ program: 1 }); // Index for program queries
 SemesterSchema.index({ level: 1 });
 SemesterSchema.index({ status: 1 });
 

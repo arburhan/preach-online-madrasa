@@ -15,6 +15,7 @@ import {
     Calendar,
     Pencil
 } from 'lucide-react';
+import SemesterManager from '@/components/admin/programs/SemesterManager';
 
 export default async function ProgramDetailPage({
     params,
@@ -32,7 +33,7 @@ export default async function ProgramDetailPage({
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const program: any = await Program.findById(programId)
-        .populate('semesters', 'number titleBn level status')
+        .populate('semesters', 'number titleBn level status descriptionBn')
         .populate('createdBy', 'name')
         .lean();
 
@@ -121,38 +122,25 @@ export default async function ProgramDetailPage({
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Semesters */}
-                        <div className="bg-card rounded-xl border p-6">
-                            <h2 className="text-xl font-semibold mb-4">সেমিস্টারসমূহ</h2>
-                            {program.semesters?.length > 0 ? (
-                                <div className="space-y-3">
-                                    {program.semesters.map((semester: { _id: string; number: number; titleBn: string; level: string; status: string }, index: number) => (
-                                        <div
-                                            key={semester._id}
-                                            className="flex items-center justify-between p-4 bg-muted rounded-lg"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <span className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
-                                                    {index + 1}
-                                                </span>
-                                                <div>
-                                                    <p className="font-medium">{semester.titleBn}</p>
-                                                    <p className="text-sm text-muted-foreground">{semester.level}</p>
-                                                </div>
-                                            </div>
-                                            <span className={`px-2 py-1 rounded text-xs ${semester.status === 'active'
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-gray-100 text-gray-700'
-                                                }`}>
-                                                {semester.status === 'active' ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-muted-foreground">কোনো সেমিস্টার যুক্ত করা হয়নি</p>
-                            )}
-                        </div>
+                        {/* Semesters Manager */}
+                        <SemesterManager
+                            program={{
+                                ...program,
+                                _id: program._id.toString(),
+                                createdBy: program.createdBy?._id ? { ...program.createdBy, _id: program.createdBy._id.toString() } : program.createdBy,
+                                semesters: program.semesters.map((s: any) => ({
+                                    ...s,
+                                    _id: s._id.toString()
+                                })),
+                                maleInstructors: program.maleInstructors?.map((i: any) => i.toString()) || [],
+                                femaleInstructors: program.femaleInstructors?.map((i: any) => i.toString()) || [],
+                                enrollmentStartDate: program.enrollmentStartDate?.toISOString(),
+                                enrollmentEndDate: program.enrollmentEndDate?.toISOString(),
+                                createdAt: program.createdAt?.toISOString(),
+                                updatedAt: program.updatedAt?.toISOString(),
+                            }}
+                            programId={programId}
+                        />
 
                         {/* Features */}
                         {program.features?.length > 0 && (

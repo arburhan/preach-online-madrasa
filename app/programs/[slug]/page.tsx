@@ -6,6 +6,8 @@ import '@/lib/db/models/Teacher';
 import Link from 'next/link';
 import Image from 'next/image';
 import { EnrollButton } from '@/components/programs/EnrollButton';
+import { auth } from '@/lib/auth/auth.config';
+import Student from '@/lib/db/models/Student';
 import {
     GraduationCap,
     Clock,
@@ -76,6 +78,19 @@ export default async function ProgramDetailPage({
         notFound();
     }
 
+    // Check if current user is enrolled (using Student model for consistency)
+    let isEnrolled = false;
+    const session = await auth();
+    if (session?.user?.id) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const student: any = await Student.findById(session.user.id)
+            .select('enrolledPrograms')
+            .lean();
+        isEnrolled = student?.enrolledPrograms?.some(
+            (e: { program: { toString: () => string } }) => e.program?.toString() === program._id.toString()
+        ) || false;
+    }
+
     return (
         <div className="min-h-screen bg-background">
             {/* Hero Section */}
@@ -126,7 +141,7 @@ export default async function ProgramDetailPage({
                             </div>
 
                             <h1 className="text-3xl md:text-4xl font-bold mb-4">{program.titleBn}</h1>
-                            <p className="text-purple-100 text-lg mb-6">{program.descriptionBn}</p>
+
 
                             <div className="flex flex-wrap gap-4 text-sm">
                                 <span className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
@@ -268,7 +283,9 @@ export default async function ProgramDetailPage({
 
                             <EnrollButton
                                 programId={program._id.toString()}
+                                programSlug={program.slug}
                                 programTitle={program.titleBn}
+                                isEnrolled={isEnrolled}
                             />
 
                             <div className="space-y-3 text-sm">
