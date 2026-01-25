@@ -116,9 +116,6 @@ export default async function PublicCoursesPage() {
 
                                     <div className="p-4">
                                         <h3 className="font-bold text-lg mb-2">{program.titleBn}</h3>
-                                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                                            {program.descriptionBn}
-                                        </p>
 
                                         {/* Meta */}
                                         <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">

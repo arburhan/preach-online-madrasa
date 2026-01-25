@@ -74,9 +74,6 @@ export default async function BrowseCoursesPage() {
                                         </div>
                                     </div>
 
-                                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                                        {course.descriptionBn}
-                                    </p>
 
                                     <div className="space-y-2 mb-4">
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
