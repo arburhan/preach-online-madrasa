@@ -67,6 +67,10 @@ export interface ICourse extends Document {
     enrolledCount: number;
     totalLessons: number;
 
+    // Completion
+    isCompleted: boolean;
+    completedAt?: Date;
+
     // Timestamps
     createdAt: Date;
     updatedAt: Date;
@@ -186,6 +190,13 @@ const CourseSchema = new Schema<ICourse>(
             default: 0,
         },
         publishedAt: {
+            type: Date,
+        },
+        isCompleted: {
+            type: Boolean,
+            default: false,
+        },
+        completedAt: {
             type: Date,
         },
     },

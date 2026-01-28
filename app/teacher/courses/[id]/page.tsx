@@ -10,6 +10,7 @@ import { ArrowLeft, Plus, FileText } from 'lucide-react';
 import CourseEditForm from '@/components/teacher/CourseEditForm';
 import LessonList from '@/components/teacher/LessonList';
 import ExamList from '@/components/teacher/ExamList';
+import CourseActionsClient from '@/components/teacher/CourseActionsClient';
 
 export default async function EditCoursePage({
     params,
@@ -75,6 +76,7 @@ export default async function EditCoursePage({
         studentsEnrolled: course.studentsEnrolled,
         createdAt: course.createdAt?.toISOString(),
         updatedAt: course.updatedAt?.toISOString(),
+        isCompleted: course.isCompleted || false,
     };
 
     // Serialize lessons for client component  
@@ -168,13 +170,17 @@ export default async function EditCoursePage({
 
                 {/* Exams Section */}
                 <div className="bg-card p-6 rounded-xl border">
-                    <div className="mb-6">
+                    <div className="flex items-center justify-between mb-6">
                         <div>
                             <h2 className="text-2xl font-bold">পরীক্ষাসমূহ</h2>
                             <p className="text-sm text-muted-foreground mt-1">
                                 {serializedExams.length} টি পরীক্ষা
                             </p>
                         </div>
+                        <CourseActionsClient
+                            courseId={id}
+                            isCompleted={serializedCourse.isCompleted}
+                        />
                     </div>
 
                     {serializedExams.length > 0 ? (
