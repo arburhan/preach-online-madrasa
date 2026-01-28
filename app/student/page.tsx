@@ -226,7 +226,7 @@ export default async function StudentDashboard() {
                             {enrolledCourses.map((course) => (
                                 <Link
                                     key={course._id.toString()}
-                                    href={`/student/courses/${course.slug || course._id}`}
+                                    href={`/student/watch/${course.slug || course._id}`}
                                     className="group"
                                 >
                                     <div className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">

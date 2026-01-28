@@ -79,43 +79,16 @@ export default function EnrollButton({
     if (isEnrolled) {
         // Only students can access enrolled courses
         if (session && session.user.role === 'student') {
-            const handleGoToCourse = async () => {
+            const handleGoToCourse = () => {
                 if (!hasLessons) {
-                    toast.error('ক্লাস ভিডিও আপলোড করা হয়নি অপেক্ষা করুন', {
+                    toast.error('ক্লাস ভিডিও আপলোড করা হয়নি অপেক্ষা করুন', {
                         duration: 4000,
                     });
                     return;
                 }
 
-                setLoading(true);
-                try {
-                    // Fetch last watched lesson
-                    const response = await fetch(`/api/progress/lastWatchedLesson?courseId=${courseId}`);
-                    const data = await response.json();
-
-                    if (data.lastWatchedLessonId) {
-                        // Resume from last watched lesson
-                        router.push(`/student/watch/${courseId}/${data.lastWatchedLessonId}`);
-                    } else {
-                        // Get first lesson and start from there
-                        const lessonsResponse = await fetch(`/api/courses/${courseId}/lessons`);
-                        const lessonsData = await lessonsResponse.json();
-
-                        if (lessonsData.lessons && lessonsData.lessons.length > 0) {
-                            router.push(`/student/watch/${slug || courseId}/${lessonsData.lessons[0]._id}`);
-                        } else {
-                            // Should not reach here if hasLessons is passed correctly, but as fallback:
-                            toast.error('ক্লাস ভিডিও আপলোড করা হয়নি অপেক্ষা করুন', {
-                                duration: 4000,
-                            });
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error fetching lesson:', error);
-                    toast.error('লেসন লোড করতে সমস্যা হয়েছে');
-                } finally {
-                    setLoading(false);
-                }
+                // Navigate to the resume entry route which handles lastWatchedLesson server-side
+                router.push(`/student/watch/${slug || courseId}`);
             };
 
             return (

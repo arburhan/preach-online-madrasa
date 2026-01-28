@@ -6,10 +6,10 @@ import Exam from '@/lib/db/models/Exam';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, FileText, Clock, CheckCircle, Edit2 } from 'lucide-react';
+import { ArrowLeft, Plus, FileText } from 'lucide-react';
 import CourseEditForm from '@/components/teacher/CourseEditForm';
 import LessonList from '@/components/teacher/LessonList';
-import { Badge } from '@/components/ui/badge';
+import ExamList from '@/components/teacher/ExamList';
 
 export default async function EditCoursePage({
     params,
@@ -182,46 +182,7 @@ export default async function EditCoursePage({
                     </div>
 
                     {serializedExams.length > 0 ? (
-                        <div className="space-y-3">
-                            {serializedExams.map((exam) => (
-                                <div
-                                    key={exam._id}
-                                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                            <FileText className="h-5 w-5 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-medium">{exam.titleBn}</h3>
-                                            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                                                <span>{exam.questionsCount} প্রশ্ন</span>
-                                                <span>•</span>
-                                                <span>{exam.totalMarks} মার্কস</span>
-                                                <span>•</span>
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="h-3 w-3" />
-                                                    {exam.duration} মিনিট
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Badge variant={exam.status === 'published' ? 'default' : 'secondary'}>
-                                            {exam.status === 'published' ? (
-                                                <><CheckCircle className="h-3 w-3 mr-1" /> প্রকাশিত</>
-                                            ) : exam.status === 'completed' ? 'সম্পন্ন' : 'ড্রাফট'}
-                                        </Badge>
-                                        <Link href={`/teacher/courses/${id}/exams/${exam._id}/edit`}>
-                                            <Button size="sm" variant="outline">
-                                                <Edit2 className="h-4 w-4 mr-1" />
-                                                এডিট
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <ExamList exams={serializedExams} courseId={id} />
                     ) : (
                         <div className="text-center py-8 border-2 border-dashed rounded-lg">
                             <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />

@@ -6,7 +6,8 @@ import { LessonPlaylist } from '@/components/video/LessonPlaylist';
 import NoteEditor from '@/components/notes/NoteEditor';
 import ExamView from '@/components/exams/ExamView';
 import Link from 'next/link';
-import { BookOpen, Clock, FileText, Loader2 } from 'lucide-react';
+import { BookOpen, Clock, FileText, Loader2, CheckCircle, PartyPopper } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ContentItem {
     type: 'lesson' | 'exam';
@@ -124,6 +125,17 @@ export default function WatchPageClient({
     const previousContent = currentIndex > 0 ? content[currentIndex - 1] : null;
     const nextContent = currentIndex < content.length - 1 ? content[currentIndex + 1] : null;
 
+    // Check if ALL content is completed (lessons watched + exams PASSED)
+    const isAllCompleted = content.every(item => {
+        if (item.type === 'lesson') return item.isCompleted;
+        if (item.type === 'exam') return item.isPassed; // Exam must be PASSED, not just attempted
+        return true;
+    });
+
+    // Check if current is the last content and all content is completed
+    const isOnLastContent = currentIndex === content.length - 1;
+    const showCompletionMessage = isOnLastContent && isAllCompleted;
+
     return (
         <div className="min-h-screen bg-background">
             <div className="container mx-auto px-4 py-6">
@@ -228,10 +240,51 @@ export default function WatchPageClient({
                         ) : currentContent.type === 'exam' ? (
                             <ExamView
                                 examId={contentId}
+                                courseId={courseId}
                                 onBack={() => handleNavigate('prev')}
-                                onNext={() => nextContent && handleNavigate('next')}
+                                onNext={() => handleNavigate('next')}
                             />
                         ) : null}
+
+                        {/* Completion Message when all content is finished */}
+                        {showCompletionMessage && (
+                            <div className="bg-gradient-to-br from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-xl border border-emerald-500/20 p-8 text-center">
+                                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-6">
+                                    <PartyPopper className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+
+                                <h2 className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
+                                    جَزَاكَ اللَّهُ خَيْرًا
+                                </h2>
+                                <h3 className="text-2xl font-semibold mb-4">
+                                    জাজাকাল্লাহ খাইরান!
+                                </h3>
+
+                                <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 mb-4">
+                                    <CheckCircle className="h-5 w-5" />
+                                    <p className="text-lg">
+                                        আলহামদুলিল্লাহ! আপনি এই কোর্সের সব ভিডিও ও পরীক্ষা সম্পন্ন করেছেন।
+                                    </p>
+                                </div>
+
+                                <p className="text-muted-foreground mb-6">
+                                    পরবর্তী আপডেটের জন্য অপেক্ষা করুন। ইনশাআল্লাহ শীঘ্রই নতুন কন্টেন্ট যোগ করা হবে।
+                                </p>
+
+                                <div className="flex justify-center gap-4">
+                                    <Link href={`/student/browse/${courseId}`}>
+                                        <Button variant="outline">
+                                            কোর্স পেজে যান
+                                        </Button>
+                                    </Link>
+                                    <Link href="/student/my-courses">
+                                        <Button>
+                                            আমার কোর্সসমূহ
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Playlist Sidebar */}

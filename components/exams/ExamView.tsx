@@ -35,11 +35,12 @@ interface ExamResult {
 
 interface ExamViewProps {
     examId: string;
+    courseId: string;
     onBack: () => void;
     onNext?: () => void;
 }
 
-export default function ExamView({ examId, onBack, onNext }: ExamViewProps) {
+export default function ExamView({ examId, courseId, onBack, onNext }: ExamViewProps) {
     const [exam, setExam] = useState<Exam | null>(null);
     const [answers, setAnswers] = useState<{ questionIndex: number; answer: string }[]>([]);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -152,6 +153,17 @@ export default function ExamView({ examId, onBack, onNext }: ExamViewProps) {
                 passed: data.result.passed,
                 canRetake: false
             });
+
+            // Update lastWatchedLesson to this exam for resume functionality
+            try {
+                await fetch('/api/progress/lastWatchedLesson', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ courseId, lessonId: examId }),
+                });
+            } catch (trackErr) {
+                console.error('Failed to track exam as last watched:', trackErr);
+            }
 
             toast.success('পরীক্ষা সফলভাবে জমা দেওয়া হয়েছে');
         } catch (err) {

@@ -116,6 +116,15 @@ export async function POST(request: Request) {
             );
         }
 
+        // Calculate order - get the next order number
+        const existingExams = await Exam.find({
+            course: course || undefined,
+            semester: semester || undefined,
+            subject: subject || undefined,
+        }).sort({ order: -1 }).limit(1);
+
+        const nextOrder = existingExams.length > 0 ? existingExams[0].order + 1 : 0;
+
         const exam = await Exam.create({
             examFor,
             course: course || undefined,
@@ -124,6 +133,7 @@ export async function POST(request: Request) {
             titleBn,
             titleEn,
             type,
+            order: nextOrder,
             totalMarks,
             passMarks,
             duration,

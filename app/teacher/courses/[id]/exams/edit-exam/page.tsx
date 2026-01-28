@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Trash2, Save, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { use } from 'react';
 
 interface Question {
     questionBn: string;
@@ -16,13 +15,17 @@ interface Question {
     marks: number;
 }
 
-export default function CreateCourseExamPage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
-    const { id: courseId } = use(params);
+export default function EditExamPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const examId = searchParams.get('id');
+
+    const [courseId, setCourseId] = React.useState<string>('');
+
+    // Unwrap params
+    React.useEffect(() => {
+        params.then(p => setCourseId(p.id));
+    }, [params]);
 
     const [formData, setFormData] = useState({
         titleBn: '',
@@ -32,7 +35,6 @@ export default function CreateCourseExamPage({
         hasTiming: false,
         startTime: '',
         endTime: '',
-        allowRetake: false,
         status: 'draft',
     });
 
@@ -41,6 +43,46 @@ export default function CreateCourseExamPage({
     ]);
 
     const [loading, setLoading] = useState(false);
+    const [fetching, setFetching] = useState(true);
+
+    // Load exam data
+    useEffect(() => {
+        if (!courseId) return; // Wait for courseId to be set
+
+        if (!examId) {
+            router.push(`/teacher/courses/${courseId}`);
+            return;
+        }
+
+        const fetchExam = async () => {
+            try {
+                const res = await fetch(`/api/exams/${examId}`);
+                const data = await res.json();
+                if (data.exam) {
+                    const exam = data.exam;
+                    setFormData({
+                        titleBn: exam.titleBn || '',
+                        type: exam.type || 'mcq',
+                        passMarks: exam.passMarks?.toString() || '',
+                        duration: exam.duration?.toString() || '30',
+                        hasTiming: exam.hasTiming || false,
+                        startTime: exam.startTime ? new Date(exam.startTime).toISOString().slice(0, 16) : '',
+                        endTime: exam.endTime ? new Date(exam.endTime).toISOString().slice(0, 16) : '',
+                        status: exam.status || 'draft',
+                    });
+                    if (exam.questions?.length > 0) {
+                        setQuestions(exam.questions);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load exam:', error);
+                toast.error('পরীক্ষা লোড করতে সমস্যা হয়েছে');
+            } finally {
+                setFetching(false);
+            }
+        };
+        fetchExam();
+    }, [examId, courseId, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -78,32 +120,31 @@ export default function CreateCourseExamPage({
         return questions.reduce((acc, q) => acc + (q.marks || 0), 0);
     };
 
-    const handleSubmit = async (e: React.FormEvent, publishNow?: boolean) => {
+    const handleSubmit = async (e: React.FormEvent, newStatus?: string) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            const response = await fetch('/api/exams', {
-                method: 'POST',
+            const response = await fetch(`/api/exams/${examId}`, {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
-                    course: courseId,
                     totalMarks: calculateTotalMarks(),
                     passMarks: parseInt(formData.passMarks),
                     duration: parseInt(formData.duration),
                     questions,
-                    status: publishNow ? 'published' : 'draft',
+                    status: newStatus || formData.status,
                 }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'পরীক্ষা তৈরি করতে সমস্যা হয়েছে');
+                throw new Error(data.error || 'পরীক্ষা আপডেট করতে সমস্যা হয়েছে');
             }
 
-            toast.success(publishNow ? 'পরীক্ষা প্রকাশিত হয়েছে!' : 'পরীক্ষা ড্রাফ্ট হিসাবে সংরক্ষিত হয়েছে!');
+            toast.success(newStatus === 'published' ? 'পরীক্ষা প্রকাশিত হয়েছে!' : 'পরীক্ষা সংরক্ষিত হয়েছে!');
             router.push(`/teacher/courses/${courseId}`);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'সমস্যা হয়েছে';
@@ -112,6 +153,14 @@ export default function CreateCourseExamPage({
             setLoading(false);
         }
     };
+
+    if (fetching) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -125,8 +174,24 @@ export default function CreateCourseExamPage({
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         কোর্সে ফিরে যান
                     </Link>
-                    <h1 className="text-3xl font-bold">নতুন পরীক্ষা তৈরি করুন</h1>
-                    <p className="text-muted-foreground mt-1">এই কোর্সের জন্য পরীক্ষা তৈরি করুন</p>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold">পরীক্ষা সম্পাদনা</h1>
+                            <p className="text-muted-foreground mt-1">পরীক্ষা আপডেট বা প্রকাশ করুন</p>
+                        </div>
+                        <div className="flex gap-2">
+                            {formData.status === 'draft' && (
+                                <Button
+                                    onClick={(e) => handleSubmit(e, 'published')}
+                                    disabled={loading}
+                                    variant="default"
+                                >
+                                    <CheckCircle className="mr-2 h-4 w-4" />
+                                    প্রকাশ করুন
+                                </Button>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -331,39 +396,21 @@ export default function CreateCourseExamPage({
 
                     {/* Submit */}
                     <div className="flex gap-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            disabled={loading}
-                            onClick={(e) => handleSubmit(e, false)}
-                            className="flex-1"
-                        >
+                        <Button type="submit" disabled={loading} className="flex-1">
                             {loading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     অপেক্ষা করুন...
                                 </>
                             ) : (
-                                'ড্রাফ্ট সংরক্ষণ করুন'
-                            )}
-                        </Button>
-                        <Button
-                            type="button"
-                            disabled={loading}
-                            onClick={(e) => handleSubmit(e, true)}
-                            className="flex-1"
-                        >
-                            {loading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    অপেক্ষা করুন...
+                                    <Save className="mr-2 h-4 w-4" />
+                                    সংরক্ষণ করুন
                                 </>
-                            ) : (
-                                'প্রকাশ করুন'
                             )}
                         </Button>
                         <Link href={`/teacher/courses/${courseId}`}>
-                            <Button type="button" variant="ghost">বাতিল</Button>
+                            <Button type="button" variant="outline">বাতিল</Button>
                         </Link>
                     </div>
                 </form>

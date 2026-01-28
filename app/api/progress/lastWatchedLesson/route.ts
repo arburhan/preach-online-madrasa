@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Student from '@/lib/db/models/Student';
+import mongoose from 'mongoose';
 
 export async function POST(request: NextRequest) {
     try {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
                 },
             },
             {
-                arrayFilters: [{ 'elem.course': courseId }],
+                arrayFilters: [{ 'elem.course': new mongoose.Types.ObjectId(courseId) }],
                 new: true,
             }
         );

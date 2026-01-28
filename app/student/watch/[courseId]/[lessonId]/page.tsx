@@ -5,6 +5,7 @@ import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
 import Lesson from '@/lib/db/models/Lesson';
 import WatchPageClient from '@/components/watch/WatchPageClient';
+import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,8 +83,27 @@ export default async function WatchLessonPage({ params }: PageProps) {
         const exam = await Exam.findById(lessonId).lean();
 
         if (exam && exam.course?.toString() === courseId) {
-            // This is an exam, redirect to proper exam view or handle inline
-            // For now, we'll let WatchPageClient handle it
+            // Track this exam as last watched content
+            if (session?.user?.id && isEnrolled) {
+                try {
+                    await Student.findByIdAndUpdate(
+                        session.user.id,
+                        {
+                            $set: {
+                                'enrolledCourses.$[elem].lastWatchedLesson': lessonId,
+                                'enrolledCourses.$[elem].lastWatchedAt': new Date(),
+                            },
+                        },
+                        {
+                            arrayFilters: [{ 'elem.course': new mongoose.Types.ObjectId(courseId) }],
+                        }
+                    );
+                } catch (err) {
+                    console.error('Failed to update last watched exam:', err);
+                }
+            }
+
+            // This is an exam, let WatchPageClient handle it
             return (
                 <WatchPageClient
                     courseId={courseId}
@@ -97,22 +117,24 @@ export default async function WatchLessonPage({ params }: PageProps) {
         redirect(`/student/browse/${courseId}`);
     }
 
-    // Track this lesson as last watched
+    // Track this lesson/exam as last watched content
     if (session?.user?.id && isEnrolled) {
         try {
             await Student.findByIdAndUpdate(
                 session.user.id,
                 {
                     $set: {
+                        // Track the current content (lesson or exam) as last watched
                         'enrolledCourses.$[elem].lastWatchedLesson': lessonId,
+                        'enrolledCourses.$[elem].lastWatchedAt': new Date(),
                     },
                 },
                 {
-                    arrayFilters: [{ 'elem.course': courseId }],
+                    arrayFilters: [{ 'elem.course': new mongoose.Types.ObjectId(courseId) }],
                 }
             );
         } catch (err) {
-            console.error('Failed to update last watched lesson:', err);
+            console.error('Failed to update last watched content:', err);
         }
     }
 
