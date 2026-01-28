@@ -76,15 +76,15 @@ export async function GET(
         const examStats = [];
         for (const exam of exams) {
             const examResults = allResults.filter(
-                (r: any) => r.exam?.toString() === exam._id.toString()
+                (r: any) => r.exam?.toString() === exam._id.toString() // eslint-disable-line @typescript-eslint/no-explicit-any
             );
 
-            const passed = examResults.filter((r: any) => r.obtainedMarks >= exam.passMarks).length;
-            const failed = examResults.filter((r: any) => r.obtainedMarks < exam.passMarks).length;
+            const passed = examResults.filter((r: any) => r.obtainedMarks >= exam.passMarks).length; // eslint-disable-line @typescript-eslint/no-explicit-any
+            const failed = examResults.filter((r: any) => r.obtainedMarks < exam.passMarks).length; // eslint-disable-line @typescript-eslint/no-explicit-any
             const taken = examResults.length;
             const notTaken = totalEnrolled - taken;
             const avgScore = taken > 0
-                ? examResults.reduce((sum: number, r: any) => sum + r.obtainedMarks, 0) / taken
+                ? examResults.reduce((sum: number, r: any) => sum + r.obtainedMarks, 0) / taken // eslint-disable-line @typescript-eslint/no-explicit-any
                 : 0;
 
             examStats.push({
@@ -101,8 +101,10 @@ export async function GET(
         }
 
         // Calculate student completion stats
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const studentExamCounts = new Map<string, { count: number; totalMarks: number; student: any }>();
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         for (const result of allResults as any[]) {
             const studentId = result.student?._id?.toString();
             if (!studentId) continue;

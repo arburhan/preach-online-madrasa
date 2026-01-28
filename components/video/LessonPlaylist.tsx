@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Clock, Lock, FileText, CheckCircle, XCircle } from 'lucide-react';
+import { Clock, Lock, FileText, CheckCircle, XCircle, Award } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export interface ContentItem {
-    type: 'lesson' | 'exam';
+    type: 'lesson' | 'exam' | 'certificate';
     _id: string;
     titleBn: string;
     order: number;
@@ -46,13 +46,14 @@ export function LessonPlaylist({ courseId, currentContentId, content }: LessonPl
                     const isCurrent = item._id === currentContentId;
                     const isLesson = item.type === 'lesson';
                     const isExam = item.type === 'exam';
+                    const isCertificate = item.type === 'certificate';
 
                     return (
                         <Link
                             key={item._id}
                             href={item.isLocked ? '#' : `/student/watch/${courseId}/${item._id}`}
                             className={`block p-4 border-b hover:bg-muted/50 transition-colors ${isCurrent ? 'bg-purple-50 dark:bg-purple-900/20 border-l-4 border-l-purple-600' : ''
-                                } ${item.isLocked ? 'cursor-not-allowed opacity-60' : ''}`}
+                                } ${item.isLocked ? 'cursor-not-allowed opacity-60' : ''} ${isCertificate && !item.isLocked ? 'bg-linear-to-r from-emerald-50/50 to-teal-50/50 dark:from-emerald-900/20 dark:to-teal-900/20' : ''}`}
                             onClick={(e) => {
                                 if (item.isLocked) {
                                     e.preventDefault();
@@ -61,7 +62,20 @@ export function LessonPlaylist({ courseId, currentContentId, content }: LessonPl
                         >
                             <div className="flex items-start gap-3">
                                 {/* Icon/Number */}
-                                {isLesson ? (
+                                {isCertificate ? (
+                                    <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${item.isLocked
+                                        ? 'bg-muted text-muted-foreground'
+                                        : isCurrent
+                                            ? 'bg-purple-600 text-white'
+                                            : 'bg-linear-to-r from-emerald-500 to-teal-500 text-white'
+                                        }`}>
+                                        {item.isLocked ? (
+                                            <Lock className="h-4 w-4" />
+                                        ) : (
+                                            <Award className="h-4 w-4" />
+                                        )}
+                                    </div>
+                                ) : isLesson ? (
                                     <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${item.isCompleted
                                         ? 'bg-green-500 text-white'
                                         : isCurrent
@@ -143,8 +157,13 @@ export function LessonPlaylist({ courseId, currentContentId, content }: LessonPl
                                     {item.isLocked && (
                                         <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
                                             <Lock className="h-3 w-3" />
-                                            <span>লক করা আছে</span>
+                                            <span>{isCertificate ? 'সব পাঠ ও পরীক্ষা শেষ করুন' : 'লক করা আছে'}</span>
                                         </div>
+                                    )}
+                                    {isCertificate && !item.isLocked && (
+                                        <Badge variant="secondary" className="text-xs mt-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                                            ডাউনলোড করুন
+                                        </Badge>
                                     )}
                                 </div>
                             </div>

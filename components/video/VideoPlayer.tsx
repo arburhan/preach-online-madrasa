@@ -15,7 +15,7 @@ interface VideoPlayerProps {
     totalLessons?: number;
     previousLessonId?: string | null;
     nextLessonId?: string | null;
-    nextContentType?: 'lesson' | 'exam'; // Type of next content
+    nextContentType?: 'lesson' | 'exam' | 'certificate'; // Type of next content
     nextContentLocked?: boolean; // If next content is locked
     basePath?: string; // Custom base path for navigation (e.g., '/student/programs/xyz/semesters/abc?lesson=')
 }
@@ -426,7 +426,7 @@ export function VideoPlayer({
                             }`}
                     >
                         <span>
-                            {nextContentType === 'exam' ? 'পরীক্ষা দিন' : 'পরবর্তী ভিডিও'}
+                            {nextContentType === 'certificate' ? 'সার্টিফিকেট নিন' : nextContentType === 'exam' ? 'পরীক্ষা দিন' : 'পরবর্তী ভিডিও'}
                         </span>
                         <ChevronRight className="h-5 w-5" />
                     </button>

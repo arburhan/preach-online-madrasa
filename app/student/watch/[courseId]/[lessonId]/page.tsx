@@ -74,13 +74,29 @@ export default async function WatchLessonPage({ params }: PageProps) {
         redirect(`/student/browse/${courseId}`);
     }
 
+    // If it's a certificate view, render client directly
+    // Note: We don't update lastWatchedLesson for certificate since it's not a valid ObjectId
+    // Resume logic should handle completed courses by checking if all content is done
+    if (lessonId.startsWith('certificate-')) {
+        return (
+            <WatchPageClient
+                courseId={courseId}
+                contentId={lessonId}
+                courseTitle={course.titleBn}
+            />
+        );
+    }
+
     // Get current lesson or exam - try lesson first
-    const lesson = await Lesson.findById(lessonId).lean();
+    let lesson = null;
+    if (isValidObjectId(lessonId)) {
+        lesson = await Lesson.findById(lessonId).lean();
+    }
 
     if (!lesson || lesson.course?.toString() !== courseId) {
         // Not a lesson, check if it's an exam
         const Exam = (await import('@/lib/db/models/Exam')).default;
-        const exam = await Exam.findById(lessonId).lean();
+        const exam = isValidObjectId(lessonId) ? await Exam.findById(lessonId).lean() : null;
 
         if (exam && exam.course?.toString() === courseId) {
             // Track this exam as last watched content

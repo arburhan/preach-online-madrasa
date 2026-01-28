@@ -3,6 +3,7 @@ import connectDB from '@/lib/db/mongodb';
 import Lesson from '@/lib/db/models/Lesson';
 import Exam from '@/lib/db/models/Exam';
 import ExamResult from '@/lib/db/models/ExamResult';
+import Course from '@/lib/db/models/Course';
 import { auth } from '@/lib/auth/auth.config';
 
 // GET /api/courses/[courseId]/content - Get unified content (lessons + exams) for watch page
@@ -21,6 +22,9 @@ export async function GET(
 
         const { courseId } = await params;
         await connectDB();
+
+        // Fetch course to check isCompleted status
+        const course = await Course.findById(courseId).select('isCompleted').lean();
 
         // Fetch lessons
         const lessons = await Lesson.find({ course: courseId })
@@ -43,8 +47,8 @@ export async function GET(
 
         const completedLessonIds = new Set(
             progresses
-                .filter((p: any) => p.isCompleted)
-                .map((p: any) => p.lesson?.toString())
+                .filter((p: any) => p.isCompleted) // eslint-disable-line @typescript-eslint/no-explicit-any
+                .map((p: any) => p.lesson?.toString()) // eslint-disable-line @typescript-eslint/no-explicit-any
         );
 
         // Get user's exam results
@@ -54,7 +58,7 @@ export async function GET(
         }).lean();
 
         const examResultsMap = new Map();
-        examResults.forEach((result: any) => {
+        examResults.forEach((result: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
             const examId = result.exam.toString();
             if (!examResultsMap.has(examId) || result.createdAt > examResultsMap.get(examId).createdAt) {
                 examResultsMap.set(examId, result);
@@ -62,10 +66,10 @@ export async function GET(
         });
 
         // Combine and sort content
-        const content: any[] = [];
+        const content: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         // Add lessons
-        lessons.forEach((lesson: any) => {
+        lessons.forEach((lesson: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
             content.push({
                 type: 'lesson',
                 _id: lesson._id.toString(),
@@ -79,7 +83,7 @@ export async function GET(
         });
 
         // Add exams
-        exams.forEach((exam: any) => {
+        exams.forEach((exam: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
             const examId = exam._id.toString();
             const result = examResultsMap.get(examId);
             const isPassed = result ? result.obtainedMarks >= exam.passMarks : false;
@@ -120,7 +124,35 @@ export async function GET(
             // - Only exam failures should block progress
         }
 
-        return NextResponse.json(content);
+        // Add certificate item if course is marked as completed by admin/teacher
+        if (course?.isCompleted) {
+            // Check if all regular content is completed
+            const allLessonsCompleted = content
+                .filter(c => c.type === 'lesson')
+                .every(c => c.isCompleted);
+            const allExamsPassed = content
+                .filter(c => c.type === 'exam')
+                .every(c => c.isPassed);
+
+            const isCertificateUnlocked = allLessonsCompleted && allExamsPassed;
+            const lastOrder = content.length > 0 ? Math.max(...content.map(c => c.order)) + 1 : 1;
+
+            content.push({
+                type: 'certificate',
+                _id: `certificate-${courseId}`,
+                order: lastOrder,
+                titleBn: 'সার্টিফিকেট',
+                titleEn: 'Certificate',
+                isCompleted: false,
+                isPassed: isCertificateUnlocked,
+                isLocked: !isCertificateUnlocked,
+            });
+        }
+
+        return NextResponse.json({
+            content,
+            courseIsCompleted: course?.isCompleted || false,
+        });
     } catch (error) {
         console.error('Get course content error:', error);
         return NextResponse.json(

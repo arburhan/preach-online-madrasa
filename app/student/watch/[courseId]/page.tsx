@@ -5,6 +5,8 @@ import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
 import Lesson from '@/lib/db/models/Lesson';
 import Exam from '@/lib/db/models/Exam';
+import Progress from '@/lib/db/models/Progress';
+import ExamResult from '@/lib/db/models/ExamResult';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,6 +63,36 @@ export default async function WatchCourseResumeEntry({ params }: PageProps) {
     // Check for last watched content
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const lastWatchedId = (enrollment as any)?.lastWatchedLesson?.toString();
+
+    // Check if all content is completed - redirect to certificate
+    const lessons = await Lesson.find({ course: course._id }).select('_id').lean();
+    const exams = await Exam.find({ course: course._id }).select('_id').lean();
+
+    const lessonIds = lessons.map(l => l._id.toString());
+    const examIds = exams.map(e => e._id.toString());
+
+    // Check completion status
+    const completedProgress = await Progress.find({
+        user: session.user.id,
+        lesson: { $in: lessonIds },
+        isCompleted: true
+    }).lean();
+
+    // Exam pass check - percentage >= 40 means passed (D grade or above)
+    const passedExams = await ExamResult.find({
+        student: session.user.id,
+        exam: { $in: examIds },
+        percentage: { $gte: 40 },
+        isLatest: true
+    }).lean();
+
+    const allLessonsCompleted = lessonIds.length > 0 && completedProgress.length >= lessonIds.length;
+    const allExamsPassed = examIds.length === 0 || passedExams.length >= examIds.length;
+
+    if (allLessonsCompleted && allExamsPassed) {
+        // All content done, redirect to certificate
+        redirect(`/student/watch/${paramCourseId}/certificate-${courseId}`);
+    }
 
     if (lastWatchedId) {
         // Validate the lastWatched content still exists
