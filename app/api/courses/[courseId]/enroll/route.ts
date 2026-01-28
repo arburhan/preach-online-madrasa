@@ -7,7 +7,7 @@ import { getCurrentUser } from '@/lib/auth/rbac';
 // POST /api/courses/[id]/enroll - Enroll in a course
 export async function POST(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -19,10 +19,10 @@ export async function POST(
             );
         }
 
-        const { id } = await params;
+        const { courseId } = await params;
         await connectDB();
 
-        const course = await Course.findById(id);
+        const course = await Course.findById(courseId);
 
         if (!course) {
             return NextResponse.json(
@@ -47,10 +47,10 @@ export async function POST(
             (e) => {
                 // Old format: e is just an ObjectId
                 if ((e as unknown as { toString: () => string })?.toString && !(e as { course?: unknown }).course) {
-                    return (e as unknown as { toString: () => string }).toString() === id;
+                    return (e as unknown as { toString: () => string }).toString() === courseId;
                 }
                 // New format: e has course property
-                return (e as { course: { toString: () => string } })?.course?.toString() === id;
+                return (e as { course: { toString: () => string } })?.course?.toString() === courseId;
             }
         );
 
@@ -79,14 +79,14 @@ export async function POST(
         await Student.findByIdAndUpdate(user.id, {
             $push: {
                 enrolledCourses: {
-                    course: id,
+                    course: courseId,
                     enrolledAt: new Date(),
                 },
             },
         });
 
         // Update course enrolled count
-        await Course.findByIdAndUpdate(id, {
+        await Course.findByIdAndUpdate(courseId, {
             $inc: { enrolledCount: 1 },
         });
 
@@ -106,7 +106,7 @@ export async function POST(
 // DELETE /api/courses/[id]/enroll - Unenroll from a course
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -118,10 +118,10 @@ export async function DELETE(
             );
         }
 
-        const { id } = await params;
+        const { courseId } = await params;
         await connectDB();
 
-        const course = await Course.findById(id);
+        const course = await Course.findById(courseId);
 
         if (!course) {
             return NextResponse.json(
@@ -138,10 +138,10 @@ export async function DELETE(
             (e) => {
                 // Old format: e is just an ObjectId
                 if ((e as unknown as { toString: () => string })?.toString && !(e as { course?: unknown }).course) {
-                    return (e as unknown as { toString: () => string }).toString() === id;
+                    return (e as unknown as { toString: () => string }).toString() === courseId;
                 }
                 // New format: e has course property
-                return (e as { course: { toString: () => string } })?.course?.toString() === id;
+                return (e as { course: { toString: () => string } })?.course?.toString() === courseId;
             }
         );
 
@@ -154,11 +154,11 @@ export async function DELETE(
 
         // Unenroll user from the course
         await Student.findByIdAndUpdate(user.id, {
-            $pull: { enrolledCourses: { course: id } },
+            $pull: { enrolledCourses: { course: courseId } },
         });
 
         // Update course enrolled count
-        await Course.findByIdAndUpdate(id, {
+        await Course.findByIdAndUpdate(courseId, {
             $inc: { enrolledCount: -1 },
         });
 
@@ -173,3 +173,4 @@ export async function DELETE(
         );
     }
 }
+

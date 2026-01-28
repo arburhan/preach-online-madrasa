@@ -4,14 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Play, Pause, Volume2, VolumeX, Maximize, Gauge, ChevronLeft, ChevronRight, Download, FileText, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { Button } from '../ui/button';
-
-// Dynamically import ReactPlayer to avoid SSR issues
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// Dynamically import ReactPlayer to avoid SSR issues
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any;
 
 interface VideoPlayerProps {
     lessonId: string;
@@ -22,12 +15,24 @@ interface VideoPlayerProps {
     totalLessons?: number;
     previousLessonId?: string | null;
     nextLessonId?: string | null;
+    nextContentType?: 'lesson' | 'exam'; // Type of next content
+    nextContentLocked?: boolean; // If next content is locked
     basePath?: string; // Custom base path for navigation (e.g., '/student/programs/xyz/semesters/abc?lesson=')
 }
 
 
 
-export function VideoPlayer({ lessonId, courseId, videoUrl, videoSource = 'r2', previousLessonId, nextLessonId, basePath }: VideoPlayerProps) {
+export function VideoPlayer({
+    lessonId,
+    courseId,
+    videoUrl,
+    videoSource = 'r2',
+    previousLessonId,
+    nextLessonId,
+    nextContentType,
+    nextContentLocked = false,
+    basePath
+}: VideoPlayerProps) {
     const router = useRouter();
 
     // Generate navigation URL
@@ -414,9 +419,15 @@ export function VideoPlayer({ lessonId, courseId, videoUrl, videoSource = 'r2', 
                             // Navigate immediately using Next.js router (no page reload)
                             router.push(getNavigationUrl(nextLessonId));
                         }}
-                        className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                        disabled={nextContentLocked}
+                        className={`flex-1 py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors ${nextContentLocked
+                            ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
+                            : 'bg-purple-600 hover:bg-purple-700 text-white'
+                            }`}
                     >
-                        <span>পরবর্তী ভিডিও</span>
+                        <span>
+                            {nextContentType === 'exam' ? 'পরীক্ষা দিন' : 'পরবর্তী ভিডিও'}
+                        </span>
                         <ChevronRight className="h-5 w-5" />
                     </button>
                 ) : (

@@ -22,13 +22,17 @@ export interface IAnswer {
 export interface IExamResult extends Document {
     student: mongoose.Types.ObjectId;
     exam: mongoose.Types.ObjectId;
-    semester: mongoose.Types.ObjectId;
+    course?: mongoose.Types.ObjectId; // Short Course এর জন্য
+    semester?: mongoose.Types.ObjectId; // Long Course/Semester এর জন্য
     answers: IAnswer[];
     totalMarks: number;
     obtainedMarks: number;
     percentage: number;
     grade: Grade;
     status: 'submitted' | 'graded';
+    attemptNumber: number; // কততম attempt
+    isLatest: boolean; // সর্বশেষ attempt কিনা
+    canRetake: boolean; // শিক্ষক অনুমোদন দিয়েছেন কিনা
     submittedAt: Date;
     gradedAt?: Date;
     gradedBy?: mongoose.Types.ObjectId;
@@ -49,10 +53,13 @@ const ExamResultSchema = new Schema<IExamResult>(
             ref: 'Exam',
             required: [true, 'পরীক্ষা আবশ্যক'],
         },
+        course: {
+            type: Schema.Types.ObjectId,
+            ref: 'Course',
+        },
         semester: {
             type: Schema.Types.ObjectId,
             ref: 'Semester',
-            required: [true, 'সেমিস্টার আবশ্যক'],
         },
         answers: [{
             questionIndex: {
@@ -87,6 +94,19 @@ const ExamResultSchema = new Schema<IExamResult>(
             enum: ['submitted', 'graded'],
             default: 'submitted',
         },
+        attemptNumber: {
+            type: Number,
+            default: 1,
+            min: 1,
+        },
+        isLatest: {
+            type: Boolean,
+            default: true,
+        },
+        canRetake: {
+            type: Boolean,
+            default: false,
+        },
         submittedAt: {
             type: Date,
             default: Date.now,
@@ -105,7 +125,8 @@ const ExamResultSchema = new Schema<IExamResult>(
 );
 
 // Indexes
-ExamResultSchema.index({ student: 1, exam: 1 }, { unique: true });
+ExamResultSchema.index({ student: 1, exam: 1, attemptNumber: 1 }, { unique: true });
+ExamResultSchema.index({ student: 1, exam: 1, isLatest: 1 });
 ExamResultSchema.index({ student: 1, semester: 1 });
 ExamResultSchema.index({ exam: 1 });
 ExamResultSchema.index({ status: 1 });

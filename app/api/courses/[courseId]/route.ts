@@ -7,13 +7,13 @@ import { getCurrentUser } from '@/lib/auth/rbac';
 // GET /api/courses/[id] - Get course details
 export async function GET(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
-        const { id } = await params;
+        const { courseId } = await params;
         await connectDB();
 
-        const course = await Course.findById(id)
+        const course = await Course.findById(courseId)
             .populate('instructors', 'name image bio qualifications')
             .lean();
 
@@ -25,7 +25,7 @@ export async function GET(
         }
 
         // Get lessons for this course
-        const lessons = await Lesson.find({ course: id })
+        const lessons = await Lesson.find({ course: courseId })
             .sort({ order: 1 })
             .select('-videoKey') // Don't send video key to client
             .lean();
@@ -46,7 +46,7 @@ export async function GET(
 // PUT /api/courses/[id] - Update course
 export async function PUT(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -58,10 +58,10 @@ export async function PUT(
             );
         }
 
-        const { id } = await params;
+        const { courseId } = await params;
         await connectDB();
 
-        const course = await Course.findById(id);
+        const course = await Course.findById(courseId);
 
         if (!course) {
             return NextResponse.json(
@@ -85,7 +85,7 @@ export async function PUT(
 
         const body = await request.json();
         const updatedCourse = await Course.findByIdAndUpdate(
-            id,
+            courseId,
             { $set: body },
             { new: true, runValidators: true }
         );
@@ -106,7 +106,7 @@ export async function PUT(
 // DELETE /api/courses/[id] - Delete course
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -118,10 +118,10 @@ export async function DELETE(
             );
         }
 
-        const { id } = await params;
+        const { courseId } = await params;
         await connectDB();
 
-        const course = await Course.findById(id);
+        const course = await Course.findById(courseId);
 
         if (!course) {
             return NextResponse.json(
@@ -144,10 +144,10 @@ export async function DELETE(
         }
 
         // Delete all lessons associated with this course
-        await Lesson.deleteMany({ course: id });
+        await Lesson.deleteMany({ course: courseId });
 
         // Delete the course
-        await Course.findByIdAndDelete(id);
+        await Course.findByIdAndDelete(courseId);
 
         return NextResponse.json({
             message: 'কোর্স মুছে ফেলা হয়েছে',

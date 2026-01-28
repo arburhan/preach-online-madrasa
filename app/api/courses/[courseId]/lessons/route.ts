@@ -7,7 +7,7 @@ import { getCurrentUser } from '@/lib/auth/rbac';
 // POST /api/courses/[id]/lessons - Create new lesson
 export async function POST(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
         const user = await getCurrentUser();
@@ -19,10 +19,10 @@ export async function POST(
             );
         }
 
-        const { id } = await params;
+        const { courseId } = await params;
         await connectDB();
 
-        const course = await Course.findById(id);
+        const course = await Course.findById(courseId);
 
         if (!course) {
             return NextResponse.json(
@@ -81,7 +81,7 @@ export async function POST(
         }
 
         // Auto-increment order logic
-        const lastLesson = await Lesson.findOne({ course: id })
+        const lastLesson = await Lesson.findOne({ course: courseId })
             .sort({ order: -1 })
             .select('order');
 
@@ -90,14 +90,14 @@ export async function POST(
         const lesson = await Lesson.create({
             ...body,
             videoSource,
-            course: id,
+            course: courseId,
             order: newOrder, // Auto-assigned
             duration: body.duration || 0, // Default to 0 if not provided
             attachments: attachments || [], // Save attachments
         });
 
         // Update course total lessons count
-        await Course.findByIdAndUpdate(id, {
+        await Course.findByIdAndUpdate(courseId, {
             $inc: { totalLessons: 1 },
         });
 
@@ -120,13 +120,13 @@ export async function POST(
 // GET /api/courses/[id]/lessons - Get all lessons for a course
 export async function GET(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ courseId: string }> }
 ) {
     try {
-        const { id } = await params;
+        const { courseId } = await params;
         await connectDB();
 
-        const lessons = await Lesson.find({ course: id })
+        const lessons = await Lesson.find({ course: courseId })
             .sort({ order: 1 })
             .select('_id titleBn order duration isFree')
             .lean();
@@ -140,3 +140,4 @@ export async function GET(
         );
     }
 }
+

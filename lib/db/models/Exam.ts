@@ -24,19 +24,31 @@ export interface IQuestion {
     marks: number;
 }
 
+// Exam for type
+export enum ExamFor {
+    COURSE = 'course',
+    SEMESTER = 'semester',
+    SUBJECT = 'subject',
+}
+
 // Exam interface
 export interface IExam extends Document {
-    semester: mongoose.Types.ObjectId;
+    examFor: ExamFor;
+    course?: mongoose.Types.ObjectId; // Short Course এর জন্য
+    semester?: mongoose.Types.ObjectId; // Long Course/Semester এর জন্য
     subject?: mongoose.Types.ObjectId;
     titleBn: string;
     titleEn?: string;
     type: ExamType;
+    order: number; // Content sequence order (used with lessons)
     totalMarks: number;
     passMarks: number;
     duration: number; // মিনিটে
     questions: IQuestion[];
-    startTime: Date;
-    endTime: Date;
+    hasTiming: boolean; // সময়সীমা আছে কিনা
+    startTime?: Date;
+    endTime?: Date;
+    allowRetake: boolean; // ফেল করলে আবার পরীক্ষা দেওয়া যাবে
     status: 'draft' | 'published' | 'completed';
     createdBy: mongoose.Types.ObjectId;
     createdAt: Date;
@@ -46,10 +58,18 @@ export interface IExam extends Document {
 // Exam schema
 const ExamSchema = new Schema<IExam>(
     {
+        examFor: {
+            type: String,
+            enum: Object.values(ExamFor),
+            required: [true, 'পরীক্ষার ধরন (course/semester/subject) আবশ্যক'],
+        },
+        course: {
+            type: Schema.Types.ObjectId,
+            ref: 'Course',
+        },
         semester: {
             type: Schema.Types.ObjectId,
             ref: 'Semester',
-            required: [true, 'সেমিস্টার আবশ্যক'],
         },
         subject: {
             type: Schema.Types.ObjectId,
@@ -68,6 +88,11 @@ const ExamSchema = new Schema<IExam>(
             type: String,
             enum: Object.values(ExamType),
             required: [true, 'পরীক্ষার ধরন আবশ্যক'],
+        },
+        order: {
+            type: Number,
+            required: [true, 'ক্রম নম্বর আবশ্যক'],
+            min: 0,
         },
         totalMarks: {
             type: Number,
@@ -103,13 +128,19 @@ const ExamSchema = new Schema<IExam>(
                 min: 0,
             },
         }],
+        hasTiming: {
+            type: Boolean,
+            default: false,
+        },
         startTime: {
             type: Date,
-            required: [true, 'শুরুর সময় আবশ্যক'],
         },
         endTime: {
             type: Date,
-            required: [true, 'শেষের সময় আবশ্যক'],
+        },
+        allowRetake: {
+            type: Boolean,
+            default: false,
         },
         status: {
             type: String,
@@ -128,6 +159,8 @@ const ExamSchema = new Schema<IExam>(
 );
 
 // Indexes
+ExamSchema.index({ examFor: 1 });
+ExamSchema.index({ course: 1 });
 ExamSchema.index({ semester: 1 });
 ExamSchema.index({ subject: 1 });
 ExamSchema.index({ status: 1 });

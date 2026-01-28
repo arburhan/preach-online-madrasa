@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { use } from 'react';
 
 interface Question {
     questionBn: string;
@@ -15,26 +16,23 @@ interface Question {
     marks: number;
 }
 
-interface Semester {
-    _id: string;
-    number: number;
-    titleBn: string;
-}
-
 interface Subject {
     _id: string;
     titleBn: string;
 }
 
-export default function CreateExamPage() {
+export default function CreateSemesterExamPage({
+    params,
+}: {
+    params: Promise<{ programId: string; semesterId: string }>;
+}) {
+    const { programId, semesterId } = use(params);
     const router = useRouter();
 
     const [formData, setFormData] = useState({
-        semester: '',
         subject: '',
         titleBn: '',
         type: 'mcq',
-        totalMarks: '',
         passMarks: '',
         duration: '30',
         hasTiming: false,
@@ -47,36 +45,14 @@ export default function CreateExamPage() {
         { questionBn: '', type: 'mcq', options: ['', '', '', ''], correctAnswer: '', marks: 1 }
     ]);
 
-    const [semesters, setSemesters] = useState<Semester[]>([]);
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Load semesters
+    // Load subjects for this semester
     useEffect(() => {
-        const fetchSemesters = async () => {
-            try {
-                const res = await fetch('/api/semesters');
-                const data = await res.json();
-                if (Array.isArray(data)) {
-                    setSemesters(data);
-                }
-            } catch (error) {
-                console.error('Failed to load semesters:', error);
-            }
-        };
-        fetchSemesters();
-    }, []);
-
-    // Load subjects when semester changes
-    useEffect(() => {
-        if (!formData.semester) {
-            setSubjects([]);
-            return;
-        }
-
         const fetchSubjects = async () => {
             try {
-                const res = await fetch(`/api/subjects?semesterId=${formData.semester}`);
+                const res = await fetch(`/api/subjects?semesterId=${semesterId}`);
                 const data = await res.json();
                 if (Array.isArray(data)) {
                     setSubjects(data);
@@ -86,7 +62,7 @@ export default function CreateExamPage() {
             }
         };
         fetchSubjects();
-    }, [formData.semester]);
+    }, [semesterId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -134,6 +110,8 @@ export default function CreateExamPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
+                    semester: semesterId,
+                    subject: formData.subject || undefined,
                     totalMarks: calculateTotalMarks(),
                     passMarks: parseInt(formData.passMarks),
                     duration: parseInt(formData.duration),
@@ -148,7 +126,7 @@ export default function CreateExamPage() {
             }
 
             toast.success('পরীক্ষা সফলভাবে তৈরি হয়েছে!');
-            router.push('/admin/exams');
+            router.push(`/admin/programs/${programId}/semesters/${semesterId}`);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'সমস্যা হয়েছে';
             toast.error(errorMessage);
@@ -157,19 +135,22 @@ export default function CreateExamPage() {
         }
     };
 
+    const backUrl = `/admin/programs/${programId}/semesters/${semesterId}`;
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
             <div className="border-b bg-card">
                 <div className="container mx-auto px-4 py-6">
                     <Link
-                        href="/admin/exams"
+                        href={backUrl}
                         className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
-                        পরীক্ষা তালিকায় ফিরে যান
+                        সেমিস্টারে ফিরে যান
                     </Link>
                     <h1 className="text-3xl font-bold">নতুন পরীক্ষা তৈরি করুন</h1>
+                    <p className="text-muted-foreground mt-1">এই সেমিস্টারের জন্য পরীক্ষা তৈরি করুন</p>
                 </div>
             </div>
 
@@ -180,21 +161,6 @@ export default function CreateExamPage() {
                         <h2 className="text-xl font-semibold border-b pb-2">পরীক্ষার তথ্য</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">সেমিস্টার *</label>
-                                <select
-                                    name="semester"
-                                    value={formData.semester}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
-                                >
-                                    <option value="">নির্বাচন করুন</option>
-                                    {semesters.map(s => (
-                                        <option key={s._id} value={s._id}>{s.titleBn}</option>
-                                    ))}
-                                </select>
-                            </div>
                             <div>
                                 <label className="block text-sm font-medium mb-2">বিষয় (ঐচ্ছিক)</label>
                                 <select
@@ -209,19 +175,18 @@ export default function CreateExamPage() {
                                     ))}
                                 </select>
                             </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-2">পরীক্ষার নাম *</label>
-                            <input
-                                type="text"
-                                name="titleBn"
-                                value={formData.titleBn}
-                                onChange={handleChange}
-                                required
-                                placeholder="যেমন: ১ম সেমিস্টার ফাইনাল পরীক্ষা"
-                                className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
-                            />
+                            <div>
+                                <label className="block text-sm font-medium mb-2">পরীক্ষার নাম *</label>
+                                <input
+                                    type="text"
+                                    name="titleBn"
+                                    value={formData.titleBn}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="যেমন: ১ম সেমিস্টার ফাইনাল পরীক্ষা"
+                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
+                                />
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -272,6 +237,7 @@ export default function CreateExamPage() {
                             </div>
                         </div>
 
+                        {/* Timing Section - Optional */}
                         <div className="border-t pt-4">
                             <div className="flex items-center gap-3 mb-4">
                                 <input
@@ -415,7 +381,7 @@ export default function CreateExamPage() {
                                 'পরীক্ষা তৈরি করুন'
                             )}
                         </Button>
-                        <Link href="/admin/exams">
+                        <Link href={backUrl}>
                             <Button type="button" variant="outline">বাতিল</Button>
                         </Link>
                     </div>

@@ -5,10 +5,11 @@ import Semester from '@/lib/db/models/Semester';
 import Subject from '@/lib/db/models/Subject';
 import LongCourse from '@/lib/db/models/LongCourse';
 import Section from '@/lib/db/models/Section';
+import Exam from '@/lib/db/models/Exam';
 import SemesterContentManager from '@/components/admin/programs/SemesterContentManager';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Plus, MoreHorizontal, Layers } from 'lucide-react';
+import { BookOpen, Plus, MoreHorizontal, Layers, FileText, Edit2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -48,21 +49,25 @@ export default async function SemesterDetailPage({
 
     // ...
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subjectsPromise = Subject.find({ semester: semesterId })
         .sort({ order: 1 })
         .lean();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sectionsPromise = Section.find({ semester: semesterId })
         .sort({ order: 1 })
         .populate({ path: 'lessons', options: { sort: { order: 1 } } })
         .lean();
 
+    // Fetch exams for this semester
+    const examsPromise = Exam.find({ semester: semesterId })
+        .sort({ createdAt: -1 })
+        .lean();
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [subjects, sections]: [any[], any[]] = await Promise.all([
+    const [subjects, sections, exams]: [any[], any[], any[]] = await Promise.all([
         subjectsPromise,
-        sectionsPromise
+        sectionsPromise,
+        examsPromise
     ]);
 
     return (
@@ -94,7 +99,12 @@ export default async function SemesterDetailPage({
                             </p>
                         </div>
                         <div className="flex gap-2">
-                            {/* Actions can be added here */}
+                            <Link href={`/admin/programs/${programId}/semesters/${semesterId}/exams/create`}>
+                                <Button>
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    পরীক্ষা নিন
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -105,11 +115,15 @@ export default async function SemesterDetailPage({
                     <TabsList>
                         <TabsTrigger value="subjects" className="flex items-center gap-2">
                             <BookOpen className="h-4 w-4" />
-                            বিষয়ভিত্তিক (Subject-wise)
+                            বিষয়ভিত্তিক
                         </TabsTrigger>
                         <TabsTrigger value="content" className="flex items-center gap-2">
                             <Layers className="h-4 w-4" />
-                            সরাসরি কন্টেন্ট (Direct Content)
+                            সরাসরি কন্টেন্ট
+                        </TabsTrigger>
+                        <TabsTrigger value="exams" className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            পরীক্ষাসমূহ ({exams.length})
                         </TabsTrigger>
                     </TabsList>
 
@@ -179,9 +193,73 @@ export default async function SemesterDetailPage({
                         <SemesterContentManager
                             programId={programId}
                             semesterId={semesterId}
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             sections={JSON.parse(JSON.stringify(sections))}
                         />
+                    </TabsContent>
+
+                    <TabsContent value="exams">
+                        <div className="bg-card rounded-xl border p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h2 className="text-xl font-semibold">পরীক্ষাসমূহ</h2>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        এই সেমিস্টারের সকল পরীক্ষা
+                                    </p>
+                                </div>
+                                <Link href={`/admin/programs/${programId}/semesters/${semesterId}/exams/create`}>
+                                    <Button>
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        নতুন পরীক্ষা
+                                    </Button>
+                                </Link>
+                            </div>
+
+                            {exams.length > 0 ? (
+                                <div className="space-y-3">
+                                    {exams.map((exam) => (
+                                        <div
+                                            key={exam._id.toString()}
+                                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                                    <FileText className="h-5 w-5 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-medium">{exam.titleBn}</h3>
+                                                    <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                                                        <span>{exam.questions?.length || 0} প্রশ্ন</span>
+                                                        <span>•</span>
+                                                        <span>{exam.totalMarks} মার্কস</span>
+                                                        <span>•</span>
+                                                        <span>{exam.duration} মিনিট</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant={exam.status === 'published' ? 'default' : 'secondary'}>
+                                                    {exam.status === 'published' ? 'প্রকাশিত' : exam.status === 'completed' ? 'সম্পন্ন' : 'ড্রাফট'}
+                                                </Badge>
+                                                <Link href={`/admin/programs/${programId}/semesters/${semesterId}/exams/${exam._id.toString()}/edit`}>
+                                                    <Button size="sm" variant="outline">
+                                                        <Edit2 className="h-4 w-4 mr-1" />
+                                                        এডিট
+                                                    </Button>
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 border-2 border-dashed rounded-xl">
+                                    <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                                    <h3 className="text-lg font-medium">কোনো পরীক্ষা নেই</h3>
+                                    <p className="text-muted-foreground text-sm max-w-sm mx-auto mt-1">
+                                        এখনো এই সেমিস্টারে কোনো পরীক্ষা যুক্ত করা হয়নি
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     </TabsContent>
                 </Tabs>
             </div>
