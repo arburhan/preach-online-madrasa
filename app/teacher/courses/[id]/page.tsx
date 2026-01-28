@@ -125,13 +125,7 @@ export default async function EditCoursePage({
                                 কোর্স সম্পাদনা এবং পরিচালনা করুন
                             </p>
                         </div>
-                        <div className="flex gap-2">
-                            <Link href={`/teacher/courses/${id}/exams/create`}>
-                                <Button variant="outline">
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    পরীক্ষা নিন
-                                </Button>
-                            </Link>
+                        <div>
                             <Link href={`/courses/${serializedCourse.slug}`} target="_blank">
                                 <Button variant="outline">প্রিভিউ</Button>
                             </Link>
@@ -153,12 +147,20 @@ export default async function EditCoursePage({
                                 {serializedLessons.length} টি পাঠ
                             </p>
                         </div>
-                        <Link href={`/teacher/courses/${id}/lessons/new`}>
-                            <Button>
-                                <Plus className="mr-2 h-4 w-4" />
-                                নতুন পাঠ যোগ করুন
-                            </Button>
-                        </Link>
+                        <div className='space-x-4'>
+                            <Link href={`/teacher/courses/${id}/exams/create`}>
+                                <Button variant="outline">
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    পরীক্ষা নিন
+                                </Button>
+                            </Link>
+                            <Link href={`/teacher/courses/${id}/lessons/new`}>
+                                <Button>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    নতুন পাঠ যোগ করুন
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
 
                     <LessonList lessons={serializedLessons} courseId={id} />
@@ -166,19 +168,13 @@ export default async function EditCoursePage({
 
                 {/* Exams Section */}
                 <div className="bg-card p-6 rounded-xl border">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="mb-6">
                         <div>
                             <h2 className="text-2xl font-bold">পরীক্ষাসমূহ</h2>
                             <p className="text-sm text-muted-foreground mt-1">
                                 {serializedExams.length} টি পরীক্ষা
                             </p>
                         </div>
-                        <Link href={`/teacher/courses/${id}/exams/create`}>
-                            <Button>
-                                <Plus className="mr-2 h-4 w-4" />
-                                নতুন পরীক্ষা
-                            </Button>
-                        </Link>
                     </div>
 
                     {serializedExams.length > 0 ? (
