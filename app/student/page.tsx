@@ -161,7 +161,7 @@ export default async function StudentDashboard() {
                                     className="group"
                                 >
                                     <div className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
-                                        <div className="relative h-48 bg-gradient-to-r from-purple-600 to-indigo-700">
+                                        <div className="relative h-48 bg-linear-to-r from-purple-600 to-indigo-700">
                                             {program.thumbnail ? (
                                                 <Image
                                                     src={program.thumbnail}

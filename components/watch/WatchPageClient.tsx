@@ -248,7 +248,7 @@ export default function WatchPageClient({
 
                         {/* Completion Message when all content is finished */}
                         {showCompletionMessage && (
-                            <div className="bg-gradient-to-br from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-xl border border-emerald-500/20 p-8 text-center">
+                            <div className="bg-linear-to-br from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-xl border border-emerald-500/20 p-8 text-center">
                                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-6">
                                     <PartyPopper className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
                                 </div>
