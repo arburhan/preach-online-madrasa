@@ -116,14 +116,33 @@ export async function POST(request: Request) {
             );
         }
 
-        // Calculate order - get the next order number
-        const existingExams = await Exam.find({
-            course: course || undefined,
-            semester: semester || undefined,
-            subject: subject || undefined,
-        }).sort({ order: -1 }).limit(1);
+        // Calculate order - get the next order number from BOTH lessons and exams
+        let nextOrder = 1;
 
-        const nextOrder = existingExams.length > 0 ? existingExams[0].order + 1 : 0;
+        if (course) {
+            // For course exams, count all lessons and exams in the course
+            const Lesson = (await import('@/lib/db/models/Lesson')).default;
+
+            const lastLesson = await Lesson.findOne({ course })
+                .sort({ order: -1 })
+                .select('order');
+
+            const lastExam = await Exam.findOne({ course })
+                .sort({ order: -1 })
+                .select('order');
+
+            const lastLessonOrder = lastLesson?.order || 0;
+            const lastExamOrder = lastExam?.order || 0;
+            nextOrder = Math.max(lastLessonOrder, lastExamOrder) + 1;
+        } else {
+            // For semester/subject exams, just count exams
+            const existingExams = await Exam.find({
+                semester: semester || undefined,
+                subject: subject || undefined,
+            }).sort({ order: -1 }).limit(1);
+
+            nextOrder = existingExams.length > 0 ? existingExams[0].order + 1 : 1;
+        }
 
         const exam = await Exam.create({
             examFor,

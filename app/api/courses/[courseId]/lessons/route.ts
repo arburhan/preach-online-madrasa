@@ -80,12 +80,20 @@ export async function POST(
             );
         }
 
-        // Auto-increment order logic
+        // Auto-increment order logic - count BOTH lessons and exams for proper ordering
+        const Exam = (await import('@/lib/db/models/Exam')).default;
+
         const lastLesson = await Lesson.findOne({ course: courseId })
             .sort({ order: -1 })
             .select('order');
 
-        const newOrder = (lastLesson?.order || 0) + 1;
+        const lastExam = await Exam.findOne({ course: courseId })
+            .sort({ order: -1 })
+            .select('order');
+
+        const lastLessonOrder = lastLesson?.order || 0;
+        const lastExamOrder = lastExam?.order || 0;
+        const newOrder = Math.max(lastLessonOrder, lastExamOrder) + 1;
 
         const lesson = await Lesson.create({
             ...body,
