@@ -2,7 +2,6 @@ import { redirect, notFound } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Program from '@/lib/db/models/LongCourse';
-import '@/lib/db/models/Semester'; // Register for populate
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,7 +14,7 @@ import {
     Calendar,
     Pencil
 } from 'lucide-react';
-import SemesterManager from '@/components/admin/programs/SemesterManager';
+
 
 export default async function ProgramDetailPage({
     params,
@@ -122,25 +121,13 @@ export default async function ProgramDetailPage({
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Semesters Manager */}
-                        <SemesterManager
-                            program={{
-                                ...program,
-                                _id: program._id.toString(),
-                                createdBy: program.createdBy?._id ? { ...program.createdBy, _id: program.createdBy._id.toString() } : program.createdBy,
-                                semesters: program.semesters.map((s: any) => ({
-                                    ...s,
-                                    _id: s._id.toString()
-                                })),
-                                maleInstructors: program.maleInstructors?.map((i: any) => i.toString()) || [],
-                                femaleInstructors: program.femaleInstructors?.map((i: any) => i.toString()) || [],
-                                enrollmentStartDate: program.enrollmentStartDate?.toISOString(),
-                                enrollmentEndDate: program.enrollmentEndDate?.toISOString(),
-                                createdAt: program.createdAt?.toISOString(),
-                                updatedAt: program.updatedAt?.toISOString(),
-                            }}
-                            programId={programId}
-                        />
+                        {/* Program Info */}
+                        <div className="bg-card rounded-xl border p-6">
+                            <h2 className="text-xl font-semibold mb-4">প্রোগ্রাম তথ্য</h2>
+                            <p className="text-muted-foreground">
+                                এই প্রোগ্রামে {program.totalSemesters} টি সেমিস্টার রয়েছে।
+                            </p>
+                        </div>
 
                         {/* Features */}
                         {program.features?.length > 0 && (

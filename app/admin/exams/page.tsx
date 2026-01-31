@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Exam from '@/lib/db/models/Exam';
-import Semester from '@/lib/db/models/Semester';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,14 +30,6 @@ export default async function AdminExamsPage() {
         .populate('createdBy', 'name')
         .sort({ createdAt: -1 })
         .lean();
-
-    // Get semesters for filter
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const semesters: any[] = await Semester.find({ status: 'active' })
-        .select('number titleBn')
-        .sort({ number: 1 })
-        .lean();
-
     // Stats
     const draftExams = exams.filter(e => e.status === 'draft').length;
     const publishedExams = exams.filter(e => e.status === 'published').length;
@@ -155,10 +146,10 @@ export default async function AdminExamsPage() {
                                         </td>
                                         <td className="p-4">
                                             <span className={`px-2 py-1 rounded text-xs ${exam.type === 'mcq'
-                                                    ? 'bg-blue-100 text-blue-700'
-                                                    : exam.type === 'written'
-                                                        ? 'bg-amber-100 text-amber-700'
-                                                        : 'bg-purple-100 text-purple-700'
+                                                ? 'bg-blue-100 text-blue-700'
+                                                : exam.type === 'written'
+                                                    ? 'bg-amber-100 text-amber-700'
+                                                    : 'bg-purple-100 text-purple-700'
                                                 }`}>
                                                 {exam.type === 'mcq' ? 'MCQ' : exam.type === 'written' ? 'লিখিত' : 'মিশ্র'}
                                             </span>
@@ -171,10 +162,10 @@ export default async function AdminExamsPage() {
                                         </td>
                                         <td className="p-4">
                                             <span className={`px-2 py-1 rounded-full text-xs ${exam.status === 'published'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : exam.status === 'completed'
-                                                        ? 'bg-blue-100 text-blue-700'
-                                                        : 'bg-gray-100 text-gray-700'
+                                                ? 'bg-green-100 text-green-700'
+                                                : exam.status === 'completed'
+                                                    ? 'bg-blue-100 text-blue-700'
+                                                    : 'bg-gray-100 text-gray-700'
                                                 }`}>
                                                 {exam.status === 'published' ? 'প্রকাশিত' :
                                                     exam.status === 'completed' ? 'সম্পন্ন' : 'ড্রাফট'}

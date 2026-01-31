@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Program from '@/lib/db/models/LongCourse';
-import '@/lib/db/models/Semester'; // Ensure Semester model is registered for populate
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {

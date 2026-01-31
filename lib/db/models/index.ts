@@ -33,9 +33,7 @@ export type { INote } from './Note';
 export { default as Order, OrderStatus, PaymentMethod } from './Order';
 export type { IOrder } from './Order';
 
-// Semester-based curriculum models
-export { default as Semester, SemesterLevel } from './Semester';
-export type { ISemester } from './Semester';
+// Subject and Exam models
 
 export { default as Subject, SubjectType } from './Subject';
 export type { ISubject } from './Subject';
@@ -46,8 +44,7 @@ export type { IExam, IQuestion } from './Exam';
 export { default as ExamResult, Grade } from './ExamResult';
 export type { IExamResult, IAnswer } from './ExamResult';
 
-export { default as StudentSemester } from './StudentSemester';
-export type { IStudentSemester, ISubjectProgress, ISemesterResult } from './StudentSemester';
+
 
 // Long course program model
 export { default as Program } from './LongCourse';

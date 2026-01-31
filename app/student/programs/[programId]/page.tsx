@@ -3,11 +3,10 @@ import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Student from '@/lib/db/models/Student';
 import LongCourse from '@/lib/db/models/LongCourse';
-import '@/lib/db/models/Semester';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, GraduationCap, Clock, BookOpen } from 'lucide-react';
-import { SemesterCard } from '@/components/programs/SemesterCard';
+import { ArrowLeft, GraduationCap, Clock } from 'lucide-react';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -130,66 +129,13 @@ export default async function StudentProgramPage({ params }: PageProps) {
 
             {/* Semesters List */}
             <div className="container mx-auto px-4 py-8">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <BookOpen className="h-6 w-6" />
-                    সেমিস্টারসমূহ
-                </h2>
-
-                {sortedSemesters.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {sortedSemesters.map((semester: {
-                            _id: { toString: () => string };
-                            number: number;
-                            titleBn: string;
-                            level: string;
-                            descriptionBn?: string;
-                            duration?: number;
-                            status: string;
-                        }, index: number) => {
-                            const semesterId = semester._id.toString();
-                            const isCompleted = completedSemesterIds.has(semesterId);
-
-                            // First semester is always unlocked
-                            // Other semesters require previous semester to be completed
-                            let isLocked = false;
-                            if (index > 0) {
-                                const previousSemesterId = sortedSemesters[index - 1]._id.toString();
-                                isLocked = !completedSemesterIds.has(previousSemesterId);
-                            }
-
-                            // Serialize semester for client component
-                            const serializedSemester = {
-                                _id: semesterId,
-                                number: semester.number,
-                                titleBn: semester.titleBn,
-                                level: semester.level,
-                                descriptionBn: semester.descriptionBn,
-                                duration: semester.duration,
-                                status: semester.status,
-                            };
-
-                            return (
-                                <SemesterCard
-                                    key={semesterId}
-                                    semester={serializedSemester}
-                                    index={index}
-                                    programSlug={program.slug || program._id.toString()}
-                                    isLocked={isLocked}
-                                    isCompleted={isCompleted}
-                                    isAdmin={isAdmin}
-                                />
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <div className="bg-card p-12 rounded-xl border text-center">
-                        <GraduationCap className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold mb-2">কোনো সেমিস্টার নেই</h3>
-                        <p className="text-muted-foreground">
-                            এই প্রোগ্রামে এখনো কোনো সেমিস্টার যোগ করা হয়নি।
-                        </p>
-                    </div>
-                )}
+                <div className="bg-card p-12 rounded-xl border text-center">
+                    <GraduationCap className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">প্রোগ্রাম বিবরণ</h3>
+                    <p className="text-muted-foreground">
+                        এই প্রোগ্রামে {program.totalSemesters} টি সেমিস্টার রয়েছে।
+                    </p>
+                </div>
             </div>
         </div>
     );
