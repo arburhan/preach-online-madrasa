@@ -89,8 +89,16 @@ export default async function WatchCourseResumeEntry({ params }: PageProps) {
     const allLessonsCompleted = lessonIds.length > 0 && completedProgress.length >= lessonIds.length;
     const allExamsPassed = examIds.length === 0 || passedExams.length >= examIds.length;
 
-    if (allLessonsCompleted && allExamsPassed) {
-        // All content done, redirect to certificate
+    // Check if course is marked as complete by admin AND all content is completed
+    // Only redirect to certificate if:
+    // 1. Admin/teacher has marked course as completed (course.isCompleted)
+    // 2. All lessons are completed
+    // 3. All exams are passed
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const courseIsMarkedComplete = (course as any).isCompleted === true;
+
+    if (courseIsMarkedComplete && allLessonsCompleted && allExamsPassed) {
+        // All content done and course marked complete, redirect to certificate
         redirect(`/student/watch/${paramCourseId}/certificate-${courseId}`);
     }
 
