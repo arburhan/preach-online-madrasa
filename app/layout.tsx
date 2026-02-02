@@ -20,7 +20,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Online Islamic Academy - ইসলামিক শিক্ষা প্ল্যাটফর্ম",
+  title: "Islamic Online Academy - ইসলামিক শিক্ষা প্ল্যাটফর্ম",
   description: "বাংলাদেশের সম্পূর্ণ অনলাইন মাদ্রাসা প্ল্যাটফর্ম। কুরআন, হাদিস এবং ইসলামিক শিক্ষা অনলাইনে শিখুন।",
 };
 
