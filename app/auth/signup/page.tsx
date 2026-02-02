@@ -79,7 +79,7 @@ export default function StudentSignUpPage() {
                             <BookOpen className="h-9 w-9" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold">Online Islamic Academy</h1>
+                            <h1 className="text-2xl font-bold">Islamic Online Academy</h1>
                             <p className="text-sm text-muted-foreground">শিক্ষার্থী নিবন্ধন</p>
                         </div>
                     </Link>
