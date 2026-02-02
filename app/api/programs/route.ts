@@ -76,6 +76,7 @@ export async function POST(request: Request) {
             status = 'draft',
             isPopular,
             isFeatured,
+            contentMode = 'direct', // Add contentMode
         } = body;
 
         // Validation
@@ -119,6 +120,7 @@ export async function POST(request: Request) {
             status,
             isPopular: isPopular || false,
             isFeatured: isFeatured || false,
+            contentMode, // Save contentMode
             createdBy: session.user.id,
         });
 

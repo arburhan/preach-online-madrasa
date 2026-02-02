@@ -24,6 +24,7 @@ export default function CreateProgramPage() {
         descriptionBn: '',
         descriptionEn: '',
         thumbnail: '',
+        contentMode: 'direct' as 'lesson-based' | 'direct',
         durationMonths: '24',
         totalSemesters: '8',
         price: '0',
@@ -144,6 +145,7 @@ export default function CreateProgramPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
+                    contentMode: formData.contentMode,
                     durationMonths: parseInt(formData.durationMonths),
                     totalSemesters: parseInt(formData.totalSemesters),
                     price: parseInt(formData.price),
@@ -279,6 +281,59 @@ export default function CreateProgramPage() {
                                 placeholder="প্রোগ্রামের বিস্তারিত বিবরণ লিখুন..."
                             />
                         </div>
+
+                        {/* Content Mode Selection */}
+                        <div className="space-y-3">
+                            <label className="block text-sm font-medium">কন্টেন্ট মোড *</label>
+                            <p className="text-xs text-muted-foreground">
+                                প্রোগ্রামে কিভাবে কন্টেন্ট সংগঠিত হবে তা নির্বাচন করুন
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label
+                                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.contentMode === 'lesson-based'
+                                            ? 'border-primary bg-primary/5'
+                                            : 'border-input hover:border-primary/50'
+                                        }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="contentMode"
+                                        value="lesson-based"
+                                        checked={formData.contentMode === 'lesson-based'}
+                                        onChange={handleChange}
+                                        className="mt-1"
+                                    />
+                                    <div>
+                                        <span className="font-medium">লেসন ভিত্তিক</span>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            প্রতিটি সেমিস্টারে আলাদা আলাদা লেসন ও পরীক্ষা যোগ করা যাবে। শিক্ষার্থীরা ক্রমানুসারে শিখবে।
+                                        </p>
+                                    </div>
+                                </label>
+                                <label
+                                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.contentMode === 'direct'
+                                            ? 'border-primary bg-primary/5'
+                                            : 'border-input hover:border-primary/50'
+                                        }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="contentMode"
+                                        value="direct"
+                                        checked={formData.contentMode === 'direct'}
+                                        onChange={handleChange}
+                                        className="mt-1"
+                                    />
+                                    <div>
+                                        <span className="font-medium">সরাসরি কন্টেন্ট</span>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            সেমিস্টারে সরাসরি ভিডিও ও পরীক্ষা আপলোড করা হবে। লেসনের প্রয়োজন নেই।
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>

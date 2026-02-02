@@ -50,6 +50,10 @@ export type { IExamResult, IAnswer } from './ExamResult';
 export { default as Program } from './LongCourse';
 export type { IProgram } from './LongCourse';
 
+// Program Semester model (for semester-based content in long courses)
+export { default as ProgramSemester } from './ProgramSemester';
+export type { IProgramSemester } from './ProgramSemester';
+
 // System Settings
 export { default as SystemSetting } from './SystemSetting';
 export type { ISystemSetting } from './SystemSetting';

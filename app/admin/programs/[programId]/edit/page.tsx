@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, Plus, X, Upload } from 'lucide-react';
@@ -47,7 +47,9 @@ interface ProgramData {
 export default function EditProgramPage() {
     const router = useRouter();
     const params = useParams();
+    const pathname = usePathname();
     const programId = params.programId as string;
+    const basePath = pathname?.startsWith('/teacher') ? '/teacher' : '/admin';
 
     const [formData, setFormData] = useState<ProgramData | null>(null);
     const [features, setFeatures] = useState<string[]>([]);
@@ -211,7 +213,7 @@ export default function EditProgramPage() {
             }
 
             toast.success('প্রোগ্রাম আপডেট হয়েছে!');
-            router.push(`/admin/programs/${programId}`);
+            router.push(`${basePath}/programs/${programId}`);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'সমস্যা হয়েছে';
             toast.error(errorMessage);
@@ -242,7 +244,7 @@ export default function EditProgramPage() {
             <div className="border-b bg-card">
                 <div className="container mx-auto px-4 py-6">
                     <Link
-                        href={`/admin/programs/${programId}`}
+                        href={`${basePath}/programs/${programId}`}
                         className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -520,7 +522,7 @@ export default function EditProgramPage() {
                                 'পরিবর্তন সংরক্ষণ করুন'
                             )}
                         </Button>
-                        <Link href={`/admin/programs/${programId}`}>
+                        <Link href={`${basePath}/programs/${programId}`}>
                             <Button type="button" variant="outline">বাতিল</Button>
                         </Link>
                     </div>

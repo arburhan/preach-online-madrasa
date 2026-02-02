@@ -29,6 +29,7 @@ export enum ExamFor {
     COURSE = 'course',
     SEMESTER = 'semester',
     SUBJECT = 'subject',
+    PROGRAM_SEMESTER = 'program_semester',  // Long course semester exam
 }
 
 // Exam interface
@@ -36,6 +37,8 @@ export interface IExam extends Document {
     examFor: ExamFor;
     course?: mongoose.Types.ObjectId; // Short Course এর জন্য
     semester?: mongoose.Types.ObjectId; // Long Course/Semester এর জন্য
+    programSemester?: mongoose.Types.ObjectId; // Long Course Program Semester এর জন্য
+    module?: mongoose.Types.ObjectId; // Module reference (for lesson-based programs)
     subject?: mongoose.Types.ObjectId;
     titleBn: string;
     titleEn?: string;
@@ -70,6 +73,14 @@ const ExamSchema = new Schema<IExam>(
         semester: {
             type: Schema.Types.ObjectId,
             ref: 'Semester',
+        },
+        programSemester: {
+            type: Schema.Types.ObjectId,
+            ref: 'ProgramSemester',
+        },
+        module: {
+            type: Schema.Types.ObjectId,
+            ref: 'Module',
         },
         subject: {
             type: Schema.Types.ObjectId,

@@ -10,6 +10,12 @@ export interface ILesson extends Document {
     subject?: mongoose.Types.ObjectId;
     semester?: mongoose.Types.ObjectId;
 
+    // Program semester reference (for long courses)
+    programSemester?: mongoose.Types.ObjectId;
+
+    // Module reference (for lesson-based programs)
+    module?: mongoose.Types.ObjectId;
+
     // Instructor info for gender-based filtering
     instructor?: mongoose.Types.ObjectId;
     instructorGender?: 'male' | 'female';
@@ -67,6 +73,14 @@ const LessonSchema = new Schema<ILesson>(
         semester: {
             type: Schema.Types.ObjectId,
             ref: 'Semester',
+        },
+        programSemester: {
+            type: Schema.Types.ObjectId,
+            ref: 'ProgramSemester',
+        },
+        module: {
+            type: Schema.Types.ObjectId,
+            ref: 'Module',
         },
         instructor: {
             type: Schema.Types.ObjectId,

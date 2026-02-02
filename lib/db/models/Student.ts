@@ -25,8 +25,8 @@ export interface IStudent extends Document {
     // Program (long course) enrollments
     enrolledPrograms?: Array<{
         program: Types.ObjectId;
-        currentSemester?: Types.ObjectId;
-        completedSemesters?: Types.ObjectId[];  // Track completed semesters
+        currentSemesterNumber: number;           // বর্তমানে কোন সেমিস্টারে আছে
+        completedSemesterNumbers: number[];      // কোন কোন সেমিস্টার শেষ করেছে
         enrolledAt: Date;
     }>;
 
@@ -93,13 +93,12 @@ const StudentSchema = new Schema<IStudent>(
                     ref: 'LongCourse',
                     required: true,
                 },
-                currentSemester: {
-                    type: Schema.Types.ObjectId,
-                    ref: 'Semester',
+                currentSemesterNumber: {
+                    type: Number,
+                    default: 1,
                 },
-                completedSemesters: [{
-                    type: Schema.Types.ObjectId,
-                    ref: 'Semester',
+                completedSemesterNumbers: [{
+                    type: Number,
                 }],
                 enrolledAt: {
                     type: Date,

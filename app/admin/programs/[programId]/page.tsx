@@ -2,6 +2,7 @@ import { redirect, notFound } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Program from '@/lib/db/models/LongCourse';
+import ProgramSemester from '@/lib/db/models/ProgramSemester';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +15,7 @@ import {
     Calendar,
     Pencil
 } from 'lucide-react';
+import { SemesterGrid } from '@/components/admin/programs/SemesterGrid';
 
 
 export default async function ProgramDetailPage({
@@ -23,7 +25,7 @@ export default async function ProgramDetailPage({
 }) {
     const session = await auth();
 
-    if (!session?.user || session.user.role !== 'admin') {
+    if (!session?.user) {
         redirect('/unauthorized');
     }
 
@@ -32,13 +34,44 @@ export default async function ProgramDetailPage({
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const program: any = await Program.findById(programId)
-        .populate('semesters', 'number titleBn level status descriptionBn')
         .populate('createdBy', 'name')
+        .populate('maleInstructors', 'email')
+        .populate('femaleInstructors', 'email')
         .lean();
 
     if (!program) {
         notFound();
     }
+
+    // Check if user has access: admin OR assigned instructor
+    const isAdmin = session.user.role === 'admin';
+    // Match by email since session.user.id might be from User model but instructors are from Teacher model
+    const userEmail = session.user.email;
+    const isInstructor =
+        program.maleInstructors?.some((instructor: { email?: string }) => instructor?.email === userEmail) ||
+        program.femaleInstructors?.some((instructor: { email?: string }) => instructor?.email === userEmail);
+
+    if (!isAdmin && !isInstructor) {
+        redirect('/unauthorized');
+    }
+
+    // Fetch semesters for this program
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const semesters: any[] = await ProgramSemester.find({ program: programId })
+        .sort({ semesterNumber: 1 })
+        .lean();
+
+    // Serialize semesters for client component
+    const serializedSemesters = semesters.map((s) => ({
+        _id: s._id.toString(),
+        semesterNumber: s.semesterNumber,
+        titleBn: s.titleBn,
+        status: s.status,
+        isCompleted: s.isCompleted,
+        totalLessons: s.totalLessons || 0,
+        totalExams: s.totalExams || 0,
+        contentMode: s.contentMode || 'direct',
+    }));
 
     return (
         <div className="min-h-screen bg-background">
@@ -46,7 +79,7 @@ export default async function ProgramDetailPage({
             <div className="border-b bg-card">
                 <div className="container mx-auto px-4 py-6">
                     <Link
-                        href="/admin/programs"
+                        href={isAdmin ? '/admin/programs' : '/teacher'}
                         className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -65,7 +98,7 @@ export default async function ProgramDetailPage({
                                 </span>
                             </div>
                         </div>
-                        <Link href={`/admin/programs/${programId}/edit`}>
+                        <Link href={`${isAdmin ? '/admin' : '/teacher'}/programs/${programId}/edit`}>
                             <Button>
                                 <Pencil className="h-4 w-4 mr-2" />
                                 এডিট করুন
@@ -121,13 +154,13 @@ export default async function ProgramDetailPage({
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Program Info */}
-                        <div className="bg-card rounded-xl border p-6">
-                            <h2 className="text-xl font-semibold mb-4">প্রোগ্রাম তথ্য</h2>
-                            <p className="text-muted-foreground">
-                                এই প্রোগ্রামে {program.totalSemesters} টি সেমিস্টার রয়েছে।
-                            </p>
-                        </div>
+                        {/* Semester Grid */}
+                        <SemesterGrid
+                            programId={programId}
+                            totalSemesters={program.totalSemesters}
+                            semesters={serializedSemesters}
+                            basePath={isAdmin ? '/admin' : '/teacher'}
+                        />
 
                         {/* Features */}
                         {program.features?.length > 0 && (

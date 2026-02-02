@@ -10,6 +10,9 @@ export interface IProgram extends Document {
     thumbnail?: string;     // Thumbnail image
     bannerImage?: string;   // Banner image
 
+    // Content Mode
+    contentMode: 'lesson-based' | 'direct'; // লেসন ভিত্তিক বা সরাসরি কন্টেন্ট
+
     // Duration
     durationMonths: number; // মোট মেয়াদ (মাস)
     totalSemesters: number; // মোট সেমিস্টার সংখ্যা
@@ -80,6 +83,12 @@ const ProgramSchema = new Schema<IProgram>(
         thumbnail: String,
         bannerImage: String,
 
+        contentMode: {
+            type: String,
+            enum: ['lesson-based', 'direct'],
+            default: 'direct', // সরাসরি কন্টেন্ট ডিফল্ট
+        },
+
         durationMonths: {
             type: Number,
             required: true,
@@ -93,7 +102,7 @@ const ProgramSchema = new Schema<IProgram>(
 
         semesters: [{
             type: Schema.Types.ObjectId,
-            ref: 'Semester',
+            ref: 'ProgramSemester',
         }],
 
         price: {
