@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Bengali, Inter } from "next/font/google";
 import "./globals.css";
+import AuthProvider from "@/components/providers/AuthProvider";
+import ToastProvider from "@/components/providers/ToastProvider";
+import Navbar from "@/components/layout/Navbar";
 
 const notoSansBengali = Noto_Sans_Bengali({
   variable: "--font-bengali",
@@ -17,7 +20,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Preach Online Madrasa - ইসলামিক শিক্ষা প্ল্যাটফর্ম",
+  title: "Online Islamic Academy - ইসলামিক শিক্ষা প্ল্যাটফর্ম",
   description: "বাংলাদেশের সম্পূর্ণ অনলাইন মাদ্রাসা প্ল্যাটফর্ম। কুরআন, হাদিস এবং ইসলামিক শিক্ষা অনলাইনে শিখুন।",
 };
 
@@ -31,7 +34,11 @@ export default function RootLayout({
       <body
         className={`${notoSansBengali.variable} ${inter.variable} font-bengali antialiased`}
       >
-        {children}
+        <AuthProvider>
+          <Navbar />
+          {children}
+          <ToastProvider />
+        </AuthProvider>
       </body>
     </html>
   );

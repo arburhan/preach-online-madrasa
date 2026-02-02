@@ -2,15 +2,26 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, X, User, LogOut } from "lucide-react";
+import { BookOpen, Menu, X, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { data: session, status } = useSession();
 
-    // This will be replaced with actual session check later
-    const isLoggedIn = false;
-    const userRole = null; // 'student' | 'teacher' | 'admin'
+    const isLoggedIn = status === "authenticated";
+    const user = session?.user;
+    const userRole = user?.role || 'student';
 
     const navLinks = [
         { href: "/", label: "হোম" },
@@ -20,6 +31,16 @@ export default function Navbar() {
         { href: "/contact", label: "যোগাযোগ" },
     ];
 
+    const getDashboardLink = () => {
+        if (userRole === 'admin') return '/admin';
+        if (userRole === 'teacher') return '/teacher';
+        return '/student';
+    };
+
+    const handleSignOut = async () => {
+        await signOut({ callbackUrl: '/' });
+    };
+
     return (
         <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -28,7 +49,7 @@ export default function Navbar() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                         <BookOpen className="h-6 w-6" />
                     </div>
-                    <span className="text-xl font-bold text-primary">প্রিচ অনলাইন মাদ্রাসা</span>
+                    <span className="text-xl font-bold text-primary">অনলাইন ইসলামিক একাডেমি</span>
                 </Link>
 
                 {/* Desktop Navigation */}
@@ -44,20 +65,57 @@ export default function Navbar() {
                     ))}
                 </div>
 
-                {/* Auth Buttons - Desktop */}
+                {/* Auth Buttons / User Menu - Desktop */}
                 <div className="hidden items-center gap-3 md:flex">
                     {isLoggedIn ? (
                         <>
-                            <Link href={`/${userRole}/dashboard`}>
+                            <Link href={getDashboardLink()}>
                                 <Button variant="ghost" size="sm" className="gap-2">
-                                    <User className="h-4 w-4" />
+                                    <LayoutDashboard className="h-4 w-4" />
                                     ড্যাশবোর্ড
                                 </Button>
                             </Link>
-                            <Button variant="outline" size="sm" className="gap-2">
-                                <LogOut className="h-4 w-4" />
-                                লগআউট
-                            </Button>
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                                        <Avatar className="h-9 w-9">
+                                            <AvatarImage src={user?.image || ''} alt={user?.name || ''} />
+                                            <AvatarFallback>
+                                                {user?.name?.charAt(0).toUpperCase() || 'U'}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56">
+                                    <DropdownMenuLabel>
+                                        <div className="flex flex-col space-y-1">
+                                            <p className="text-sm font-medium leading-none">{user?.name}</p>
+                                            <p className="text-xs leading-none text-muted-foreground">
+                                                {user?.email}
+                                            </p>
+                                        </div>
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    {user?.role !== 'admin' && <DropdownMenuItem asChild>
+                                        <Link href="/student/profile" className="cursor-pointer">
+                                            <UserCircle className="mr-2 h-4 w-4" />
+                                            প্রোফাইল
+                                        </Link>
+                                    </DropdownMenuItem>}
+                                    <DropdownMenuItem asChild>
+                                        <Link href={getDashboardLink()} className="cursor-pointer">
+                                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                                            ড্যাশবোর্ড
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        লগআউট
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </>
                     ) : (
                         <>
@@ -105,13 +163,23 @@ export default function Navbar() {
                         <div className="flex flex-col gap-2 border-t border-border pt-4">
                             {isLoggedIn ? (
                                 <>
-                                    <Link href={`/${userRole}/dashboard`}>
+                                    <Link href="/student/profile">
                                         <Button variant="ghost" className="w-full justify-start gap-2">
-                                            <User className="h-4 w-4" />
+                                            <UserCircle className="h-4 w-4" />
+                                            প্রোফাইল
+                                        </Button>
+                                    </Link>
+                                    <Link href={getDashboardLink()}>
+                                        <Button variant="ghost" className="w-full justify-start gap-2">
+                                            <LayoutDashboard className="h-4 w-4" />
                                             ড্যাশবোর্ড
                                         </Button>
                                     </Link>
-                                    <Button variant="outline" className="w-full justify-start gap-2">
+                                    <Button
+                                        variant="outline"
+                                        className="w-full justify-start gap-2"
+                                        onClick={handleSignOut}
+                                    >
                                         <LogOut className="h-4 w-4" />
                                         লগআউট
                                     </Button>
