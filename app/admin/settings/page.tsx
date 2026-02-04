@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Loader2, Lock, Unlock, Plus, Pencil, Trash2, X, Check, FolderOpen } from 'lucide-react';
+import { Loader2, Lock, Unlock, Plus, Pencil, Trash2, X, Check, FolderOpen, ChevronDown } from 'lucide-react';
 
 interface Category {
     _id: string;
@@ -30,6 +30,7 @@ export default function AdminSettingsPage() {
     const [editData, setEditData] = useState({ nameBn: '', nameEn: '', description: '' });
     const [savingEdit, setSavingEdit] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 
     useEffect(() => {
         fetchSettings();
@@ -223,157 +224,172 @@ export default function AdminSettingsPage() {
                 </div>
             </div>
 
-            {/* Blog Categories Section */}
-            <div className="bg-card border rounded-lg p-6 max-w-2xl shadow-sm">
-                <div className="flex items-center justify-between mb-4">
+            {/* Blog Categories Section - Accordion */}
+            <div className="bg-card border rounded-lg max-w-2xl shadow-sm overflow-hidden">
+                {/* Accordion Header */}
+                <button
+                    onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                    className="w-full flex items-center justify-between p-6 hover:bg-muted/50 transition-colors"
+                >
                     <div className="flex items-center gap-2">
                         <FolderOpen className="h-5 w-5 text-primary" />
                         <h2 className="text-lg font-semibold">ব্লগ ক্যাটাগরি</h2>
+                        <span className="text-sm text-muted-foreground ml-2">({categories.length}টি)</span>
                     </div>
-                    <Button
-                        size="sm"
-                        onClick={() => setShowAddCategory(!showAddCategory)}
-                        variant={showAddCategory ? "outline" : "default"}
-                    >
-                        {showAddCategory ? (
-                            <><X className="h-4 w-4 mr-1" /> বাতিল</>
-                        ) : (
-                            <><Plus className="h-4 w-4 mr-1" /> নতুন ক্যাটাগরি</>
-                        )}
-                    </Button>
-                </div>
+                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${isCategoriesOpen ? 'rotate-180' : ''}`} />
+                </button>
 
-                {/* Add Category Form */}
-                {showAddCategory && (
-                    <div className="mb-4 p-4 bg-muted/50 rounded-lg space-y-3">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label className="text-sm font-medium mb-1 block">বাংলা নাম *</label>
-                                <Input
-                                    placeholder="যেমন: তাফসীর"
-                                    value={newCategory.nameBn}
-                                    onChange={(e) => setNewCategory({ ...newCategory, nameBn: e.target.value })}
-                                />
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium mb-1 block">ইংরেজি নাম (Slug) *</label>
-                                <Input
-                                    placeholder="e.g., tafsir"
-                                    value={newCategory.nameEn}
-                                    onChange={(e) => setNewCategory({ ...newCategory, nameEn: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium mb-1 block">বিবরণ (ঐচ্ছিক)</label>
-                            <Input
-                                placeholder="ক্যাটাগরির সংক্ষিপ্ত বিবরণ"
-                                value={newCategory.description}
-                                onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                            />
-                        </div>
-                        <Button onClick={handleAddCategory} disabled={addingCategory} className="w-full">
-                            {addingCategory ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                            ক্যাটাগরি যোগ করুন
-                        </Button>
-                    </div>
-                )}
-
-                {/* Categories List */}
-                {loadingCategories ? (
-                    <div className="flex justify-center py-4">
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                    </div>
-                ) : categories.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                        <FolderOpen className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                        <p>কোনো ক্যাটাগরি নেই</p>
-                        <p className="text-sm">উপরের বাটনে ক্লিক করে নতুন ক্যাটাগরি যোগ করুন</p>
-                    </div>
-                ) : (
-                    <div className="space-y-2">
-                        {categories.map((category) => (
-                            <div
-                                key={category._id}
-                                className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border"
+                {/* Accordion Content */}
+                <div className={`transition-all duration-300 ease-in-out ${isCategoriesOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                    <div className="p-6 pt-0 space-y-4">
+                        {/* Add Category Button */}
+                        <div className="flex justify-end">
+                            <Button
+                                size="sm"
+                                onClick={() => setShowAddCategory(!showAddCategory)}
+                                variant={showAddCategory ? "outline" : "default"}
                             >
-                                {editingId === category._id ? (
-                                    <div className="flex-1 flex flex-col gap-2 mr-2">
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <Input
-                                                placeholder="বাংলা নাম"
-                                                value={editData.nameBn}
-                                                onChange={(e) => setEditData({ ...editData, nameBn: e.target.value })}
-                                            />
-                                            <Input
-                                                placeholder="ইংরেজি নাম"
-                                                value={editData.nameEn}
-                                                onChange={(e) => setEditData({ ...editData, nameEn: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
-                                            />
-                                        </div>
+                                {showAddCategory ? (
+                                    <><X className="h-4 w-4 mr-1" /> বাতিল</>
+                                ) : (
+                                    <><Plus className="h-4 w-4 mr-1" /> নতুন ক্যাটাগরি</>
+                                )}
+                            </Button>
+                        </div>
+
+                        {/* Add Category Form */}
+                        {showAddCategory && (
+                            <div className="mb-4 p-4 bg-muted/50 rounded-lg space-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-sm font-medium mb-1 block">বাংলা নাম *</label>
                                         <Input
-                                            placeholder="বিবরণ"
-                                            value={editData.description}
-                                            onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                                            placeholder="যেমন: তাফসীর"
+                                            value={newCategory.nameBn}
+                                            onChange={(e) => setNewCategory({ ...newCategory, nameBn: e.target.value })}
                                         />
                                     </div>
-                                ) : (
                                     <div>
-                                        <p className="font-medium">{category.nameBn}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            Slug: {category.nameEn}
-                                            {category.description && ` • ${category.description}`}
-                                        </p>
+                                        <label className="text-sm font-medium mb-1 block">ইংরেজি নাম (Slug) *</label>
+                                        <Input
+                                            placeholder="e.g., tafsir"
+                                            value={newCategory.nameEn}
+                                            onChange={(e) => setNewCategory({ ...newCategory, nameEn: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                                        />
                                     </div>
-                                )}
-
-                                <div className="flex items-center gap-1">
-                                    {editingId === category._id ? (
-                                        <>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleSaveEdit(category._id)}
-                                                disabled={savingEdit}
-                                            >
-                                                {savingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 text-green-600" />}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={cancelEdit}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => startEdit(category)}
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleDelete(category._id)}
-                                                disabled={deletingId === category._id}
-                                            >
-                                                {deletingId === category._id ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                                )}
-                                            </Button>
-                                        </>
-                                    )}
                                 </div>
+                                <div>
+                                    <label className="text-sm font-medium mb-1 block">বিবরণ (ঐচ্ছিক)</label>
+                                    <Input
+                                        placeholder="ক্যাটাগরির সংক্ষিপ্ত বিবরণ"
+                                        value={newCategory.description}
+                                        onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                                    />
+                                </div>
+                                <Button onClick={handleAddCategory} disabled={addingCategory} className="w-full">
+                                    {addingCategory ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                                    ক্যাটাগরি যোগ করুন
+                                </Button>
                             </div>
-                        ))}
+                        )}
+
+                        {/* Categories List */}
+                        {loadingCategories ? (
+                            <div className="flex justify-center py-4">
+                                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : categories.length === 0 ? (
+                            <div className="text-center py-8 text-muted-foreground">
+                                <FolderOpen className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                                <p>কোনো ক্যাটাগরি নেই</p>
+                                <p className="text-sm">উপরের বাটনে ক্লিক করে নতুন ক্যাটাগরি যোগ করুন</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {categories.map((category) => (
+                                    <div
+                                        key={category._id}
+                                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border"
+                                    >
+                                        {editingId === category._id ? (
+                                            <div className="flex-1 flex flex-col gap-2 mr-2">
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <Input
+                                                        placeholder="বাংলা নাম"
+                                                        value={editData.nameBn}
+                                                        onChange={(e) => setEditData({ ...editData, nameBn: e.target.value })}
+                                                    />
+                                                    <Input
+                                                        placeholder="ইংরেজি নাম"
+                                                        value={editData.nameEn}
+                                                        onChange={(e) => setEditData({ ...editData, nameEn: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                                                    />
+                                                </div>
+                                                <Input
+                                                    placeholder="বিবরণ"
+                                                    value={editData.description}
+                                                    onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <p className="font-medium">{category.nameBn}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Slug: {category.nameEn}
+                                                    {category.description && ` • ${category.description}`}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center gap-1">
+                                            {editingId === category._id ? (
+                                                <>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleSaveEdit(category._id)}
+                                                        disabled={savingEdit}
+                                                    >
+                                                        {savingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 text-green-600" />}
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={cancelEdit}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => startEdit(category)}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleDelete(category._id)}
+                                                        disabled={deletingId === category._id}
+                                                    >
+                                                        {deletingId === category._id ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                                        )}
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );
