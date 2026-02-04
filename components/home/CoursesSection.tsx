@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, GraduationCap, Clock, Tag, Users, ArrowRight, Star } from 'lucide-react';
 import Link from 'next/link';
 import { ObjectId } from 'mongoose';
+import Image from 'next/image';
 
 export default async function CoursesSection() {
     await connectDB();
@@ -94,10 +95,11 @@ export default async function CoursesSection() {
                                     {/* Thumbnail */}
                                     <div className="h-40 bg-linear-to-br from-purple-500 to-indigo-600 relative">
                                         {program.thumbnail ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img
+                                            <Image
                                                 src={program.thumbnail}
                                                 alt={program.titleBn}
+                                                width={500}
+                                                height={500}
                                                 className="w-full h-full object-cover"
                                             />
                                         ) : (

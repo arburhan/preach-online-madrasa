@@ -9,6 +9,7 @@ import { ArrowLeft, Loader2, Save, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { DirectR2ImageUpload } from '@/components/upload/DirectR2ImageUpload';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 
 const LexicalEditor = dynamic(() => import('@/components/editor/LexicalEditor'), {
     ssr: false,
@@ -147,8 +148,10 @@ export default function NewBlogPostPage() {
                         <h2 className="text-lg font-semibold mb-4">থাম্বনেইল</h2>
                         {thumbnailUrl ? (
                             <div className="space-y-3">
-                                <img
+                                <Image
                                     src={thumbnailUrl}
+                                    width={500}
+                                    height={500}
                                     alt="Thumbnail"
                                     className="w-full max-w-md h-48 object-cover rounded-lg"
                                 />

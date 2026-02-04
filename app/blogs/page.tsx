@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Loader2, Calendar, Eye, ArrowRight, Tag } from 'lucide-react';
+import Image from 'next/image';
 
 interface BlogPost {
     _id: string;
@@ -106,9 +107,11 @@ export default function BlogsPage() {
                                 >
                                     {post.thumbnail && (
                                         <div className="relative aspect-video overflow-hidden">
-                                            <img
+                                            <Image
                                                 src={post.thumbnail}
                                                 alt={post.title}
+                                                width={500}
+                                                height={500}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             />
                                             <div className="absolute top-3 left-3">
@@ -170,9 +173,11 @@ export default function BlogsPage() {
                                     >
                                         {post.thumbnail && (
                                             <div className="relative aspect-video overflow-hidden">
-                                                <img
+                                                <Image
                                                     src={post.thumbnail}
                                                     alt={post.title}
+                                                    width={500}
+                                                    height={500}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                 />
                                             </div>

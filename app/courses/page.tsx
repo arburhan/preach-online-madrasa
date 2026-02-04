@@ -8,6 +8,7 @@ import CourseCard from '@/components/courses/CourseCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ObjectId } from 'mongoose';
+import Image from 'next/image';
 
 export default async function PublicCoursesPage() {
     await connectDB();
@@ -90,10 +91,11 @@ export default async function PublicCoursesPage() {
                                     {/* Thumbnail */}
                                     <div className="h-40 bg-linear-to-br from-purple-500 to-indigo-600 relative">
                                         {program.thumbnail ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img
+                                            <Image
                                                 src={program.thumbnail}
                                                 alt={program.titleBn}
+                                                width={500}
+                                                height={500}
                                                 className="w-full h-full object-cover"
                                             />
                                         ) : (

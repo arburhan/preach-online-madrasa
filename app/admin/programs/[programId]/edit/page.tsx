@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, Plus, X, Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 interface Semester {
     _id: string;
@@ -262,9 +263,10 @@ export default function EditProgramPage() {
                         <div className="flex items-start gap-6">
                             {formData.thumbnail ? (
                                 <div className="relative">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
+                                    <Image
                                         src={formData.thumbnail}
+                                        width={100}
+                                        height={100}
                                         alt="Thumbnail"
                                         className="w-48 h-32 object-cover rounded-lg"
                                     />
