@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthProvider from "@/components/providers/AuthProvider";
 import ToastProvider from "@/components/providers/ToastProvider";
 import Navbar from "@/components/layout/Navbar";
+import TawkChat from "@/components/TawkChat";
 
 const notoSansBengali = Noto_Sans_Bengali({
   variable: "--font-bengali",
@@ -38,6 +39,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <ToastProvider />
+          <TawkChat />
         </AuthProvider>
       </body>
     </html>
