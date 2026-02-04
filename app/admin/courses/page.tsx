@@ -132,11 +132,10 @@ export default async function AdminCoursesPage() {
                         >
                             {/* Thumbnail */}
                             {course.thumbnail ? (
-                                <div className="relative h-48 w-full bg-muted">
+                                <div className="relative h-48  bg-muted">
                                     <Image
                                         src={course.thumbnail}
-                                        width={100}
-                                        height={100}
+                                        fill={true}
                                         alt={course.titleBn}
                                         className="object-cover"
                                     />
