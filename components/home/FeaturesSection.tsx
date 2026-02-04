@@ -42,7 +42,7 @@ export default function FeaturesSection() {
                         আমাদের বিশেষত্ব
                     </h2>
                     <p className="text-lg text-muted-foreground">
-                        কেন আপনি আমাদের প্লাটফর্ম বেছে নেবেন
+                        কেন আপনি IOA বেছে নেবেন
                     </p>
                 </div>
 

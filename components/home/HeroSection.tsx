@@ -6,12 +6,11 @@ export default function HeroSection() {
         <section className="relative overflow-hidden bg-linear-to-br from-primary/10 via-background to-accent/10">
             <div className="container mx-auto px-4 py-20 md:py-32">
                 <div className="max-w-4xl mx-auto text-center">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-linear-to-r from-primary to-accent py-5">
-                        অনলাইন ইসলামিক শিক্ষা প্ল্যাটফর্ম
+                    <h1 className="text-3xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-linear-to-r from-primary to-accent py-5">
+                        অনলাইনে ধর্মীয় শিক্ষা অর্জন করে আলেম/আলেমা হবার পথে অগ্রসর হওয়া কি সম্ভব?
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground mb-8">
-                        ঘরে বসে কুরআন, হাদিস এবং ইসলামিক জ্ঞান অর্জন করুন। বিশেষজ্ঞ
-                        উস্তাযদের কাছ থেকে মানসম্পন্ন শিক্ষা লাভ করুন।
+                        আলহামদুলিল্লাহ  ! আমাদের পরিচালিত বাংলাদেশ নৈশ মাদ্রাসা শিক্ষাবোর্ডে আমাদের অধীনে প্রতিবছর শতাধিক শিক্ষার্থী আলেম হয়ে দেশ-বিদেশে দ্বীনি ও দুনিয়াবি উৎকর্ষতা অর্জন করে প্রতিষ্ঠানের জন্য সুনাম বয়ে এনেছে
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/courses">
