@@ -27,6 +27,7 @@ export default function Navbar() {
         { href: "/", label: "হোম" },
         { href: "/courses", label: "কোর্সসমূহ" },
         { href: "/teachers", label: "উস্তাযগণ" },
+        { href: "/blogs", label: "ব্লগ" },
         { href: "/about", label: "আমাদের সম্পর্কে" },
         { href: "/contact", label: "যোগাযোগ" },
     ];

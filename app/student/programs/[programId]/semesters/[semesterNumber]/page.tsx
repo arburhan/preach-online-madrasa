@@ -225,7 +225,7 @@ export default async function StudentSemesterPage({ params }: PageProps) {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-8">
+            <div className="bg-linear-to-r from-purple-600 to-indigo-700 text-white py-8">
                 <div className="container mx-auto px-4">
                     <Link
                         href={`/student/programs/${programId}`}

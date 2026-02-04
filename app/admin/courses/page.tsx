@@ -135,8 +135,9 @@ export default async function AdminCoursesPage() {
                                 <div className="relative h-48 w-full bg-muted">
                                     <Image
                                         src={course.thumbnail}
+                                        width={100}
+                                        height={100}
                                         alt={course.titleBn}
-                                        fill
                                         className="object-cover"
                                     />
                                 </div>

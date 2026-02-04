@@ -48,7 +48,6 @@ export default function CreateProgramPage() {
     const [loadingData, setLoadingData] = useState(true);
     const [uploading, setUploading] = useState(false);
 
-    // Load teachers only
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -291,8 +290,8 @@ export default function CreateProgramPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label
                                     className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.contentMode === 'lesson-based'
-                                            ? 'border-primary bg-primary/5'
-                                            : 'border-input hover:border-primary/50'
+                                        ? 'border-primary bg-primary/5'
+                                        : 'border-input hover:border-primary/50'
                                         }`}
                                 >
                                     <input
@@ -312,8 +311,8 @@ export default function CreateProgramPage() {
                                 </label>
                                 <label
                                     className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.contentMode === 'direct'
-                                            ? 'border-primary bg-primary/5'
-                                            : 'border-input hover:border-primary/50'
+                                        ? 'border-primary bg-primary/5'
+                                        : 'border-input hover:border-primary/50'
                                         }`}
                                 >
                                     <input
