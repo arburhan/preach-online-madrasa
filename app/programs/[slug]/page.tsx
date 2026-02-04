@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import connectDB from '@/lib/db/mongodb';
 import Program from '@/lib/db/models/LongCourse';
 import '@/lib/db/models/Teacher';
+import '@/lib/db/models/ProgramSemester';
 import Link from 'next/link';
 import Image from 'next/image';
 import { EnrollButton } from '@/components/programs/EnrollButton';
@@ -104,25 +105,6 @@ export default async function ProgramDetailPage({
                     </Link>
 
                     <div className="flex flex-col md:flex-row gap-8">
-                        {/* Thumbnail */}
-                        <div className="w-full md:w-1/3">
-                            <div className="aspect-video rounded-xl overflow-hidden bg-purple-500/30 relative" suppressHydrationWarning>
-                                {program.thumbnail ? (
-                                    <Image
-                                        src={program.thumbnail}
-                                        alt={program.titleBn}
-                                        fill
-                                        className="object-cover"
-                                        unoptimized
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <GraduationCap className="h-20 w-20 text-white/30" />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
                         {/* Info */}
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -165,6 +147,26 @@ export default async function ProgramDetailPage({
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-8">
+                        {/* Description */}
+                        {program.descriptionBn && (
+                            <div className="bg-card rounded-xl border p-6">
+                                <h2 className="text-xl font-semibold mb-4">প্রোগ্রাম বিবরণ</h2>
+                                <div className="prose prose-sm max-w-none dark:prose-invert">
+                                    {/* Check if it's Lexical JSON or plain text */}
+                                    {program.descriptionBn.startsWith('{') ? (
+                                        <div dangerouslySetInnerHTML={{
+                                            __html: JSON.parse(program.descriptionBn)?.root?.children
+                                                ?.map((node: { children?: { text?: string }[] }) =>
+                                                    node.children?.map((child: { text?: string }) => child.text || '').join('')
+                                                ).join('<br/>') || program.descriptionBn
+                                        }} />
+                                    ) : (
+                                        <p className="text-muted-foreground whitespace-pre-wrap">{program.descriptionBn}</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Features */}
                         {program.features?.length > 0 && (
                             <div className="bg-card rounded-xl border p-6">
@@ -260,9 +262,29 @@ export default async function ProgramDetailPage({
                     </div>
 
                     {/* Sidebar */}
-                    <div className="space-y-6">
+                    <div className="lg:col-span-1">
                         {/* Enrollment Card */}
-                        <div className="bg-card rounded-xl border p-6 sticky top-24">
+                        <div className="bg-card rounded-xl border p-6 sticky top-4 space-y-6">
+                            {/* Thumbnail */}
+                            <div className="w-full">
+                                <div className="aspect-video rounded-xl overflow-hidden bg-purple-500/30 relative" suppressHydrationWarning>
+                                    {program.thumbnail ? (
+                                        <Image
+                                            src={program.thumbnail}
+                                            width={500}
+                                            height={500}
+                                            alt={program.titleBn}
+                                            className="object-cover"
+                                            unoptimized
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <GraduationCap className="h-20 w-20 text-white/30" />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
                             <div className="text-center mb-6">
                                 {program.isFree ? (
                                     <div className="text-3xl font-bold text-green-600 mb-2">বিনামূল্যে</div>
