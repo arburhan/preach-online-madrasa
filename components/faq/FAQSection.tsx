@@ -117,7 +117,7 @@ export default function FAQSection({ limit, showViewAll = false, showHeader = fa
                             >
                                 {/* Decorative gradient */}
                                 {openIndex === index && (
-                                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+                                    <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
                                 )}
 
                                 <button
@@ -127,7 +127,7 @@ export default function FAQSection({ limit, showViewAll = false, showHeader = fa
                                 >
                                     {/* Icon */}
                                     <span className={`
-                                        flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-lg
+                                        shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-lg
                                         transition-all duration-300
                                         ${openIndex === index
                                             ? 'bg-primary text-primary-foreground scale-110'

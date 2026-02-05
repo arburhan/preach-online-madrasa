@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function FAQPage() {
     return (
-        <main className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+        <main className="min-h-screen bg-linear-to-b from-background to-secondary/20">
             {/* Hero Section */}
             <section className="relative overflow-hidden py-16 md:py-20">
                 {/* Islamic Pattern Background */}

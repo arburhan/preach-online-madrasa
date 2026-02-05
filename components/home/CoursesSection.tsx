@@ -139,7 +139,7 @@ export default async function CoursesSection() {
                                         <div className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
                                             <Users className="h-4 w-4" />
                                             <span className="text-blue-600">{program.maleInstructors?.length || 0} পুরুষ</span>
-                                            <span className="text-pink-600">{program.femaleInstructors?.length || 0} মহিলা</span>
+                                            <span className="text-pink-400">{program.femaleInstructors?.length || 0} মহিলা</span>
                                             শিক্ষক
                                         </div>
 
