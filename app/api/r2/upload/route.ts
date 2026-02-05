@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { fileName, fileType } = await request.json();
+        const { fileName, fileType, folder } = await request.json();
 
         if (!fileName || !fileType) {
             return NextResponse.json(
@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
         const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
 
         let key: string;
-        if (fileType.startsWith('image/')) {
+        if (folder) {
+            // Use custom folder path (e.g., images/blogs)
+            key = `${folder}/${timestamp}-${randomString}-${sanitizedFileName}`;
+        } else if (fileType.startsWith('image/')) {
             // Images go to images/course-thumbnails/
             key = `images/course-thumbnails/${timestamp}-${sanitizedFileName}`;
         } else if (fileType.startsWith('video/')) {
