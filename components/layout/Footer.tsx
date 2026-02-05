@@ -12,6 +12,7 @@ import {
     ArrowUp,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 const quickLinks = [
     { name: 'হোম', href: '/' },
@@ -32,9 +33,16 @@ const socialLinks = [
     { name: 'YouTube', icon: Youtube, href: 'https://youtube.com', color: 'hover:text-red-500' },
 ];
 
+// Routes where footer should be hidden (dashboard areas with sidebars)
+const hiddenRoutes = ['/admin'];
+
 export default function Footer() {
     const [showScrollTop, setShowScrollTop] = useState(false);
     const currentYear = new Date().getFullYear();
+    const pathname = usePathname();
+
+    // Hide footer on dashboard routes
+    const shouldHideFooter = hiddenRoutes.some(route => pathname.startsWith(route));
 
     useEffect(() => {
         const handleScroll = () => {
@@ -47,6 +55,11 @@ export default function Footer() {
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    // Don't render footer on dashboard routes
+    if (shouldHideFooter) {
+        return null;
+    }
 
     return (
         <footer className="relative bg-linear-to-br from-primary/10 via-background to-accent/10 border-t">
@@ -153,7 +166,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             <li>
                                 <a
-                                    href="mailto:info@preach.com"
+                                    href="mailto:info@ioa.bd"
                                     className="flex items-start gap-3 text-muted-foreground hover:text-primary transition-colors group"
                                 >
                                     <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors mt-0.5">
@@ -161,7 +174,7 @@ export default function Footer() {
                                     </div>
                                     <div>
                                         <span className="text-xs text-muted-foreground/70">ইমেইল</span>
-                                        <p className="text-sm">info@preach.com</p>
+                                        <p className="text-sm">info@ioa.bd</p>
                                     </div>
                                 </a>
                             </li>

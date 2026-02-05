@@ -84,7 +84,7 @@ export async function sendVerificationEmail(email: string, token: string): Promi
 
     return sendEmail({
         to: email,
-        subject: 'ইমেইল ভেরিফিকেশন - প্রিচ অনলাইন মাদ্রাসা',
+        subject: 'ইমেইল ভেরিফিকেশন -ইসলামিক অনলাইন একাডেমি',
         html,
     });
 }
@@ -143,7 +143,7 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
 
     return sendEmail({
         to: email,
-        subject: 'পাসওয়ার্ড রিসেট - প্রিচ অনলাইন মাদ্রাসা',
+        subject: 'পাসওয়ার্ড রিসেট - ইসলামিক অনলাইন একাডেমি',
         html,
     });
 }
