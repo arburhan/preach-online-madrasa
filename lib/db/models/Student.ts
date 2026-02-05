@@ -11,6 +11,13 @@ export interface IStudent extends Document {
     address?: string;
     bio?: string;
 
+    // Gender change request (for users who want to change gender after setting)
+    genderChangeRequest?: {
+        status: 'pending' | 'approved' | 'rejected';
+        requestedAt?: Date;
+        reason?: string;
+    };
+
     // OAuth
     provider?: 'credentials' | 'google';
     providerId?: string;
@@ -61,6 +68,15 @@ const StudentSchema = new Schema<IStudent>(
         phone: String,
         address: String,
         bio: String,
+
+        genderChangeRequest: {
+            status: {
+                type: String,
+                enum: ['pending', 'approved', 'rejected'],
+            },
+            requestedAt: Date,
+            reason: String,
+        },
 
         provider: {
             type: String,

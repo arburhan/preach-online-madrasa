@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ProfileCheckModal } from '@/components/shared/ProfileCheckModal';
 
 interface EnrollButtonProps {
     programId: string;
@@ -17,6 +18,27 @@ export function EnrollButton({ programId, programSlug, programTitle: _programTit
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [enrolled, setEnrolled] = useState(isEnrolled);
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [missingFields, setMissingFields] = useState<string[]>([]);
+
+    const checkProfileCompleteness = async (): Promise<boolean> => {
+        try {
+            const response = await fetch('/api/user/profile/check');
+            if (response.ok) {
+                const data = await response.json();
+                if (!data.isComplete) {
+                    setMissingFields(data.missingFields);
+                    setShowProfileModal(true);
+                    return false;
+                }
+                return true;
+            }
+            return true; // Proceed if check fails
+        } catch (error) {
+            console.error('Profile check error:', error);
+            return true; // Proceed if check fails
+        }
+    };
 
     const handleEnroll = async () => {
         if (enrolled) {
@@ -33,6 +55,13 @@ export function EnrollButton({ programId, programSlug, programTitle: _programTit
             if (authRes.status === 401) {
                 toast.info('অনুগ্রহ করে লগইন করুন');
                 router.push('/auth/signin?redirect=/programs/' + programId);
+                return;
+            }
+
+            // Check profile completeness before enrolling
+            const isProfileComplete = await checkProfileCompleteness();
+            if (!isProfileComplete) {
+                setLoading(false);
                 return;
             }
 
@@ -57,23 +86,31 @@ export function EnrollButton({ programId, programSlug, programTitle: _programTit
     };
 
     return (
-        <Button
-            className="w-full mb-4"
-            size="lg"
-            onClick={handleEnroll}
-            disabled={loading}
-            variant={enrolled ? "default" : "default"}
-        >
-            {loading ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    অপেক্ষা করুন...
-                </>
-            ) : enrolled ? (
-                'প্রোগ্রামে যান'
-            ) : (
-                'এনরোল করুন'
-            )}
-        </Button>
+        <>
+            <Button
+                className="w-full mb-4"
+                size="lg"
+                onClick={handleEnroll}
+                disabled={loading}
+                variant={enrolled ? "default" : "default"}
+            >
+                {loading ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        অপেক্ষা করুন...
+                    </>
+                ) : enrolled ? (
+                    'প্রোগ্রামে যান'
+                ) : (
+                    'এনরোল করুন'
+                )}
+            </Button>
+
+            <ProfileCheckModal
+                isOpen={showProfileModal}
+                onClose={() => setShowProfileModal(false)}
+                missingFields={missingFields}
+            />
+        </>
     );
 }
