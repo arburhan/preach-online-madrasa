@@ -6,17 +6,16 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function SignInPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
         setLoading(true);
 
         try {
@@ -27,14 +26,21 @@ export default function SignInPage() {
             });
 
             if (result?.error) {
-                setError(result.error);
+                // Check if error is EMAIL_NOT_VERIFIED
+                if (result.error.startsWith('EMAIL_NOT_VERIFIED:') || result.error.includes('ইমেইল এখনো ভেরিফাই হয়নি')) {
+                    // Redirect to verification-pending page with email
+                    router.push(`/auth/verification-pending?email=${encodeURIComponent(email)}`);
+                    return;
+                } else {
+                    // Show toast for all other errors (wrong email/password, user not found, etc.)
+                    toast.error('আপনার ইমেইল অথবা পাসওয়ার্ড ভুল');
+                }
             } else {
                 router.push('/');
                 router.refresh();
             }
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'লগইন করতে সমস্যা হয়েছে';
-            setError(errorMessage);
+        } catch {
+            toast.error('লগইন করতে সমস্যা হয়েছে');
         } finally {
             setLoading(false);
         }
@@ -60,12 +66,6 @@ export default function SignInPage() {
                 {/* Sign In Card */}
                 <div className="rounded-xl border border-border bg-card p-8 shadow-lg">
                     <h2 className="mb-6 text-center text-2xl font-bold">লগইন করুন</h2>
-
-                    {error && (
-                        <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
-                            {error}
-                        </div>
-                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
@@ -96,6 +96,14 @@ export default function SignInPage() {
                                 className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 placeholder="••••••••"
                             />
+                            <div className="mt-2 text-right">
+                                <Link
+                                    href="/auth/forgot-password"
+                                    className="text-sm text-primary hover:underline"
+                                >
+                                    পাসওয়ার্ড ভুলে গেছেন?
+                                </Link>
+                            </div>
                         </div>
 
                         <Button

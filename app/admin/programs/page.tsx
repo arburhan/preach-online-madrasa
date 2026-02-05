@@ -118,8 +118,8 @@ export default async function AdminProgramsPage() {
                                         <Image
                                             src={program.thumbnail}
                                             alt={program.titleBn}
-                                            width={500}
-                                            height={500}
+
+                                            fill={true}
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
