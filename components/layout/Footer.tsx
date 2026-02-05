@@ -64,7 +64,7 @@ export default function Footer() {
                                 <BookOpen className="h-6 w-6 text-primary" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-foreground">প্রীচ</h3>
+                                <h3 className="text-xl font-bold text-foreground">IOA</h3>
                                 <p className="text-xs text-muted-foreground">অনলাইন মাদ্রাসা</p>
                             </div>
                         </Link>
@@ -198,11 +198,11 @@ export default function Footer() {
                 <div className="container mx-auto px-4 py-6">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <p className="text-sm text-muted-foreground text-center md:text-left">
-                            © {currentYear} প্রীচ অনলাইন মাদ্রাসা। সর্বস্বত্ব সংরক্ষিত।
+                            © {currentYear} ইসলামিক অনলাইন একাডেমি। সর্বস্বত্ব সংরক্ষিত।
                         </p>
                         <p className="text-sm text-muted-foreground flex items-center gap-1.5">
                             <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-                            <span>ভালোবাসায় তৈরি বাংলাদেশ থেকে</span>
+                            <span>ভালোবাসায় তৈরি</span>
                         </p>
                     </div>
                 </div>
