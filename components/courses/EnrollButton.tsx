@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ProfileCheckModal } from '@/components/shared/ProfileCheckModal';
 
 interface EnrollButtonProps {
     courseId: string;
@@ -28,6 +29,27 @@ export default function EnrollButton({
     const router = useRouter();
     const { data: session, status } = useSession();
     const [loading, setLoading] = useState(false);
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [missingFields, setMissingFields] = useState<string[]>([]);
+
+    const checkProfileCompleteness = async (): Promise<boolean> => {
+        try {
+            const response = await fetch('/api/user/profile/check');
+            if (response.ok) {
+                const data = await response.json();
+                if (!data.isComplete) {
+                    setMissingFields(data.missingFields);
+                    setShowProfileModal(true);
+                    return false;
+                }
+                return true;
+            }
+            return true; // Proceed if check fails
+        } catch (error) {
+            console.error('Profile check error:', error);
+            return true; // Proceed if check fails
+        }
+    };
 
     const handleEnroll = async () => {
         // Check if user is logged in using session hook (most reliable)
@@ -50,6 +72,13 @@ export default function EnrollButton({
         setLoading(true);
 
         try {
+            // Check profile completeness before enrolling
+            const isProfileComplete = await checkProfileCompleteness();
+            if (!isProfileComplete) {
+                setLoading(false);
+                return;
+            }
+
             const response = await fetch(`/api/courses/${courseId}/enroll`, {
                 method: 'POST',
             });
@@ -114,23 +143,31 @@ export default function EnrollButton({
     }
 
     return (
-        <Button
-            size="lg"
-            className="w-full"
-            onClick={handleEnroll}
-            disabled={loading || status === 'loading'}
-        >
-            {loading || status === 'loading' ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    অপেক্ষা করুন...
-                </>
-            ) : (
-                <>
-                    এনরোল করুন
-                    {!isFree && <span className="ml-2">(৳{price})</span>}
-                </>
-            )}
-        </Button>
+        <>
+            <Button
+                size="lg"
+                className="w-full"
+                onClick={handleEnroll}
+                disabled={loading || status === 'loading'}
+            >
+                {loading || status === 'loading' ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        অপেক্ষা করুন...
+                    </>
+                ) : (
+                    <>
+                        এনরোল করুন
+                        {!isFree && <span className="ml-2">(৳{price})</span>}
+                    </>
+                )}
+            </Button>
+
+            <ProfileCheckModal
+                isOpen={showProfileModal}
+                onClose={() => setShowProfileModal(false)}
+                missingFields={missingFields}
+            />
+        </>
     );
 }

@@ -26,6 +26,7 @@ const navigation = [
     { name: 'পরীক্ষা', href: '/admin/exams', icon: FileText },
     { name: 'কোর্স', href: '/admin/courses', icon: BookOpen },
     { name: 'পরিসংখ্যান', href: '/admin/statistics', icon: BarChart3 },
+    { name: 'ব্লগ', href: '/admin/blogs', icon: BookOpen },
     { name: 'সেটিংস', href: '/admin/settings', icon: Settings },
 ];
 

@@ -10,7 +10,7 @@ export async function PUT(request: NextRequest) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { name, phone, address, bio, qualifications, subjects } = body;
+        const { name, phone, address, bio, gender, qualifications, subjects } = body;
 
         if (!name || name.trim() === '') {
             return NextResponse.json(
@@ -47,14 +47,41 @@ export async function PUT(request: NextRequest) {
             );
         } else {
             // Default to Student
+            // First, get current student to check gender status
+            const currentStudent = await Student.findById(user.id).lean();
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const updateData: any = {
+                name: name.trim(),
+                phone: phone?.trim() || '',
+                address: address?.trim() || '',
+                bio: bio?.trim() || ''
+            };
+
+            // Gender update logic:
+            // 1. If gender is not set yet, allow setting it
+            // 2. If gender is set but genderChangeRequest.status is 'approved', allow changing
+            // 3. Otherwise, ignore gender update
+            if (gender && (gender === 'male' || gender === 'female')) {
+                const currentGender = currentStudent?.gender;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const changeRequest = (currentStudent as any)?.genderChangeRequest;
+
+                if (!currentGender) {
+                    // No gender set yet - allow setting
+                    updateData.gender = gender;
+                } else if (changeRequest?.status === 'approved') {
+                    // Change request approved - allow one-time change
+                    updateData.gender = gender;
+                    // Clear the change request after successful update
+                    updateData.genderChangeRequest = null;
+                }
+                // If gender is already set and no approved request, ignore the gender update
+            }
+
             updatedUser = await Student.findByIdAndUpdate(
                 user.id,
-                {
-                    name: name.trim(),
-                    phone: phone?.trim() || '',
-                    address: address?.trim() || '',
-                    bio: bio?.trim() || ''
-                },
+                updateData,
                 { new: true }
             );
         }
@@ -77,7 +104,8 @@ export async function PUT(request: NextRequest) {
                 email: userResponse.email,
                 phone: userResponse.phone || '',
                 address: userResponse.address || '',
-                bio: userResponse.bio || ''
+                bio: userResponse.bio || '',
+                gender: userResponse.gender || null
             }
         });
     } catch (error) {

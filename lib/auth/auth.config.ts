@@ -46,7 +46,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             async authorize(credentials: any) {
                 if (!credentials?.email || !credentials?.password) {
-                    throw new Error('অনুগ্রহ করে ইমেইল এবং পাসওয়ার্ড প্রদান করুন');
+                    return null; // Missing credentials - silent fail
                 }
 
                 await connectDB();
@@ -55,14 +55,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 const result = await findUserByEmail(credentials.email as string, true);
 
                 if (!result) {
-                    throw new Error('ব্যবহারকারী খুঁজে পাওয়া যায়নি');
+                    return null; // User not found - silent fail (no terminal error)
                 }
 
                 const { user, role } = result;
 
                 // Check if user has a password (OAuth users don't have password)
                 if (!user.password) {
-                    throw new Error('এই ইমেইল দিয়ে Google লগইন ব্যবহার করুন');
+                    return null; // OAuth user trying password login - silent fail
                 }
 
                 // Verify password
@@ -72,7 +72,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 );
 
                 if (!isValidPassword) {
-                    throw new Error('ভুল পাসওয়ার্ড');
+                    return null; // Wrong password - silent fail (no terminal error)
+                }
+
+                // Check if email is verified (only for credential users)
+                // This one throws to pass the message to the client for redirect
+                if (user.provider === 'credentials' && !user.isEmailVerified) {
+                    throw new Error('EMAIL_NOT_VERIFIED:আপনার ইমেইল এখনো ভেরিফাই হয়নি। অনুগ্রহ করে আপনার ইমেইল চেক করুন।');
                 }
 
                 // Check if teacher is approved

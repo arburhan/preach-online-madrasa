@@ -15,6 +15,15 @@ export interface ITeacher extends Document {
     provider?: 'credentials' | 'google';
     providerId?: string;
 
+    // Email verification
+    isEmailVerified?: boolean;
+    emailVerificationToken?: string;
+    emailVerificationExpires?: Date;
+
+    // Password reset
+    passwordResetToken?: string;
+    passwordResetExpires?: Date;
+
     // Contact Info
     phone?: string;
     mobileNumber?: string;
@@ -67,6 +76,16 @@ const TeacherSchema = new Schema<ITeacher>(
             enum: ['credentials', 'google'],
         },
         providerId: String,
+
+        isEmailVerified: {
+            type: Boolean,
+            default: false,
+        },
+        emailVerificationToken: String,
+        emailVerificationExpires: Date,
+
+        passwordResetToken: String,
+        passwordResetExpires: Date,
 
         // Contact
         phone: String,

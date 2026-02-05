@@ -84,7 +84,7 @@ export default function TeachersSection({ teachers }: TeachersSectionProps) {
                 <div className="text-center">
                     <Link
                         href="/teachers"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-colors"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 hover:bg-primary hover:text-primary-foreground text-primary font-medium rounded-lg transition-all duration-300"
                     >
                         সমস্ত উস্তাযদের দেখুন
                         <GraduationCap className="h-5 w-5" />

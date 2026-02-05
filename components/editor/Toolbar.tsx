@@ -13,11 +13,11 @@ import {
 } from '@lexical/list';
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
-import { $createParagraphNode } from 'lexical';
 import {
     Bold,
     Italic,
     Underline,
+    Strikethrough,
     List,
     ListOrdered,
     Heading1,
@@ -29,7 +29,18 @@ import {
     Quote,
 } from 'lucide-react';
 
-export default function Toolbar() {
+// Import custom plugins
+import ImagePlugin from './plugins/ImagePlugin';
+import YouTubePlugin from './plugins/YouTubePlugin';
+import TablePluginUI from './plugins/TablePlugin';
+import LinkPlugin from './plugins/LinkPlugin';
+import { TextColorPlugin, BackgroundColorPlugin } from './plugins/ColorPlugin';
+
+interface ToolbarProps {
+    onImageUpload?: (file: File) => Promise<string>;
+}
+
+export default function Toolbar({ onImageUpload }: ToolbarProps) {
     const [editor] = useLexicalComposerContext();
 
     const formatHeading = (headingSize: 'h1' | 'h2' | 'h3') => {
@@ -58,6 +69,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Bold"
+                title="বোল্ড"
             >
                 <Bold className="h-4 w-4" />
             </button>
@@ -66,6 +78,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Italic"
+                title="ইটালিক"
             >
                 <Italic className="h-4 w-4" />
             </button>
@@ -74,9 +87,25 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Underline"
+                title="আন্ডারলাইন"
             >
                 <Underline className="h-4 w-4" />
             </button>
+            <button
+                onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')}
+                className="p-2 hover:bg-accent rounded"
+                type="button"
+                aria-label="Strikethrough"
+                title="স্ট্রাইকথ্রু"
+            >
+                <Strikethrough className="h-4 w-4" />
+            </button>
+
+            <div className="w-px h-6 bg-border mx-1" />
+
+            {/* Text & Background Colors */}
+            <TextColorPlugin />
+            <BackgroundColorPlugin />
 
             <div className="w-px h-6 bg-border mx-1" />
 
@@ -86,6 +115,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Heading 1"
+                title="হেডিং ১"
             >
                 <Heading1 className="h-4 w-4" />
             </button>
@@ -94,6 +124,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Heading 2"
+                title="হেডিং ২"
             >
                 <Heading2 className="h-4 w-4" />
             </button>
@@ -102,6 +133,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Heading 3"
+                title="হেডিং ৩"
             >
                 <Heading3 className="h-4 w-4" />
             </button>
@@ -114,6 +146,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Bullet List"
+                title="বুলেট লিস্ট"
             >
                 <List className="h-4 w-4" />
             </button>
@@ -122,6 +155,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Numbered List"
+                title="নম্বর লিস্ট"
             >
                 <ListOrdered className="h-4 w-4" />
             </button>
@@ -134,6 +168,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Align Left"
+                title="বামে"
             >
                 <AlignLeft className="h-4 w-4" />
             </button>
@@ -142,6 +177,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Align Center"
+                title="মাঝে"
             >
                 <AlignCenter className="h-4 w-4" />
             </button>
@@ -150,6 +186,7 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Align Right"
+                title="ডানে"
             >
                 <AlignRight className="h-4 w-4" />
             </button>
@@ -162,9 +199,26 @@ export default function Toolbar() {
                 className="p-2 hover:bg-accent rounded"
                 type="button"
                 aria-label="Quote"
+                title="কোট"
             >
                 <Quote className="h-4 w-4" />
             </button>
+
+            <div className="w-px h-6 bg-border mx-1" />
+
+            {/* Link */}
+            <LinkPlugin />
+
+            <div className="w-px h-6 bg-border mx-1" />
+
+            {/* Media */}
+            <ImagePlugin onUpload={onImageUpload} />
+            <YouTubePlugin />
+
+            <div className="w-px h-6 bg-border mx-1" />
+
+            {/* Table */}
+            <TablePluginUI />
         </div>
     );
 }

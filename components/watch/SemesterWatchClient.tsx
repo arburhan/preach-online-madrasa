@@ -200,7 +200,7 @@ export default function SemesterWatchClient({
                                                 // Refresh content
                                                 window.location.reload();
                                             }}
-                                            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                                            className="bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
                                         >
                                             <CheckCircle className="mr-2 h-5 w-5" />
                                             দেখা হয়েছে
@@ -210,7 +210,7 @@ export default function SemesterWatchClient({
 
                                 {/* All completed success message */}
                                 {allContentCompleted && isLastContent && (
-                                    <div className="bg-gradient-to-br from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-xl border border-emerald-500/20 p-6 text-center">
+                                    <div className="bg-linear-to-br from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-xl border border-emerald-500/20 p-6 text-center">
                                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-4">
                                             <Award className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                                         </div>
@@ -221,7 +221,7 @@ export default function SemesterWatchClient({
                                             আপনি সেমিস্টার {semesterNumber} এর সব কন্টেন্ট সম্পন্ন করেছেন।
                                         </p>
                                         <Link href={`/student/programs/${programId}`}>
-                                            <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">
+                                            <Button className="bg-linear-to-r from-emerald-600 to-teal-600">
                                                 পরবর্তী সেমিস্টারে যান
                                             </Button>
                                         </Link>

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Student from '@/lib/db/models/Student';
-import { UserCircle, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import { UserCircle, Mail, Phone, MapPin, Calendar, VenusAndMars } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -50,7 +50,7 @@ export default async function StudentProfilePage() {
                                         alt={user.name || ''}
                                         width={96}
                                         height={96}
-                                        className="rounded-full object-cover"
+                                        className="rounded-full"
                                         unoptimized
                                     />
                                 ) : (
@@ -119,6 +119,14 @@ export default async function StudentProfilePage() {
                                         day: 'numeric'
                                     })}
                                 </p>
+                            </div>
+                            {/* Gender */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                    <VenusAndMars className="h-4 w-4" />
+                                    লিঙ্গ
+                                </label>
+                                <p className="text-lg font-medium">{user.gender || 'যোগ করা হয়নি'}</p>
                             </div>
                         </div>
 

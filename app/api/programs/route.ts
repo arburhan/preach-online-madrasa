@@ -87,13 +87,21 @@ export async function POST(request: Request) {
             );
         }
 
-        // Generate slug from English title
-        const slugBase = titleEn
+        // Generate slug from English title (no random suffix)
+        const slug = titleEn
             .toLowerCase()
             .replace(/\s+/g, '-')
             .replace(/[^a-z0-9\-]/g, '')
             .substring(0, 50);
-        const slug = slugBase + '-' + Date.now().toString(36);
+
+        // Check if slug already exists
+        const existingProgram = await Program.findOne({ slug });
+        if (existingProgram) {
+            return NextResponse.json(
+                { error: 'এই নামে ইতিমধ্যে একটি প্রোগ্রাম আছে। অনুগ্রহ করে ইংরেজি নাম পরিবর্তন করুন।' },
+                { status: 400 }
+            );
+        }
 
         const program = await Program.create({
             titleBn,

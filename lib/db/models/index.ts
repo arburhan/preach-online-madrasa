@@ -57,3 +57,13 @@ export type { IProgramSemester } from './ProgramSemester';
 // System Settings
 export { default as SystemSetting } from './SystemSetting';
 export type { ISystemSetting } from './SystemSetting';
+
+// Category
+export { default as Category } from './Category';
+export type { ICategory } from './Category';
+
+// BlogPost
+export { default as BlogPost } from './BlogPost';
+export type { IBlogPost } from './BlogPost';
+export { BlogStatus } from './BlogPost';
+

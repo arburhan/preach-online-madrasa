@@ -13,6 +13,7 @@ import {
     Eye,
     Pencil
 } from 'lucide-react';
+import Image from 'next/image';
 
 export default async function AdminProgramsPage() {
     const session = await auth();
@@ -114,10 +115,11 @@ export default async function AdminProgramsPage() {
                                 {/* Thumbnail */}
                                 <div className="h-40 bg-linear-to-br from-purple-500 to-indigo-600 relative">
                                     {program.thumbnail ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img
+                                        <Image
                                             src={program.thumbnail}
                                             alt={program.titleBn}
+
+                                            fill={true}
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (

@@ -9,25 +9,30 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListItemNode, ListNode } from '@lexical/list';
 import { LinkNode } from '@lexical/link';
+import { TableNode, TableRowNode, TableCellNode } from '@lexical/table';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
+import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { EditorState } from 'lexical';
 import Toolbar from './Toolbar';
-
+import { ImageNode } from './nodes/ImageNode';
+import { YouTubeNode } from './nodes/YouTubeNode';
 
 interface LexicalEditorProps {
     initialContent?: string; // JSON string
     onChange: (json: string) => void;
     placeholder?: string;
     editable?: boolean;
+    onImageUpload?: (file: File) => Promise<string>;
 }
 
 export default function LexicalEditor({
     initialContent,
     onChange,
     placeholder = 'কন্টেন্ট লিখুন...',
-    editable = true
+    editable = true,
+    onImageUpload,
 }: LexicalEditorProps) {
 
     const initialConfig = {
@@ -47,14 +52,32 @@ export default function LexicalEditor({
                 ul: 'list-disc ml-6 mb-2',
                 listitem: 'ml-4',
             },
-            link: 'text-blue-600 hover:underline',
+            link: 'text-blue-600 hover:underline cursor-pointer',
+            quote: 'border-l-4 border-primary pl-4 py-2 my-4 italic bg-muted/30',
             text: {
                 bold: 'font-bold',
                 italic: 'italic',
                 underline: 'underline',
+                strikethrough: 'line-through',
             },
+            table: 'border-collapse border border-border my-4 w-full',
+            tableCell: 'border border-border p-2 min-w-[50px]',
+            tableCellHeader: 'border border-border p-2 bg-muted font-semibold',
+            image: 'my-4',
+            youtube: 'my-4',
         },
-        nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode],
+        nodes: [
+            HeadingNode,
+            QuoteNode,
+            ListNode,
+            ListItemNode,
+            LinkNode,
+            TableNode,
+            TableRowNode,
+            TableCellNode,
+            ImageNode,
+            YouTubeNode,
+        ],
         editable,
         editorState: initialContent || undefined,
         onError: (error: Error) => {
@@ -72,7 +95,7 @@ export default function LexicalEditor({
     return (
         <LexicalComposer initialConfig={initialConfig}>
             <div className="relative rounded-lg border border-input bg-background">
-                {editable && <Toolbar />}
+                {editable && <Toolbar onImageUpload={onImageUpload} />}
                 <div className="relative">
                     <RichTextPlugin
                         contentEditable={
@@ -93,6 +116,7 @@ export default function LexicalEditor({
                     <AutoFocusPlugin />
                     <ListPlugin />
                     <LinkPlugin />
+                    <TablePlugin />
                 </div>
             </div>
         </LexicalComposer>

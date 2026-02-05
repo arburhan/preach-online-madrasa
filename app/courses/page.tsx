@@ -3,10 +3,9 @@ import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
 import Program from '@/lib/db/models/LongCourse';
 import '@/lib/db/models/Teacher'; // For populate
-import { BookOpen, GraduationCap, Clock, Tag, Users, ArrowRight, Star } from 'lucide-react';
+import { BookOpen, GraduationCap } from 'lucide-react';
 import CourseCard from '@/components/courses/CourseCard';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import ProgramsCard from '@/components/programs/ProgramsCard';
 import { ObjectId } from 'mongoose';
 
 export default async function PublicCoursesPage() {
@@ -61,13 +60,31 @@ export default async function PublicCoursesPage() {
         };
     });
 
+    // Serialize programs for client component
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const serializedPrograms = programs.map((program: any) => ({
+        _id: program._id.toString(),
+        titleBn: program.titleBn,
+        slug: program.slug,
+        thumbnail: program.thumbnail,
+        durationMonths: program.durationMonths,
+        totalSemesters: program.totalSemesters,
+        maleInstructors: program.maleInstructors,
+        femaleInstructors: program.femaleInstructors,
+        isFree: program.isFree,
+        price: program.price,
+        discountPrice: program.discountPrice,
+        isFeatured: program.isFeatured,
+        isPopular: program.isPopular,
+    }));
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <div className="py-16 bg-linear-to-r from-purple-600 to-indigo-700 text-white">
+            <div className="bg-linear-to-br from-[#3fdaa6] via-[#b3f2d4] to-[#3fdaa6] py-16 ">
                 <div className="container mx-auto px-4 text-center">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-4">সকল কোর্স ও প্রোগ্রাম</h1>
-                    <p className="md:text-lg text-purple-100">
+                    <h1 className="text-3xl md:text-4xl font-bold mb-4 text-black">সকল কোর্স ও প্রোগ্রাম</h1>
+                    <p className="md:text-lg text-blue-950">
                         ইসলামিক শিক্ষার জন্য আমাদের সেরা কোর্স ও সেমিস্টার ভিত্তিক প্রোগ্রাম
                     </p>
                 </div>
@@ -75,98 +92,15 @@ export default async function PublicCoursesPage() {
 
             <div className="container mx-auto px-4 py-8">
                 {/* Programs Section (Long Courses) */}
-                {programs.length > 0 && (
+                {serializedPrograms.length > 0 && (
                     <section className="mb-12">
                         <div className="flex items-center gap-2 mb-6">
                             <GraduationCap className="h-6 w-6 text-primary" />
                             <h2 className="text-2xl font-bold">সেমিস্টার ভিত্তিক প্রোগ্রাম</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {programs.map((program) => (
-                                <div
-                                    key={program._id.toString()}
-                                    className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow"
-                                >
-                                    {/* Thumbnail */}
-                                    <div className="h-40 bg-linear-to-br from-purple-500 to-indigo-600 relative">
-                                        {program.thumbnail ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img
-                                                src={program.thumbnail}
-                                                alt={program.titleBn}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <GraduationCap className="h-16 w-16 text-white/30" />
-                                            </div>
-                                        )}
-                                        {program.isFeatured && (
-                                            <span className="absolute top-3 left-3 px-2 py-1 bg-yellow-500 text-white rounded-full text-xs font-medium flex items-center gap-1">
-                                                <Star className="h-3 w-3 fill-white" />
-                                                ফিচার্ড
-                                            </span>
-                                        )}
-                                        {program.isPopular && (
-                                            <span className="absolute top-3 right-3 px-2 py-1 bg-red-500 text-white rounded-full text-xs font-medium">
-                                                জনপ্রিয়
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div className="p-4">
-                                        <h3 className="font-bold text-lg mb-2">{program.titleBn}</h3>
-
-                                        {/* Meta */}
-                                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="h-4 w-4" />
-                                                {program.durationMonths} মাস
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <GraduationCap className="h-4 w-4" />
-                                                {program.totalSemesters} সেমিস্টার
-                                            </span>
-                                        </div>
-
-                                        {/* Instructors */}
-                                        <div className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
-                                            <Users className="h-4 w-4" />
-                                            <span className="text-blue-600">{program.maleInstructors?.length || 0} পুরুষ</span>
-                                            <span className="text-pink-600">{program.femaleInstructors?.length || 0} মহিলা</span>
-                                            শিক্ষক
-                                        </div>
-
-                                        {/* Price & CTA */}
-                                        <div className="flex items-center justify-between pt-3 border-t">
-                                            <div className="flex items-center gap-1">
-                                                <Tag className="h-4 w-4 text-primary" />
-                                                {program.isFree ? (
-                                                    <span className="text-green-600 font-bold">বিনামূল্যে</span>
-                                                ) : (
-                                                    <span className="font-bold">
-                                                        {program.discountPrice ? (
-                                                            <>
-                                                                <span className="line-through text-muted-foreground text-sm mr-1">
-                                                                    ৳{program.price}
-                                                                </span>
-                                                                ৳{program.discountPrice}
-                                                            </>
-                                                        ) : (
-                                                            <>৳{program.price}</>
-                                                        )}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <Link href={`/programs/${program.slug || program._id}`}>
-                                                <Button size="sm">
-                                                    বিস্তারিত
-                                                    <ArrowRight className="h-4 w-4 ml-1" />
-                                                </Button>
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
+                            {serializedPrograms.map((program) => (
+                                <ProgramsCard key={program._id} program={program} />
                             ))}
                         </div>
                     </section>

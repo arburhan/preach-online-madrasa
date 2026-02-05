@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import connectDB from '@/lib/db/mongodb';
 import Student from '@/lib/db/models/Student';
 import Teacher from '@/lib/db/models/Teacher';
+import { sendVerificationEmail } from '@/lib/email/mailer';
 
 export async function POST(request: NextRequest) {
     try {
@@ -58,6 +60,10 @@ export async function POST(request: NextRequest) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Generate verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
         // Create user based on role
         if (role === 'teacher') {
             // Create Teacher
@@ -74,12 +80,23 @@ export async function POST(request: NextRequest) {
                 qualifications,
                 isApproved: false,
                 approvalStatus: 'pending',
+                isEmailVerified: false,
+                emailVerificationToken: verificationToken,
+                emailVerificationExpires: verificationExpires,
             });
+
+            // Send verification email
+            const emailSent = await sendVerificationEmail(email, verificationToken);
+
+            if (!emailSent) {
+                console.error('Failed to send verification email to teacher:', email);
+            }
 
             return NextResponse.json(
                 {
-                    message: 'শিক্ষক নিবন্ধন সফল হয়েছে। অনুমোদনের জন্য অপেক্ষা করুন।',
+                    message: 'শিক্ষক নিবন্ধন সফল হয়েছে। অনুগ্রহ করে আপনার ইমেইল ভেরিফাই করুন।',
                     userId: teacher._id,
+                    requiresVerification: true,
                 },
                 { status: 201 }
             );
@@ -91,12 +108,23 @@ export async function POST(request: NextRequest) {
                 password: hashedPassword,
                 gender: gender || undefined,
                 provider: 'credentials',
+                isEmailVerified: false,
+                emailVerificationToken: verificationToken,
+                emailVerificationExpires: verificationExpires,
             });
+
+            // Send verification email
+            const emailSent = await sendVerificationEmail(email, verificationToken);
+
+            if (!emailSent) {
+                console.error('Failed to send verification email to student:', email);
+            }
 
             return NextResponse.json(
                 {
-                    message: 'নিবন্ধন সফল হয়েছে',
+                    message: 'নিবন্ধন সফল হয়েছে। অনুগ্রহ করে আপনার ইমেইল ভেরিফাই করুন।',
                     userId: student._id,
+                    requiresVerification: true,
                 },
                 { status: 201 }
             );

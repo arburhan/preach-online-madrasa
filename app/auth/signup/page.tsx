@@ -59,8 +59,8 @@ export default function StudentSignUpPage() {
                 throw new Error(data.error || 'নিবন্ধন করতে সমস্যা হয়েছে');
             }
 
-            toast.success('নিবন্ধন সফল হয়েছে!');
-            router.push('/auth/signin?registered=true');
+            toast.success('নিবন্ধন সফল হয়েছে! অনুগ্রহ করে আপনার ইমেইল ভেরিফাই করুন।');
+            router.push('/auth/verification-pending?source=signup');
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'নিবন্ধন করতে সমস্যা হয়েছে';
             toast.error(errorMessage);

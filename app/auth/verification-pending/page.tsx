@@ -1,0 +1,165 @@
+'use client';
+
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { Mail, Loader2, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+
+function VerificationPendingContent() {
+    const searchParams = useSearchParams();
+    const emailFromUrl = searchParams.get('email') || '';
+    const source = searchParams.get('source'); // 'signup' = just registered
+
+    const [email, setEmail] = useState(emailFromUrl);
+    const [loading, setLoading] = useState(false);
+    // If coming from signup, show sent state immediately
+    const [sent, setSent] = useState(source === 'signup');
+
+    // Update email when URL param changes
+    useEffect(() => {
+        if (emailFromUrl) {
+            setEmail(emailFromUrl);
+        }
+    }, [emailFromUrl]);
+
+    const handleResend = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!email) {
+            toast.error('ইমেইল লিখুন');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await fetch('/api/auth/resend-verification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setSent(true);
+                toast.success(data.message);
+            } else {
+                toast.error(data.error);
+            }
+        } catch {
+            toast.error('ইমেইল পাঠাতে সমস্যা হয়েছে');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+            <div className="max-w-md w-full bg-card border rounded-xl p-8 space-y-6">
+                {/* Header */}
+                <div className="text-center">
+                    <div className="w-20 h-20 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4">
+                        <Mail className="h-10 w-10 text-amber-600" />
+                    </div>
+                    <h1 className="text-2xl font-bold">ইমেইল ভেরিফিকেশন প্রয়োজন</h1>
+                    <p className="text-muted-foreground mt-2">
+                        লগইন করতে প্রথমে আপনার ইমেইল ভেরিফাই করুন।
+                    </p>
+                </div>
+
+                {sent ? (
+                    // State 1: Email has been sent (after signup or after resend)
+                    <div className="text-center space-y-4">
+                        <div className="w-16 h-16 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                            <CheckCircle className="h-8 w-8 text-green-600" />
+                        </div>
+                        <p className="text-green-600 font-medium">
+                            ভেরিফিকেশন ইমেইল পাঠানো হয়েছে!
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                            আপনার ইনবক্স এবং স্প্যাম ফোল্ডার চেক করুন।
+                        </p>
+                        <div className="pt-4 space-y-2">
+                            <Button
+                                variant="outline"
+                                className="w-full"
+                                onClick={() => setSent(false)}
+                            >
+                                নতুন ইমেইল পাঠান
+                            </Button>
+                            <Link href="/auth/signin" className="block">
+                                <Button className="w-full">
+                                    লগইন পেজে যান
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                ) : (
+                    // State 2: Need to resend (when coming from login attempt)
+                    <form onSubmit={handleResend} className="space-y-4">
+                        <div>
+                            <label className="text-sm font-medium block mb-2">
+                                আপনার ইমেইল
+                            </label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                className="w-full px-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                placeholder="example@email.com"
+                            />
+                        </div>
+
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    পাঠানো হচ্ছে...
+                                </>
+                            ) : (
+                                <>
+                                    <Mail className="mr-2 h-4 w-4" />
+                                    ভেরিফিকেশন ইমেইল পাঠান
+                                </>
+                            )}
+                        </Button>
+
+                        <p className="text-xs text-center text-muted-foreground">
+                            ইমেইল পাঠানোর পর আপনার ইনবক্স এবং স্প্যাম ফোল্ডার চেক করুন
+                        </p>
+                    </form>
+                )}
+
+                <div className="text-center pt-4 border-t">
+                    <Link
+                        href="/auth/signin"
+                        className="text-sm text-purple-600 hover:text-purple-700 inline-flex items-center gap-1"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        লগইন পেজে ফিরে যান
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function VerificationPendingPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+            </div>
+        }>
+            <VerificationPendingContent />
+        </Suspense>
+    );
+}

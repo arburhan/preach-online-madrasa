@@ -5,6 +5,7 @@ import TeachersSection from "@/components/home/TeachersSection";
 import CTASection from "@/components/home/CTASection";
 import connectDB from "@/lib/db/mongodb";
 import Teacher from "@/lib/db/models/Teacher";
+import FAQSection from "@/components/faq/FAQSection";
 
 export default async function HomePage() {
   await connectDB();
@@ -33,6 +34,7 @@ export default async function HomePage() {
       <CoursesSection />
       <TeachersSection teachers={serializedTeachers} />
       <CTASection />
+      <FAQSection limit={5} showViewAll={true} showHeader={true} />
     </div>
   );
 }

@@ -6,6 +6,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, Plus, X, Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
+
+const LexicalEditor = dynamic(() => import('@/components/editor/LexicalEditor'), {
+    ssr: false,
+    loading: () => <div className="h-[200px] w-full bg-muted animate-pulse rounded-lg" />,
+});
 
 interface Semester {
     _id: string;
@@ -262,9 +269,10 @@ export default function EditProgramPage() {
                         <div className="flex items-start gap-6">
                             {formData.thumbnail ? (
                                 <div className="relative">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
+                                    <Image
                                         src={formData.thumbnail}
+                                        width={100}
+                                        height={100}
                                         alt="Thumbnail"
                                         className="w-48 h-32 object-cover rounded-lg"
                                     />
@@ -335,13 +343,10 @@ export default function EditProgramPage() {
 
                         <div>
                             <label className="block text-sm font-medium mb-2">বিবরণ (বাংলা) *</label>
-                            <textarea
-                                name="descriptionBn"
-                                value={formData.descriptionBn}
-                                onChange={handleChange}
-                                required
-                                rows={4}
-                                className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
+                            <LexicalEditor
+                                initialContent={formData.descriptionBn}
+                                onChange={(json) => setFormData(prev => prev ? { ...prev, descriptionBn: json } : null)}
+                                placeholder="প্রোগ্রামের বিস্তারিত বিবরণ লিখুন..."
                             />
                         </div>
 

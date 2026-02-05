@@ -28,7 +28,7 @@ export default async function TeachersPage() {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <div className="bg-linear-to-r from-purple-600 to-blue-600 text-white py-16">
+            <div className="bg-linear-to-r from-green-400 to-blue-400 text-white py-8 md:py-16">
                 <div className="container mx-auto px-4">
                     <div className="text-center">
                         <GraduationCap className="h-16 w-16 mx-auto mb-4" />

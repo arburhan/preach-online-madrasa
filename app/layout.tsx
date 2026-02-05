@@ -4,6 +4,8 @@ import "./globals.css";
 import AuthProvider from "@/components/providers/AuthProvider";
 import ToastProvider from "@/components/providers/ToastProvider";
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import TawkChat from "@/components/TawkChat";
 
 const notoSansBengali = Noto_Sans_Bengali({
   variable: "--font-bengali",
@@ -32,12 +34,14 @@ export default function RootLayout({
   return (
     <html lang="bn" suppressHydrationWarning>
       <body
-        className={`${notoSansBengali.variable} ${inter.variable} font-bengali antialiased`}
+        className={`${notoSansBengali.variable} ${inter.variable} font-bengali antialiased min-h-screen flex flex-col`}
       >
         <AuthProvider>
           <Navbar />
-          {children}
+          <main className="flex-1">{children}</main>
+          <Footer />
           <ToastProvider />
+          <TawkChat />
         </AuthProvider>
       </body>
     </html>
