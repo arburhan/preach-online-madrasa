@@ -168,7 +168,7 @@ export default function Certificate({ data, onClose }: CertificateProps) {
                                     সার্টিফিকেট আইডি: {data.certificateId}
                                 </p>
                                 <p className="text-xs text-gray-400 mt-1">
-                                    প্রিচ অনলাইন মাদরাসা | preach.edu.bd
+                                    ইসলামিক অনলাইন একাডেমি | ioa.bd
                                 </p>
                             </div>
                         </div>

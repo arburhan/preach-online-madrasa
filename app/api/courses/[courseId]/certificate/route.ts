@@ -132,7 +132,7 @@ export async function GET(
             completionDate: new Date().toISOString(),
             totalLessons: lessons.length,
             totalExams: exams.length,
-            certificateId: `PREACH-${courseId.slice(-6).toUpperCase()}-${session.user.id.slice(-6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
+            certificateId: `IOA-${courseId.slice(-6).toUpperCase()}-${session.user.id.slice(-6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
         };
 
         return NextResponse.json({
