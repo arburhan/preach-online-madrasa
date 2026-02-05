@@ -69,9 +69,48 @@ export default async function CoursesSection() {
     return (
         <section className="py-20 bg-muted/30">
             <div className="container mx-auto px-4">
+
+                {/* Courses Section */}
+                {hasCourses && (
+                    <>
+                        {/* Section Header */}
+                        <div className="mb-12">
+                            <div className='text-center' >
+                                <h2 className="text-3xl md:text-4xl font-bold mb-2">
+                                    জনপ্রিয় কোর্সসমূহ
+                                </h2>
+                                <p className="text-muted-foreground">
+                                    আমাদের সেরা এবং জনপ্রিয় কোর্সগুলো দেখুন
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Courses Grid - Reusing CourseCard */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {serializedCourses.map((course) => (
+                                <CourseCard
+                                    key={course._id}
+                                    course={course}
+                                    isLoggedIn={false} // Homepage doesn't need session
+                                />
+                            ))}
+                        </div>
+
+                        {/* Mobile "See All" Button */}
+                        <div className="mt-8 text-center md:hidden">
+                            <Link href="/courses">
+                                <Button variant="outline" size="lg" className="w-full">
+                                    <BookOpen className="mr-2 h-5 w-5" />
+                                    সকল কোর্স দেখুন
+                                </Button>
+                            </Link>
+                        </div>
+                    </>
+                )}
+
                 {/* Programs Section (Semester-based) */}
                 {hasPrograms && (
-                    <div className="pb-16">
+                    <div className="pt-16 md:pt-28">
                         {/* Section Header */}
                         <div className="mb-8 text-center">
                             <div className="flex items-center justify-center gap-2 mb-2">
@@ -93,7 +132,7 @@ export default async function CoursesSection() {
                                     className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow"
                                 >
                                     {/* Thumbnail */}
-                                    <div className="h-40 bg-linear-to-br from-purple-500 to-indigo-600 relative">
+                                    <div className="h-64 bg-linear-to-br from-purple-500 to-indigo-600 relative">
                                         {program.thumbnail ? (
                                             <Image
                                                 src={program.thumbnail}
@@ -144,7 +183,7 @@ export default async function CoursesSection() {
                                         </div>
 
                                         {/* Price & CTA */}
-                                        <div className="flex items-center justify-between pt-3 border-t">
+                                        <div className="flex items-center justify-between pt-3 border-t border-green-400">
                                             <div className="flex items-center gap-1">
                                                 <Tag className="h-4 w-4 text-primary" />
                                                 {program.isFree ? (
@@ -186,44 +225,6 @@ export default async function CoursesSection() {
                             </Link>
                         </div>
                     </div>
-                )}
-
-                {/* Courses Section */}
-                {hasCourses && (
-                    <>
-                        {/* Section Header */}
-                        <div className="mb-12">
-                            <div className='text-center' >
-                                <h2 className="text-3xl md:text-4xl font-bold mb-2">
-                                    জনপ্রিয় কোর্সসমূহ
-                                </h2>
-                                <p className="text-muted-foreground">
-                                    আমাদের সেরা এবং জনপ্রিয় কোর্সগুলো দেখুন
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Courses Grid - Reusing CourseCard */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {serializedCourses.map((course) => (
-                                <CourseCard
-                                    key={course._id}
-                                    course={course}
-                                    isLoggedIn={false} // Homepage doesn't need session
-                                />
-                            ))}
-                        </div>
-
-                        {/* Mobile "See All" Button */}
-                        <div className="mt-8 text-center md:hidden">
-                            <Link href="/courses">
-                                <Button variant="outline" size="lg" className="w-full">
-                                    <BookOpen className="mr-2 h-5 w-5" />
-                                    সকল কোর্স দেখুন
-                                </Button>
-                            </Link>
-                        </div>
-                    </>
                 )}
             </div>
         </section>
