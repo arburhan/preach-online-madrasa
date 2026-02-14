@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
@@ -7,6 +8,21 @@ import { BookOpen, GraduationCap } from 'lucide-react';
 import CourseCard from '@/components/courses/CourseCard';
 import ProgramsCard from '@/components/programs/ProgramsCard';
 import { ObjectId } from 'mongoose';
+import { seoUrl } from '@/lib/seo';
+
+export const metadata: Metadata = {
+    title: 'সকল কোর্স ও প্রোগ্রাম',
+    description: 'ইসলামিক শিক্ষার জন্য আমাদের সেরা কোর্স ও সেমিস্টার ভিত্তিক প্রোগ্রাম। কুরআন, হাদিস, ফিকহ এবং আরও অনেক কিছু শিখুন।',
+    openGraph: {
+        title: 'সকল কোর্স ও প্রোগ্রাম - ইসলামিক অনলাইন একাডেমি',
+        description: 'ইসলামিক শিক্ষার জন্য আমাদের সেরা কোর্স ও সেমিস্টার ভিত্তিক প্রোগ্রাম।',
+        url: seoUrl('/courses'),
+        type: 'website',
+    },
+    alternates: {
+        canonical: seoUrl('/courses'),
+    },
+};
 
 export default async function PublicCoursesPage() {
     await connectDB();

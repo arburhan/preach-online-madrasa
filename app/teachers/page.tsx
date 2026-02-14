@@ -1,8 +1,24 @@
+import { Metadata } from 'next';
 import connectDB from '@/lib/db/mongodb';
 import Teacher from '@/lib/db/models/Teacher';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BookOpen, GraduationCap } from 'lucide-react';
+import { seoUrl } from '@/lib/seo';
+
+export const metadata: Metadata = {
+    title: 'আমাদের উস্তাযগণ',
+    description: 'অভিজ্ঞ ও যোগ্য আলেম উস্তাযগণ। দেশের স্বনামধন্য মাদ্রাসা থেকে সনদপ্রাপ্ত শিক্ষকদের দ্বারা পরিচালিত মানসম্মত শিক্ষা।',
+    openGraph: {
+        title: 'আমাদের উস্তাযগণ - ইসলামিক অনলাইন একাডেমি',
+        description: 'অভিজ্ঞ ও যোগ্য আলেম উস্তাযগণ দ্বারা পরিচালিত মানসম্মত ইসলামিক শিক্ষা।',
+        url: seoUrl('/teachers'),
+        type: 'website',
+    },
+    alternates: {
+        canonical: seoUrl('/teachers'),
+    },
+};
 
 export default async function TeachersPage() {
     await connectDB();

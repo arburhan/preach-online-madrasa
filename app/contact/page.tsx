@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { seoUrl } from '@/lib/seo';
 import {
     Mail,
     Phone,
@@ -13,8 +14,17 @@ import {
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
-    title: 'যোগাযোগ - ইসলামিক অনলাইন একাডেমি',
+    title: 'যোগাযোগ',
     description: 'আমাদের সাথে যোগাযোগ করুন। প্রশ্ন, পরামর্শ বা সাহায্যের জন্য আমরা সর্বদা প্রস্তুত।',
+    openGraph: {
+        title: 'যোগাযোগ - ইসলামিক অনলাইন একাডেমি',
+        description: 'আমাদের সাথে যোগাযোগ করুন। প্রশ্ন, পরামর্শ বা সাহায্যের জন্য আমরা সর্বদা প্রস্তুত।',
+        url: seoUrl('/contact'),
+        type: 'website',
+    },
+    alternates: {
+        canonical: seoUrl('/contact'),
+    },
 };
 
 export default function ContactPage() {

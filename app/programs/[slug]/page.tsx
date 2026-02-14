@@ -5,6 +5,7 @@ import '@/lib/db/models/Teacher';
 import '@/lib/db/models/ProgramSemester';
 import Link from 'next/link';
 import Image from 'next/image';
+import { seoUrl, SITE_NAME } from '@/lib/seo';
 import { EnrollButton } from '@/components/programs/EnrollButton';
 import { auth } from '@/lib/auth/auth.config';
 import Student from '@/lib/db/models/Student';
@@ -41,9 +42,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         return { title: 'প্রোগ্রাম পাওয়া যায়নি' };
     }
 
+    const description = typeof program.descriptionBn === 'string'
+        ? program.descriptionBn.substring(0, 160).replace(/[{}"]/g, '')
+        : '';
+
     return {
-        title: `${program.titleBn} | অনলাইন মাদরাসা`,
-        description: program.descriptionBn?.substring(0, 160),
+        title: program.titleBn,
+        description,
+        openGraph: {
+            title: `${program.titleBn} | ${SITE_NAME}`,
+            description,
+            url: seoUrl(`/programs/${program.slug}`),
+            type: 'website',
+            ...(program.thumbnail ? { images: [{ url: program.thumbnail, width: 1200, height: 630, alt: program.titleBn }] } : {}),
+        },
+        alternates: {
+            canonical: seoUrl(`/programs/${program.slug}`),
+        },
     };
 }
 
