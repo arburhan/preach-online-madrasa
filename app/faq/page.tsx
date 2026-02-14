@@ -1,10 +1,20 @@
 import { Metadata } from 'next';
 import FAQSection from '@/components/faq/FAQSection';
+import { seoUrl } from '@/lib/seo';
 
 export const metadata: Metadata = {
-    title: 'সাধারণ জিজ্ঞাসা | IOA - ইসলামিক অনলাইন একাডেমি',
+    title: 'সাধারণ জিজ্ঞাসা',
     description: 'IOA সম্পর্কে সাধারণ প্রশ্ন ও উত্তর। ভর্তি প্রক্রিয়া, পেমেন্ট, ক্লাস সময়সূচী এবং আরও অনেক কিছু জানুন।',
     keywords: ['FAQ', 'IOA', 'ইসলামিক শিক্ষা', 'অনলাইন মাদ্রাসা', 'ভর্তি', 'প্রশ্ন-উত্তর'],
+    openGraph: {
+        title: 'সাধারণ জিজ্ঞাসা - ইসলামিক অনলাইন একাডেমি',
+        description: 'IOA সম্পর্কে সাধারণ প্রশ্ন ও উত্তর।',
+        url: seoUrl('/faq'),
+        type: 'website',
+    },
+    alternates: {
+        canonical: seoUrl('/faq'),
+    },
 };
 
 export default function FAQPage() {

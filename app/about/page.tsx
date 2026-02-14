@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { seoUrl } from '@/lib/seo';
 import Image from 'next/image';
 import {
     BookOpen,
@@ -15,8 +16,17 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: 'আমাদের সম্পর্কে - ইসলামিক অনলাইন একাডেমি',
+    title: 'আমাদের সম্পর্কে',
     description: 'ইসলামিক অনলাইন একাডেমি - বাংলাদেশের বিশ্বস্ত অনলাইন ইসলামিক শিক্ষা প্ল্যাটফর্ম। আমাদের মিশন, ভিশন এবং কর্মধারা সম্পর্কে জানুন।',
+    openGraph: {
+        title: 'আমাদের সম্পর্কে - ইসলামিক অনলাইন একাডেমি',
+        description: 'আমাদের মিশন, ভিশন এবং কর্মধারা সম্পর্কে জানুন।',
+        url: seoUrl('/about'),
+        type: 'website',
+    },
+    alternates: {
+        canonical: seoUrl('/about'),
+    },
 };
 
 const stats = [
