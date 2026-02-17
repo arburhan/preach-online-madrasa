@@ -70,14 +70,14 @@ export default async function TeachersPage() {
                             <p className="text-muted-foreground">মোট {serializedTeachers.length} জন উস্তায</p>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-4 gap-6">
                             {serializedTeachers.map((teacher) => (
                                 <Link
                                     key={teacher._id}
                                     href={`/teachers/${teacher._id}`}
                                     className="group"
                                 >
-                                    <div className="bg-card border rounded-xl hover:shadow-lg hover:border-purple-500 transition-all text-center py-6 md:py-8 px-3 md:px-4 w-48 md:w-76">
+                                    <div className="bg-card border rounded-xl hover:shadow-lg hover:border-purple-500 transition-all text-center py-6 md:py-8 px-3 w-full h-48 md:h-64">
                                         {/* Round Image */}
                                         <div className="relative w-24 h-24 mx-auto mb-4">
                                             {teacher.image ? (

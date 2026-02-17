@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, X, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import {
@@ -14,6 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -47,9 +48,7 @@ export default function Navbar() {
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                        <BookOpen className="h-6 w-6" />
-                    </div>
+                    <Image src="/icon.svg" alt="Logo" width={60} height={60} />
                     <span className="text-xl font-bold text-primary">ইসলামিক অনলাইন একাডেমি</span>
                 </Link>
 

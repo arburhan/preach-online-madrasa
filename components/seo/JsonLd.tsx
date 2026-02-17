@@ -17,12 +17,12 @@ export function OrganizationJsonLd() {
         '@type': 'EducationalOrganization',
         name: SITE_NAME,
         url: SITE_URL,
-        logo: seoUrl('/favicon.ico'),
+        logo: seoUrl('/icon-512.png'),
         description: SITE_DESCRIPTION,
         sameAs: [],
         contactPoint: {
             '@type': 'ContactPoint',
-            email: 'info@ioa.bd',
+            email: 'www.ioa.bd@gmail.com',
             contactType: 'customer service',
             availableLanguage: ['Bengali', 'English'],
         },
@@ -113,7 +113,7 @@ export function ArticleJsonLd({
             name: SITE_NAME,
             logo: {
                 '@type': 'ImageObject',
-                url: seoUrl('/favicon.ico'),
+                url: seoUrl('/icon-512.png'),
             },
         },
         datePublished: publishedAt,
