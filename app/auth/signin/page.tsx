@@ -59,7 +59,7 @@ export default function SignInPage() {
                         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
                             <BookOpen className="h-9 w-9" />
                         </div>
-                        <h1 className="text-2xl font-bold text-primary">অনলাইন মাদ্রাসা</h1>
+                        <h1 className="text-2xl font-bold text-primary">অনলাইন একাডেমি</h1>
                     </Link>
                 </div>
 

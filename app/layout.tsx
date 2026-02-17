@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   keywords: [
     "ইসলামিক শিক্ষা",
-    "অনলাইন মাদ্রাসা",
+    "অনলাইন একাডেমি",
     "কুরআন শিক্ষা",
     "হাদিস শিক্ষা",
     "ইসলামিক কোর্স",
@@ -52,6 +52,18 @@ export const metadata: Metadata = {
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/manifest.webmanifest",
   openGraph: {
     ...defaultOpenGraph,
     title: `${SITE_NAME} - ইসলামিক শিক্ষা প্ল্যাটফর্ম`,

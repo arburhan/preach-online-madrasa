@@ -2,10 +2,11 @@
 // Centralized SEO Configuration
 // ============================================
 
-export const SITE_URL = process.env.NEXTAUTH_URL || 'https://ioa.bd';
+const rawUrl = process.env.NEXTAUTH_URL || 'https://ioa.bd';
+export const SITE_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 export const SITE_NAME = 'ইসলামিক অনলাইন একাডেমি';
 export const SITE_NAME_EN = 'Islamic Online Academy';
-export const SITE_DESCRIPTION = 'বাংলাদেশের সম্পূর্ণ অনলাইন মাদ্রাসা প্ল্যাটফর্ম। কুরআন, হাদিস এবং ইসলামিক শিক্ষা অনলাইনে শিখুন।';
+export const SITE_DESCRIPTION = 'বাংলাদেশের সম্পূর্ণ অনলাইন একাডেমি প্ল্যাটফর্ম। কুরআন, হাদিস এবং ইসলামিক শিক্ষা অনলাইনে শিখুন।';
 
 /**
  * Build an absolute canonical URL from a relative path

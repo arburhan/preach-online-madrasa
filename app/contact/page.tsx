@@ -77,7 +77,7 @@ export default function ContactPage() {
                                 <label className="block text-sm font-medium mb-2">ফোন নম্বর</label>
                                 <input
                                     type="tel"
-                                    placeholder="+880 1XXX-XXXXXX"
+                                    placeholder="+8809613-000020"
                                     className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                                 />
                             </div>
@@ -124,8 +124,8 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold mb-1">ইমেইল</h3>
-                                        <a href="mailto:info@ioa.bd" className="text-muted-foreground hover:text-primary transition-colors">
-                                            info@ioa.bd
+                                        <a href="mailto:www.ioa.bd@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
+                                            www.ioa.bd@gmail.com
                                         </a>
                                         <p className="text-sm text-muted-foreground mt-1">
                                             সাধারণত ২৪ ঘন্টার মধ্যে উত্তর দেওয়া হয়
@@ -155,7 +155,7 @@ export default function ContactPage() {
                                     <div>
                                         <h3 className="font-semibold mb-1">ঠিকানা</h3>
                                         <p className="text-muted-foreground">
-                                            ঢাকা, বাংলাদেশ
+                                            মাদরাসাতুদ দাওয়াহ, বাসা নং: ০৩, ব্লক: বি, ফকিরবাড়ি মার্কেট, মিরপুর-১০,  ঢাকা-১২১৬।
                                         </p>
                                     </div>
                                 </div>
@@ -185,7 +185,7 @@ export default function ContactPage() {
                             </p>
                             <div className="flex gap-3">
                                 <a
-                                    href="https://facebook.com"
+                                    href="https://www.facebook.com/ioa.islamic"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"

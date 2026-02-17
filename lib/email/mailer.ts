@@ -18,7 +18,7 @@ interface EmailOptions {
 export async function sendEmail({ to, subject, html }: EmailOptions): Promise<boolean> {
     try {
         await transporter.sendMail({
-            from: `"প্রিচ অনলাইন মাদ্রাসা" <${process.env.GOOGLE_EMAIL}>`,
+            from: `"ইসলামিক অনলাইন একাডেমি" <${process.env.GOOGLE_EMAIL}>`,
             to,
             subject,
             html,
@@ -45,7 +45,7 @@ export async function sendVerificationEmail(email: string, token: string): Promi
             <div style="max-width: 600px; margin: 40px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                 <!-- Header -->
                 <div style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); padding: 32px; text-align: center;">
-                    <h1 style="color: white; margin: 0; font-size: 24px;">প্রিচ অনলাইন মাদ্রাসা</h1>
+                    <h1 style="color: white; margin: 0; font-size: 24px;">ইসলামিক অনলাইন একাডেমি</h1>
                 </div>
                 
                 <!-- Content -->
@@ -104,7 +104,7 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
             <div style="max-width: 600px; margin: 40px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                 <!-- Header -->
                 <div style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); padding: 32px; text-align: center;">
-                    <h1 style="color: white; margin: 0; font-size: 24px;">প্রিচ অনলাইন মাদ্রাসা</h1>
+                    <h1 style="color: white; margin: 0; font-size: 24px;">ইসলামিক অনলাইন একাডেমি</h1>
                 </div>
                 
                 <!-- Content -->

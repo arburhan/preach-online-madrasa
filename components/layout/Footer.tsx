@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 const quickLinks = [
     { name: 'হোম', href: '/' },
@@ -29,7 +30,7 @@ const legalLinks = [
 ];
 
 const socialLinks = [
-    { name: 'Facebook', icon: Facebook, href: 'https://facebook.com', color: 'hover:text-blue-500' },
+    { name: 'Facebook', icon: Facebook, href: 'https://www.facebook.com/ioa.islamic', color: 'hover:text-blue-500' },
     { name: 'YouTube', icon: Youtube, href: 'https://youtube.com', color: 'hover:text-red-500' },
 ];
 
@@ -73,12 +74,10 @@ export default function Footer() {
                     {/* Brand Section */}
                     <div className="lg:col-span-1">
                         <Link href="/" className="flex items-center gap-3 mb-4 group">
-                            <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                                <BookOpen className="h-6 w-6 text-primary" />
-                            </div>
+                            <Image src="/icon.svg" alt="Logo" width={40} height={40} />
                             <div>
                                 <h3 className="text-xl font-bold text-foreground">IOA</h3>
-                                <p className="text-xs text-muted-foreground">অনলাইন মাদ্রাসা</p>
+                                <p className="text-xs text-muted-foreground">অনলাইন একাডেমি</p>
                             </div>
                         </Link>
                         <p className="text-muted-foreground text-sm leading-relaxed mb-6">
@@ -166,7 +165,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             <li>
                                 <a
-                                    href="mailto:info@ioa.bd"
+                                    href="mailto:www.ioa.bd@gmail.com"
                                     className="flex items-start gap-3 text-muted-foreground hover:text-primary transition-colors group"
                                 >
                                     <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors mt-0.5">
@@ -174,7 +173,7 @@ export default function Footer() {
                                     </div>
                                     <div>
                                         <span className="text-xs text-muted-foreground/70">ইমেইল</span>
-                                        <p className="text-sm">info@ioa.bd</p>
+                                        <p className="text-sm">www.ioa.bd@gmail.com</p>
                                     </div>
                                 </a>
                             </li>
@@ -188,7 +187,7 @@ export default function Footer() {
                                     </div>
                                     <div>
                                         <span className="text-xs text-muted-foreground/70">ফোন</span>
-                                        <p className="text-sm">+880 1XXX-XXXXXX</p>
+                                        <p className="text-sm">+8809613-000020</p>
                                     </div>
                                 </a>
                             </li>
@@ -198,7 +197,7 @@ export default function Footer() {
                                 </div>
                                 <div>
                                     <span className="text-xs text-muted-foreground/70">ঠিকানা</span>
-                                    <p className="text-sm">ঢাকা, বাংলাদেশ</p>
+                                    <p className="text-sm">মাদরাসাতুদ দাওয়াহ, বাসা নং: ০৩, ব্লক: বি, ফকিরবাড়ি মার্কেট, মিরপুর-১০,  ঢাকা-১২১৬।</p>
                                 </div>
                             </li>
                         </ul>
