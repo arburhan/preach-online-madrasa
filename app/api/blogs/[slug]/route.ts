@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
 import BlogPost from '@/lib/db/models/BlogPost';
+import '@/lib/db/models/Admin'; // Ensure Admin model is registered for populate
 
 // GET - Get single blog post by slug (public)
 export async function GET(

@@ -109,6 +109,7 @@ export default function ImagePlugin({ onUpload }: ImagePluginProps) {
                                         className="hidden"
                                     />
                                     <button
+                                        type="button"
                                         onClick={() => fileInputRef.current?.click()}
                                         disabled={uploading}
                                         className="w-full py-2 px-4 border-2 border-dashed border-primary/30 rounded-lg hover:bg-primary/5 transition-colors disabled:opacity-50"
@@ -147,12 +148,14 @@ export default function ImagePlugin({ onUpload }: ImagePluginProps) {
 
                         <div className="flex justify-end gap-2 mt-6">
                             <button
+                                type="button"
                                 onClick={() => setShowModal(false)}
                                 className="px-4 py-2 text-sm rounded-lg hover:bg-muted"
                             >
                                 বাতিল
                             </button>
                             <button
+                                type="button"
                                 onClick={handleUrlInsert}
                                 disabled={!imageUrl.trim()}
                                 className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"

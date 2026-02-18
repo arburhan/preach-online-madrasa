@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
+    const { slug: rawSlug } = await params;
+    const slug = decodeURIComponent(rawSlug);
     await connectDB();
 
     // Check if slug looks like a MongoDB ObjectId (24 hex chars)
@@ -67,7 +68,8 @@ export default async function ProgramDetailPage({
 }: {
     params: Promise<{ slug: string }>;
 }) {
-    const { slug } = await params;
+    const { slug: rawSlug } = await params;
+    const slug = decodeURIComponent(rawSlug);
     await connectDB();
 
     // Find by slug or ID

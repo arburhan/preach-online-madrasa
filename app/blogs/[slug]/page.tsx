@@ -14,11 +14,13 @@ interface PageProps {
 
 // ─── Dynamic Metadata for SEO ───
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-    const { slug } = await params;
+    const { slug: rawSlug } = await params;
+    const slug = decodeURIComponent(rawSlug);
     await connectDB();
 
     const post = await BlogPost.findOne({ slug, status: 'published' })
         .select('title excerpt thumbnail slug publishedAt')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .lean() as any;
 
     if (!post) {
@@ -26,6 +28,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 
     const description = post.excerpt?.substring(0, 160) || '';
+    const publishedTime = post.publishedAt instanceof Date
+        ? post.publishedAt.toISOString()
+        : typeof post.publishedAt === 'string' ? post.publishedAt : undefined;
 
     return {
         title: post.title,
@@ -35,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             description,
             url: seoUrl(`/blogs/${post.slug}`),
             type: 'article',
-            publishedTime: post.publishedAt?.toISOString(),
+            publishedTime,
             ...(post.thumbnail ? { images: [{ url: post.thumbnail, width: 1200, height: 630, alt: post.title }] } : {}),
         },
         alternates: {
@@ -46,13 +51,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // ─── Server Component: Fetch data from DB ───
 export default async function BlogPostPage({ params }: PageProps) {
-    const { slug } = await params;
+    const { slug: rawSlug } = await params;
+    const slug = decodeURIComponent(rawSlug);
     await connectDB();
 
     // Fetch the post
     const post = await BlogPost.findOne({ slug, status: 'published' })
         .populate('category', 'nameBn nameEn')
         .populate('author', 'name')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .lean() as any;
 
     if (!post) {
@@ -63,6 +70,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     BlogPost.findByIdAndUpdate(post._id, { $inc: { viewCount: 1 } }).exec();
 
     // Fetch related posts from same category
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let relatedPosts: any[] = [];
     if (post.category?._id) {
         const related = await BlogPost.find({
@@ -75,6 +83,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             .limit(3)
             .lean();
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         relatedPosts = related.map((p: any) => ({
             _id: p._id.toString(),
             title: p.title,

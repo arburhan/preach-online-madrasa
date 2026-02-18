@@ -70,7 +70,7 @@ export default function BlogPostClient({
         <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
             {/* Hero Section with Thumbnail */}
             {post.thumbnail && (
-                <section className="relative h-[50vh] min-h-[400px]">
+                <section className="relative h-[30vh] min-h-[300px]">
                     <Image
                         src={post.thumbnail}
                         width={1000}
