@@ -77,7 +77,7 @@ export default function Footer() {
                             <Image src="/icon.svg" alt="Logo" width={40} height={40} />
                             <div>
                                 <h3 className="text-xl font-bold text-foreground">IOA</h3>
-                                <p className="text-xs text-muted-foreground">অনলাইন একাডেমি</p>
+                                <p className="text-xs text-muted-foreground">ইসলামিক অনলাইন একাডেমি</p>
                             </div>
                         </Link>
                         <p className="text-muted-foreground text-sm leading-relaxed mb-6">
