@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
 import BlogPost from '@/lib/db/models/BlogPost';
+import '@/lib/db/models/Admin';
 
 // GET - Get blog posts for public (only published)
 export async function GET(request: NextRequest) {

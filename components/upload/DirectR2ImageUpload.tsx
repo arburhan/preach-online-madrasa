@@ -188,6 +188,7 @@ export function DirectR2ImageUpload({ onUploadComplete, onUploadError }: DirectR
 
                         <div className="flex gap-2 justify-center">
                             <Button
+                                type="button"
                                 onClick={handleUpload}
                                 disabled={uploading}
                                 className="bg-purple-600 hover:bg-purple-700"
@@ -205,6 +206,7 @@ export function DirectR2ImageUpload({ onUploadComplete, onUploadError }: DirectR
                                 )}
                             </Button>
                             <Button
+                                type="button"
                                 variant="outline"
                                 onClick={handleClear}
                                 disabled={uploading}
@@ -218,6 +220,7 @@ export function DirectR2ImageUpload({ onUploadComplete, onUploadError }: DirectR
                     <div className="text-center">
                         <ImageIcon className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                         <Button
+                            type="button"
                             onClick={() => fileInputRef.current?.click()}
                             variant="outline"
                             size="lg"

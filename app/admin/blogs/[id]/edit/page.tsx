@@ -312,6 +312,35 @@ export default function EditBlogPostPage() {
                             initialContent={formData.content}
                             onChange={(content: string) => setFormData(prev => ({ ...prev, content }))}
                             placeholder="এখানে পোষ্টের বিস্তারিত লিখুন..."
+                            onImageUpload={async (file: File) => {
+                                const res = await fetch('/api/r2/upload', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        fileName: file.name,
+                                        fileType: file.type,
+                                        folder: 'images/blogs',
+                                    }),
+                                });
+
+                                if (!res.ok) {
+                                    throw new Error('Upload URL পেতে সমস্যা হয়েছে');
+                                }
+
+                                const { uploadUrl, publicUrl } = await res.json();
+
+                                const uploadRes = await fetch(uploadUrl, {
+                                    method: 'PUT',
+                                    body: file,
+                                    headers: { 'Content-Type': file.type },
+                                });
+
+                                if (!uploadRes.ok) {
+                                    throw new Error('ছবি আপলোড করতে সমস্যা হয়েছে');
+                                }
+
+                                return publicUrl;
+                            }}
                         />
                     </div>
 

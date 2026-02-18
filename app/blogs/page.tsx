@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Loader2, Calendar, Eye, ArrowRight, Tag } from 'lucide-react';
 import Image from 'next/image';
@@ -30,11 +30,7 @@ export default function BlogsPage() {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('');
 
-    useEffect(() => {
-        fetchData();
-    }, [selectedCategory]);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             let url = '/api/blogs?limit=20';
             if (selectedCategory) url += `&category=${selectedCategory}`;
@@ -57,7 +53,11 @@ export default function BlogsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedCategory]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('bn-BD', {
@@ -111,7 +111,7 @@ export default function BlogsPage() {
                                                 src={post.thumbnail}
                                                 alt={post.title}
                                                 width={500}
-                                                height={500}
+                                                height={300}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             />
                                             <div className="absolute top-3 left-3">
@@ -177,7 +177,7 @@ export default function BlogsPage() {
                                                     src={post.thumbnail}
                                                     alt={post.title}
                                                     width={500}
-                                                    height={500}
+                                                    height={300}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                 />
                                             </div>
