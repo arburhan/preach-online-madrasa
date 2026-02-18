@@ -74,9 +74,9 @@ export default function AboutPage() {
             {/* Hero Section */}
             <div className="bg-linear-to-br from-[#3fdaa6] via-[#b3f2d4] to-[#3fdaa6] py-8 md:py-18">
                 <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto text-center">
+                    <div className="max-w-5xl mx-auto text-center">
                         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 mb-6">
-                            <BookOpen className="h-10 w-10 text-white" />
+                            <Image src="/icon.svg" alt="Islamic Online Academy Logo" width={60} height={60} className='rounded-3xl' />
                         </div>
                         <h1 className="text-3xl md:text-5xl font-bold mb-6 text-black">
                             ইসলামিক অনলাইন একাডেমি
@@ -84,6 +84,9 @@ export default function AboutPage() {
                         <p className="text-lg md:text-xl text-blue-950 leading-relaxed">
                             বাংলাদেশের অন্যতম বিশ্বস্ত অনলাইন ইসলামিক শিক্ষা প্ল্যাটফর্ম।
                             আমরা সহীহ ইসলামিক জ্ঞান সহজ ও আধুনিক উপায়ে সকলের কাছে পৌঁছে দিতে প্রতিশ্রুতিবদ্ধ।
+                            <br />
+                            আলহামদুলিল্লাহ ! আমাদের  রয়েছে ২০ বছরের অধিক সময়ে শিক্ষকতা ও মাদ্রাসা পরিচালনার অভিজ্ঞতা। উলামায়ে কেরামের তত্ত্বাবধানে ঢাকার প্রাণকেন্দ্র মিরপুর-১০-এ মাদরাসাতুদ দাওয়াহ- এর আয়োজনে সকল বয়স-শ্রেণির মানুষের জন্য ঐশী নূর দ্বীন ইসলামের সুমহান শিক্ষার নির্যাস পাবেন।
+                            সুযোগ পাবেন উস্তাদ ও উস্তাযার বরকতময় দ্বীনি সোহবতের।
                         </p>
                     </div>
                 </div>

@@ -1,7 +1,14 @@
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function HeroSection() {
+    const ioaSpecial = [
+        'নারী ও পুরুষদের পৃথক ক্লাসকক্ষ',
+        'ঘরে বসে লাইভ / সুবিধাজনক ফ্রি সময়ে  রেকর্ড থেকে শেখা',
+        'মেয়ে-দের উস্তাযা হিসেবে থাকবেন আলেমাগণ',
+        'অনলাইনের পর্যায়ক্রমে দাওরায়ে হাদীস সম্পন্ন করার সুযোগ'
+    ];
     return (
         <section className="relative overflow-hidden bg-linear-to-br from-primary/10 via-background to-accent/10">
             <div className="container mx-auto px-4 py-20 md:py-32">
@@ -10,8 +17,17 @@ export default function HeroSection() {
                         অনলাইনে ধর্মীয় শিক্ষা অর্জন করে আলেম/আলেমা হবার পথে অগ্রসর হওয়া কি সম্ভব?
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground mb-8">
-                        আলহামদুলিল্লাহ  ! আমাদের পরিচালিত বাংলাদেশ নৈশ মাদ্রাসা শিক্ষাবোর্ডে আমাদের অধীনে প্রতিবছর শতাধিক শিক্ষার্থী আলেম হয়ে দেশ-বিদেশে দ্বীনি ও দুনিয়াবি উৎকর্ষতা অর্জন করে প্রতিষ্ঠানের জন্য সুনাম বয়ে এনেছে ।
+                        জেনারেল, শিক্ষিত, কর্মব্যস্ত ও পর্দানশীনদের জন্য Basic, Advance ও Expert- সকল লেভেলে ধাপে ধাপে সর্বোচ্চ দ্বীনি শিক্ষার আয়োজন করেছে IOA
                     </p>
+                    {/* special */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+                        {ioaSpecial.map((value, index) => (
+                            <div key={index} className="flex items-center gap-3 bg-card rounded-lg border p-4 hover:bg-primary/5 transition-colors">
+                                <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+                                <span className="font-medium">{value}</span>
+                            </div>
+                        ))}
+                    </div>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/courses">
                             <Button size="lg" className="text-lg px-8">
