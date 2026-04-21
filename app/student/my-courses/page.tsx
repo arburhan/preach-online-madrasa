@@ -5,7 +5,7 @@ import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen, CheckCircle2, PlayCircle } from 'lucide-react';
+import { BookOpen, CheckCircle2, PlayCircle, MessageCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,9 +23,9 @@ export default async function MyCoursesPage() {
 
     await connectDB();
 
-    // Get user's enrolled courses
+    // Get user's enrolled courses AND gender
     const userData = await Student.findById(session.user.id)
-        .select('enrolledCourses')
+        .select('enrolledCourses gender')
         .lean();
 
     if (!userData || !userData.enrolledCourses || userData.enrolledCourses.length === 0) {
@@ -54,21 +54,20 @@ export default async function MyCoursesPage() {
         );
     }
 
-    // Fetch enrolled courses
-    // Support both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
+    // Fetch enrolled courses with WhatsApp links
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const enrolledCourseIds = userData.enrolledCourses.map((e: any) => {
-        // Old format: e is just an ObjectId
         if (e?.toString && typeof e.toString === 'function' && !e.course) {
             return e;
         }
-        // New format: e.course is the ObjectId
         return e.course;
     });
-    const courses = await Course.find({
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const courses: any[] = await Course.find({
         _id: { $in: enrolledCourseIds }
     })
-        .select('titleBn titleEn thumbnail totalLessons status instructors')
+        .select('titleBn titleEn thumbnail totalLessons status instructors slug whatsappGroupLinkMale whatsappGroupLinkFemale')
         .lean();
 
     // Manually fetch all teachers
@@ -80,6 +79,7 @@ export default async function MyCoursesPage() {
 
     const teacherMap = new Map(teachers.map(t => [t._id.toString(), t]));
 
+    const studentGender = userData.gender;
 
     return (
         <div className="min-h-screen bg-background">
@@ -94,80 +94,103 @@ export default async function MyCoursesPage() {
 
                 {/* Courses Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {courses.map((course) => (
-                        <div
-                            key={course._id.toString()}
-                            className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow"
-                        >
-                            {/* Thumbnail */}
-                            {course.thumbnail ? (
-                                <div className="relative h-48 w-full bg-muted">
-                                    <Image
-                                        src={course.thumbnail}
-                                        alt={course.titleBn}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="h-48 w-full bg-linear-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-                                    <BookOpen className="h-16 w-16 text-white/50" />
-                                </div>
-                            )}
+                    {courses.map((course) => {
+                        // Pick the right WhatsApp link based on student's gender
+                        const whatsappLink =
+                            studentGender === 'female'
+                                ? course.whatsappGroupLinkFemale
+                                : studentGender === 'male'
+                                ? course.whatsappGroupLinkMale
+                                : null;
 
-                            {/* Content */}
-                            <div className="p-6">
-                                {/* Title */}
-                                <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                                    {course.titleBn}
-                                </h3>
-
-                                {/* Instructor */}
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {(course as any).instructors?.length > 0 && (
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                        {(course as any).instructors.map((id: any) => teacherMap.get(id.toString())?.name).filter(Boolean).join(', ') || 'Unknown'}
-                                    </p>
+                        return (
+                            <div
+                                key={course._id.toString()}
+                                className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow"
+                            >
+                                {/* Thumbnail */}
+                                {course.thumbnail ? (
+                                    <div className="relative h-48 w-full bg-muted">
+                                        <Image
+                                            src={course.thumbnail}
+                                            alt={course.titleBn}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="h-48 w-full bg-linear-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                                        <BookOpen className="h-16 w-16 text-white/50" />
+                                    </div>
                                 )}
 
-                                {/* Progress Placeholder - Will implement with actual progress later */}
-                                <div className="mb-4">
-                                    <div className="flex items-center justify-between text-sm mb-2">
-                                        <span className="text-muted-foreground">অগ্রগতি</span>
-                                        <span className="font-medium">0%</span>
-                                    </div>
-                                    <div className="w-full bg-muted rounded-full h-2">
-                                        <div
-                                            className="bg-green-600 h-2 rounded-full transition-all"
-                                            style={{ width: '0%' }}
-                                        ></div>
-                                    </div>
-                                </div>
+                                {/* Content */}
+                                <div className="p-6">
+                                    {/* Title */}
+                                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+                                        {course.titleBn}
+                                    </h3>
 
-                                {/* Stats */}
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                                    <div className="flex items-center gap-1">
-                                        <BookOpen className="h-4 w-4" />
-                                        <span>{course.totalLessons || 0} পাঠ</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <CheckCircle2 className="h-4 w-4" />
-                                        <span>0 সম্পন্ন</span>
-                                    </div>
-                                </div>
+                                    {/* Instructor */}
+                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                    {(course as any).instructors?.length > 0 && (
+                                        <p className="text-sm text-muted-foreground mb-4">
+                                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                            {(course as any).instructors.map((id: any) => teacherMap.get(id.toString())?.name).filter(Boolean).join(', ') || 'Unknown'}
+                                        </p>
+                                    )}
 
-                                {/* Continue Button */}
-                                <Link
-                                    href={`/student/browse/${course._id.toString()}`}
-                                    className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                                >
-                                    <PlayCircle className="h-5 w-5" />
-                                    শেখা চালিয়ে যান
-                                </Link>
+                                    {/* Progress Placeholder */}
+                                    <div className="mb-4">
+                                        <div className="flex items-center justify-between text-sm mb-2">
+                                            <span className="text-muted-foreground">অগ্রগতি</span>
+                                            <span className="font-medium">0%</span>
+                                        </div>
+                                        <div className="w-full bg-muted rounded-full h-2">
+                                            <div
+                                                className="bg-green-600 h-2 rounded-full transition-all"
+                                                style={{ width: '0%' }}
+                                            ></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Stats */}
+                                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                                        <div className="flex items-center gap-1">
+                                            <BookOpen className="h-4 w-4" />
+                                            <span>{course.totalLessons || 0} পাঠ</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <CheckCircle2 className="h-4 w-4" />
+                                            <span>0 সম্পন্ন</span>
+                                        </div>
+                                    </div>
+
+                                    {/* WhatsApp join banner - shows only if link available */}
+                                    {whatsappLink && (
+                                        <a
+                                            href={whatsappLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2 w-full px-4 py-2.5 mb-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                        >
+                                            <MessageCircle className="h-4 w-4 shrink-0" />
+                                            হোয়াটসঅ্যাপ গ্রুপে যোগ দিন
+                                        </a>
+                                    )}
+
+                                    {/* Continue Button */}
+                                    <Link
+                                        href={`/student/watch/${course.slug || course._id.toString()}`}
+                                        className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                                    >
+                                        <PlayCircle className="h-4 w-4" />
+                                        শেখা চালিয়ে যান
+                                    </Link>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </div>

@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
             instructors,
             thumbnail,
             publishImmediately,
+            whatsappGroupLinkMale,
+            whatsappGroupLinkFemale,
         } = body;
 
         // Validation
@@ -56,6 +58,16 @@ export async function POST(request: NextRequest) {
                 { error: 'থাম্বনেইল আবশ্যক' },
                 { status: 400 }
             );
+        }
+
+        // Validate WhatsApp links when publishing immediately
+        if (publishImmediately) {
+            if (!whatsappGroupLinkMale || !whatsappGroupLinkFemale) {
+                return NextResponse.json(
+                    { error: 'কোর্স প্রকাশ করতে ছেলে ও মেয়ে উভয়ের হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক আবশ্যক' },
+                    { status: 400 }
+                );
+            }
         }
 
         await connectDB();
@@ -88,6 +100,8 @@ export async function POST(request: NextRequest) {
             createdBy: user.id,
             status: publishImmediately ? 'published' : 'draft',
             publishedAt: publishImmediately ? new Date() : undefined,
+            whatsappGroupLinkMale: whatsappGroupLinkMale || undefined,
+            whatsappGroupLinkFemale: whatsappGroupLinkFemale || undefined,
         });
 
         return NextResponse.json({

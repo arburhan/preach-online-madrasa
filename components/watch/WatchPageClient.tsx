@@ -6,7 +6,7 @@ import { LessonPlaylist } from '@/components/video/LessonPlaylist';
 import NoteEditor from '@/components/notes/NoteEditor';
 import ExamView from '@/components/exams/ExamView';
 import Link from 'next/link';
-import { BookOpen, Clock, FileText, Loader2, CheckCircle, Award } from 'lucide-react';
+import { BookOpen, Clock, FileText, Loader2, CheckCircle, Award, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ContentItem {
@@ -40,6 +40,9 @@ interface WatchPageClientProps {
     contentId: string; // Can be lesson or exam ID
     courseTitle: string;
     initialLesson?: Lesson; // Pre-fetched lesson data from server
+    whatsappGroupLinkMale?: string;
+    whatsappGroupLinkFemale?: string;
+    studentGender?: 'male' | 'female';
 }
 
 export default function WatchPageClient({
@@ -47,6 +50,9 @@ export default function WatchPageClient({
     contentId,
     courseTitle,
     initialLesson,
+    whatsappGroupLinkMale,
+    whatsappGroupLinkFemale,
+    studentGender,
 }: WatchPageClientProps) {
     const [content, setContent] = useState<ContentItem[]>([]);
     const [currentContent, setCurrentContent] = useState<ContentItem | null>(null);
@@ -173,6 +179,74 @@ export default function WatchPageClient({
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Content Area */}
                     <div className="lg:col-span-2 space-y-6">
+                        {/* WhatsApp Group Join Banner */}
+                        {(() => {
+                            const hasAnyLink = whatsappGroupLinkMale || whatsappGroupLinkFemale;
+                            if (!hasAnyLink) return null;
+
+                            // Gender is set - show the specific link
+                            const targetLink = studentGender === 'female' ? whatsappGroupLinkFemale : studentGender === 'male' ? whatsappGroupLinkMale : null;
+
+                            if (targetLink) {
+                                return (
+                                    <a
+                                        href={targetLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl group"
+                                    >
+                                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                                            <MessageCircle className="h-6 w-6" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="font-bold text-lg">হোয়াটসঅ্যাপ গ্রুপে যোগ দিন</p>
+                                            <p className="text-sm text-white/80">কোর্সের গ্রুপে যুক্ত হয়ে আপডেট পান এবং সাহায্য নিন</p>
+                                        </div>
+                                        <span className="text-white/80 text-2xl group-hover:translate-x-1 transition-transform">→</span>
+                                    </a>
+                                );
+                            }
+
+                            // Gender NOT set - show both links for user to choose
+                            return (
+                                <div className="rounded-xl border border-green-500/30 bg-green-50 dark:bg-green-950/20 p-4 space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-green-600 rounded-lg">
+                                            <MessageCircle className="h-5 w-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-green-800 dark:text-green-200">হোয়াটসঅ্যাপ গ্রুপে যোগ দিন</p>
+                                            <p className="text-sm text-green-700 dark:text-green-300">আপনার জন্য নির্ধারিত গ্রুপে যোগ দিন</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        {whatsappGroupLinkMale && (
+                                            <a
+                                                href={whatsappGroupLinkMale}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                            >
+                                                <MessageCircle className="h-4 w-4" />
+                                                ছেলেদের গ্রুপ
+                                            </a>
+                                        )}
+                                        {whatsappGroupLinkFemale && (
+                                            <a
+                                                href={whatsappGroupLinkFemale}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                            >
+                                                <MessageCircle className="h-4 w-4" />
+                                                মেয়েদের গ্রুপ
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
                         {/* Content Display */}
                         {currentContent.type === 'lesson' && currentLesson ? (
                             <>

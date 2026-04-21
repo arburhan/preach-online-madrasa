@@ -71,9 +71,12 @@ export async function PUT(
         }
 
         // Check if user is one of the instructors or admin
+        // instructors may be raw ObjectIds or populated objects
         const isInstructor = Array.isArray(course.instructors)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ? course.instructors.some((inst: any) => inst._id?.toString() === user.id)
+            ? course.instructors.some((inst: any) =>
+                (inst._id?.toString() === user.id) || (inst.toString() === user.id)
+            )
             : false;
 
         if (!isInstructor && user.role !== 'admin') {

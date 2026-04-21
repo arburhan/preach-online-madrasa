@@ -77,6 +77,8 @@ export default async function EditCoursePage({
         createdAt: course.createdAt?.toISOString(),
         updatedAt: course.updatedAt?.toISOString(),
         isCompleted: course.isCompleted || false,
+        whatsappGroupLinkMale: course.whatsappGroupLinkMale || '',
+        whatsappGroupLinkFemale: course.whatsappGroupLinkFemale || '',
     };
 
     // Serialize lessons for client component  
