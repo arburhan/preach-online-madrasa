@@ -124,8 +124,8 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold mb-1">ইমেইল</h3>
-                                        <a href="mailto:www.ioa.bd@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
-                                            www.ioa.bd@gmail.com
+                                        <a href="mailto:info@ioa.bd" className="text-muted-foreground hover:text-primary transition-colors">
+                                            info@ioa.bd
                                         </a>
                                         <p className="text-sm text-muted-foreground mt-1">
                                             সাধারণত ২৪ ঘন্টার মধ্যে উত্তর দেওয়া হয়

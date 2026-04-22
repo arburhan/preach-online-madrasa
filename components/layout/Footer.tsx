@@ -7,9 +7,11 @@ import {
     Mail,
     Phone,
     MapPin,
-    BookOpen,
     Heart,
     ArrowUp,
+    BadgeCheck,
+    Briefcase,
+    MapPinned,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -24,7 +26,7 @@ const quickLinks = [
 ];
 
 const legalLinks = [
-    { name: 'গোপনীয়তা নীতি', href: '/privacy' },
+    { name: 'গোপনীয়তা নীতি', href: '/policy' },
     { name: 'শর্তাবলী', href: '/terms' },
     { name: 'রিফান্ড পলিসি', href: '/refund' },
 ];
@@ -165,7 +167,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             <li>
                                 <a
-                                    href="mailto:www.ioa.bd@gmail.com"
+                                    href="mailto:info@ioa.bd"
                                     className="flex items-start gap-3 text-muted-foreground hover:text-primary transition-colors group"
                                 >
                                     <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors mt-0.5">
@@ -173,7 +175,7 @@ export default function Footer() {
                                     </div>
                                     <div>
                                         <span className="text-xs text-muted-foreground/70">ইমেইল</span>
-                                        <p className="text-sm">www.ioa.bd@gmail.com</p>
+                                        <p className="text-sm">info@ioa.bd</p>
                                     </div>
                                 </a>
                             </li>
@@ -202,6 +204,52 @@ export default function Footer() {
                             </li>
                         </ul>
                     </div>
+                </div>
+            </div>
+
+            {/* Government Registration Section */}
+            <div className="border-t border-border/50 bg-muted/50">
+                <div className="container mx-auto px-4 py-5">
+                    {/* Header */}
+                    <div className="flex items-center gap-2 mb-4">
+                        <BadgeCheck className="h-4 w-4 text-primary" />
+                        <span className="text-xs font-semibold text-primary tracking-wide">সরকারি নিবন্ধন তথ্য</span>
+                    </div>
+
+                    {/* Info Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* Trade License */}
+                        <div className="flex items-start gap-2.5 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5">
+                            <BadgeCheck className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                            <div>
+                                <span className="text-[10px] text-muted-foreground leading-none">ট্রেড লাইসেন্স নম্বর</span>
+                                <p className="text-xs font-semibold text-primary mt-0.5">49374115089</p>
+                            </div>
+                        </div>
+
+                        {/* Business Type */}
+                        <div className="flex items-start gap-2.5 rounded-lg border border-border/50 bg-card px-3 py-2.5">
+                            <Briefcase className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                            <div>
+                                <span className="text-[10px] text-muted-foreground leading-none">সেবার ধরন</span>
+                                <p className="text-[11px] text-foreground/80 mt-0.5 leading-snug">অফলাইন ও অনলাইন শিক্ষা প্রতিষ্ঠান; প্রকাশনা; ট্রেনিং সেন্টার</p>
+                            </div>
+                        </div>
+
+                        {/* Address */}
+                        <div className="flex items-start gap-2.5 rounded-lg border border-border/50 bg-card px-3 py-2.5">
+                            <MapPinned className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                            <div>
+                                <span className="text-[10px] text-muted-foreground leading-none">নিবন্ধিত ঠিকানা</span>
+                                <p className="text-[11px] text-foreground/80 mt-0.5 leading-snug">কাঠালবাড়িয়া, পুঠিয়া ৬২৬০, পুঠিয়া পৌরসভা, রাজশাহী</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Disclaimer */}
+                    <p className="text-[10px] text-muted-foreground/70 mt-3">
+                        * উপরোক্ত তথ্য গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের ট্রেড লাইসেন্স অনুযায়ী প্রদত্ত।
+                    </p>
                 </div>
             </div>
 

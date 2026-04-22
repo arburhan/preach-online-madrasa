@@ -181,7 +181,7 @@ export default function WatchPageClient({
                     href={targetLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl group"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-linear-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl group"
                 >
                     <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm group-hover:bg-white/30 transition-colors">
                         <MessageCircle className="h-6 w-6" />
@@ -441,22 +441,20 @@ export default function WatchPageClient({
                             <div className="flex rounded-xl border bg-card overflow-hidden">
                                 <button
                                     onClick={() => setMobileTab('videos')}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${
-                                        mobileTab === 'videos'
+                                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${mobileTab === 'videos'
                                             ? 'bg-purple-600 text-white shadow-md'
                                             : 'text-muted-foreground hover:bg-muted/50'
-                                    }`}
+                                        }`}
                                 >
                                     <PlayCircle className="h-4 w-4" />
                                     ভিডিওসমূহ
                                 </button>
                                 <button
                                     onClick={() => setMobileTab('notes')}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${
-                                        mobileTab === 'notes'
+                                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${mobileTab === 'notes'
                                             ? 'bg-purple-600 text-white shadow-md'
                                             : 'text-muted-foreground hover:bg-muted/50'
-                                    }`}
+                                        }`}
                                 >
                                     <StickyNote className="h-4 w-4" />
                                     নোটস
