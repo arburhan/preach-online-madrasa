@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Student from '@/lib/db/models/Student';
-import { UserCircle, Mail, Phone, MapPin, Calendar, VenusAndMars } from 'lucide-react';
+import Course from '@/lib/db/models/Course';
+import { UserCircle, Mail, Phone, MapPin, Calendar, VenusAndMars, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -20,6 +21,26 @@ export default async function StudentProfilePage() {
     if (!user) {
         redirect('/auth/signin');
     }
+
+    // Fetch enrolled courses with WhatsApp links to show on profile
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enrolledCourseIds = (user.enrolledCourses || []).map((e: any) => {
+        if (e?.toString && typeof e.toString === 'function' && !e.course) return e;
+        return e.course;
+    }).filter(Boolean);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enrolledCourses: any[] = enrolledCourseIds.length > 0
+        ? await Course.find({ _id: { $in: enrolledCourseIds } })
+            .select('titleBn slug whatsappGroupLinkMale whatsappGroupLinkFemale')
+            .lean()
+        : [];
+
+    const gender = user.gender;
+    const coursesWithLinks = enrolledCourses.filter(c =>
+        (gender === 'male' && c.whatsappGroupLinkMale) ||
+        (gender === 'female' && c.whatsappGroupLinkFemale)
+    );
 
     return (
         <div className="min-h-screen bg-background p-6">
@@ -79,7 +100,7 @@ export default async function StudentProfilePage() {
                                 <p className="text-lg font-medium">{user.name || 'যোগ করা হয়নি'}</p>
                             </div>
 
-                            {/* Email (Non-editable) */}
+                            {/* Email */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                                     <Mail className="h-4 w-4" />
@@ -120,17 +141,20 @@ export default async function StudentProfilePage() {
                                     })}
                                 </p>
                             </div>
+
                             {/* Gender */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                                     <VenusAndMars className="h-4 w-4" />
                                     লিঙ্গ
                                 </label>
-                                <p className="text-lg font-medium">{user.gender || 'যোগ করা হয়নি'}</p>
+                                <p className="text-lg font-medium">
+                                    {user.gender === 'male' ? 'পুরুষ' : user.gender === 'female' ? 'মহিলা' : 'যোগ করা হয়নি'}
+                                </p>
                             </div>
                         </div>
 
-                        {/* Additional Info */}
+                        {/* Bio */}
                         {user.bio && (
                             <div className="space-y-2 pt-4 border-t">
                                 <label className="text-sm font-medium text-muted-foreground">
@@ -145,19 +169,85 @@ export default async function StudentProfilePage() {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-card border rounded-xl p-6">
-                        <p className="text-sm text-muted-foreground mb-1">Enrolled Courses</p>
+                        <p className="text-sm text-muted-foreground mb-1">এনরোল করা কোর্স</p>
                         <p className="text-3xl font-bold">{user.enrolledCourses?.length || 0}</p>
                     </div>
                     <div className="bg-card border rounded-xl p-6">
-                        <p className="text-sm text-muted-foreground mb-1">Certificates</p>
+                        <p className="text-sm text-muted-foreground mb-1">সার্টিফিকেট</p>
                         <p className="text-3xl font-bold">0</p>
                     </div>
                     <div className="bg-card border rounded-xl p-6">
-                        <p className="text-sm text-muted-foreground mb-1">Total Progress</p>
+                        <p className="text-sm text-muted-foreground mb-1">মোট অগ্রগতি</p>
                         <p className="text-3xl font-bold">--</p>
                     </div>
                 </div>
 
+                {/* WhatsApp Groups Section */}
+                {coursesWithLinks.length > 0 && (
+                    <div className="bg-card border rounded-xl overflow-hidden">
+                        <div className="p-6 border-b bg-green-50 dark:bg-green-950/20">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-green-600 rounded-lg">
+                                    <MessageCircle className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold">আমার হোয়াটসঅ্যাপ গ্রুপসমূহ</h2>
+                                    <p className="text-sm text-muted-foreground mt-0.5">
+                                        এনরোল করা কোর্সের হোয়াটসঅ্যাপ গ্রুপে যোগ দিন
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-6 space-y-3">
+                            {coursesWithLinks.map((course) => {
+                                const link = gender === 'female'
+                                    ? course.whatsappGroupLinkFemale
+                                    : course.whatsappGroupLinkMale;
+                                return (
+                                    <div
+                                        key={course._id.toString()}
+                                        className="flex items-center justify-between p-4 bg-muted/50 rounded-xl border"
+                                    >
+                                        <div>
+                                            <p className="font-semibold">{course.titleBn}</p>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                {gender === 'female' ? 'মেয়েদের গ্রুপ' : 'ছেলেদের গ্রুপ'}
+                                            </p>
+                                        </div>
+                                        <a
+                                            href={link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium shrink-0"
+                                        >
+                                            <MessageCircle className="h-4 w-4" />
+                                            গ্রুপে যোগ দিন
+                                        </a>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* If gender not set, show notice */}
+                {!gender && enrolledCourses.length > 0 && (
+                    <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-5 flex items-start gap-4">
+                        <MessageCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+                        <div>
+                            <p className="font-semibold text-amber-800 dark:text-amber-200">হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক দেখতে চাইলে</p>
+                            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                                প্রোফাইলে আপনার লিঙ্গ (Gender) যোগ করুন, তারপর আপনার কোর্সের হোয়াটসঅ্যাপ গ্রুপের লিঙ্ক দেখা যাবে।
+                            </p>
+                            <Link
+                                href="/student/profile/edit"
+                                className="inline-flex items-center gap-1.5 mt-2 text-sm font-medium text-amber-700 dark:text-amber-300 underline underline-offset-2"
+                            >
+                                প্রোফাইল আপডেট করুন →
+                            </Link>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

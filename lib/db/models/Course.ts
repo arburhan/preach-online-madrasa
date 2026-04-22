@@ -71,6 +71,10 @@ export interface ICourse extends Document {
     isCompleted: boolean;
     completedAt?: Date;
 
+    // WhatsApp Group Links
+    whatsappGroupLinkMale?: string;
+    whatsappGroupLinkFemale?: string;
+
     // Timestamps
     createdAt: Date;
     updatedAt: Date;
@@ -191,6 +195,14 @@ const CourseSchema = new Schema<ICourse>(
         },
         publishedAt: {
             type: Date,
+        },
+        whatsappGroupLinkMale: {
+            type: String,
+            trim: true,
+        },
+        whatsappGroupLinkFemale: {
+            type: String,
+            trim: true,
         },
         isCompleted: {
             type: Boolean,

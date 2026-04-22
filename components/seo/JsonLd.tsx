@@ -22,7 +22,7 @@ export function OrganizationJsonLd() {
         sameAs: [],
         contactPoint: {
             '@type': 'ContactPoint',
-            email: 'www.ioa.bd@gmail.com',
+            email: 'info@ioa.bd',
             contactType: 'customer service',
             availableLanguage: ['Bengali', 'English'],
         },

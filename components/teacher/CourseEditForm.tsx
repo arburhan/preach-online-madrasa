@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
-import { Loader2, Save, ChevronDown, ChevronRight } from 'lucide-react';
+import { Loader2, Save, ChevronDown, ChevronRight, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 
@@ -25,6 +25,8 @@ interface CourseEditFormProps {
         level?: string;
         language?: string;
         status: string;
+        whatsappGroupLinkMale?: string;
+        whatsappGroupLinkFemale?: string;
     };
 }
 
@@ -90,6 +92,8 @@ export default function CourseEditForm({ course }: CourseEditFormProps) {
         isFree: course.isFree,
         level: course.level || 'beginner',
         language: course.language || 'bn',
+        whatsappGroupLinkMale: course.whatsappGroupLinkMale || '',
+        whatsappGroupLinkFemale: course.whatsappGroupLinkFemale || '',
     });
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -342,6 +346,49 @@ export default function CourseEditForm({ course }: CourseEditFormProps) {
                             />
                         </div>
                     )}
+
+                    {/* WhatsApp Group Links */}
+                    <div className="mt-6 pt-6 border-t">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-green-600 rounded-lg">
+                                <MessageCircle className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold">হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক</h3>
+                                <p className="text-xs text-muted-foreground">কোর্স প্রকাশ করতে উভয় লিঙ্ক আবশ্যক</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="whatsappGroupLinkMale" className="block text-sm font-medium mb-2">
+                                    ছেলেদের গ্রুপ লিঙ্ক
+                                </label>
+                                <input
+                                    id="whatsappGroupLinkMale"
+                                    name="whatsappGroupLinkMale"
+                                    type="url"
+                                    value={formData.whatsappGroupLinkMale}
+                                    onChange={handleChange}
+                                    placeholder="https://chat.whatsapp.com/..."
+                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="whatsappGroupLinkFemale" className="block text-sm font-medium mb-2">
+                                    মেয়েদের গ্রুপ লিঙ্ক
+                                </label>
+                                <input
+                                    id="whatsappGroupLinkFemale"
+                                    name="whatsappGroupLinkFemale"
+                                    type="url"
+                                    value={formData.whatsappGroupLinkFemale}
+                                    onChange={handleChange}
+                                    placeholder="https://chat.whatsapp.com/..."
+                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

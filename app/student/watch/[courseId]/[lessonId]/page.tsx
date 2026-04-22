@@ -29,7 +29,7 @@ export default async function WatchLessonPage({ params }: PageProps) {
 
     // Check if user is enrolled (Fetch user data)
     const user = await Student.findById(session.user.id)
-        .select('enrolledCourses role')
+        .select('enrolledCourses gender role')
         .lean();
 
     // Try to find course by ID or Slug
@@ -78,11 +78,16 @@ export default async function WatchLessonPage({ params }: PageProps) {
     // Note: We don't update lastWatchedLesson for certificate since it's not a valid ObjectId
     // Resume logic should handle completed courses by checking if all content is done
     if (lessonId.startsWith('certificate-')) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const courseAny = course as any;
         return (
             <WatchPageClient
                 courseId={courseId}
                 contentId={lessonId}
                 courseTitle={course.titleBn}
+                whatsappGroupLinkMale={courseAny.whatsappGroupLinkMale || undefined}
+                whatsappGroupLinkFemale={courseAny.whatsappGroupLinkFemale || undefined}
+                studentGender={user?.gender || undefined}
             />
         );
     }
@@ -120,11 +125,16 @@ export default async function WatchLessonPage({ params }: PageProps) {
             }
 
             // This is an exam, let WatchPageClient handle it
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const courseAny = course as any;
             return (
                 <WatchPageClient
                     courseId={courseId}
                     contentId={lessonId}
                     courseTitle={course.titleBn}
+                    whatsappGroupLinkMale={courseAny.whatsappGroupLinkMale || undefined}
+                    whatsappGroupLinkFemale={courseAny.whatsappGroupLinkFemale || undefined}
+                    studentGender={user?.gender || undefined}
                 />
             );
         }
@@ -180,12 +190,18 @@ export default async function WatchLessonPage({ params }: PageProps) {
         })),
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const courseAny = course as any;
+
     return (
         <WatchPageClient
             courseId={courseId}
             contentId={lessonId}
             courseTitle={course.titleBn}
             initialLesson={currentLessonData}
+            whatsappGroupLinkMale={courseAny.whatsappGroupLinkMale || undefined}
+            whatsappGroupLinkFemale={courseAny.whatsappGroupLinkFemale || undefined}
+            studentGender={user?.gender || undefined}
         />
     );
 }

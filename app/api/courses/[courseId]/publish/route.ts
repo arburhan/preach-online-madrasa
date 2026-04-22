@@ -51,6 +51,14 @@ export async function POST(
             );
         }
 
+        // Validate WhatsApp group links are present
+        if (!course.whatsappGroupLinkMale || !course.whatsappGroupLinkFemale) {
+            return NextResponse.json(
+                { error: 'কোর্স প্রকাশ করতে ছেলে ও মেয়ে উভয়ের হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক আবশ্যক। কোর্স এডিট থেকে লিঙ্ক যোগ করুন।' },
+                { status: 400 }
+            );
+        }
+
         // Publish the course
         course.status = CourseStatus.PUBLISHED;
         course.publishedAt = new Date();

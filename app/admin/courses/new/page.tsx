@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import TeacherSearchSelect from '@/components/admin/TeacherSearchSelect';
@@ -38,6 +38,8 @@ export default function NewCoursePage() {
         isFree: true,
         level: 'beginner',
         publishImmediately: false,
+        whatsappGroupLinkMale: '',
+        whatsappGroupLinkFemale: '',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -88,6 +90,18 @@ export default function NewCoursePage() {
         if (!thumbnailData) {
             toast.error('থাম্বনেইল আপলোড করুন');
             return;
+        }
+
+        // Validate WhatsApp links when publishing immediately
+        if (formData.publishImmediately) {
+            if (!formData.whatsappGroupLinkMale.trim()) {
+                toast.error('প্রকাশ করতে ছেলেদের হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক আবশ্যক');
+                return;
+            }
+            if (!formData.whatsappGroupLinkFemale.trim()) {
+                toast.error('প্রকাশ করতে মেয়েদের হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক আবশ্যক');
+                return;
+            }
         }
 
         setLoading(true);
@@ -293,6 +307,49 @@ export default function NewCoursePage() {
                             <label htmlFor="publishImmediately" className="text-sm font-medium">
                                 তৈরি করার সাথে সাথে প্রকাশ করুন (ভিডিও ছাড়াই এনরোলমেন্ট শুরু হবে)
                             </label>
+                        </div>
+                    </div>
+
+                    {/* WhatsApp Group Links */}
+                    <div className="bg-card p-6 rounded-xl border space-y-4">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-green-600 rounded-lg">
+                                <MessageCircle className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-semibold">হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    কোর্স প্রকাশ করতে উভয় লিঙ্ক আবশ্যক
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="whatsappGroupLinkMale" className="block text-sm font-medium mb-2">
+                                ছেলেদের গ্রুপ লিঙ্ক {formData.publishImmediately && <span className="text-red-500">*</span>}
+                            </label>
+                            <Input
+                                id="whatsappGroupLinkMale"
+                                name="whatsappGroupLinkMale"
+                                type="url"
+                                value={formData.whatsappGroupLinkMale}
+                                onChange={handleChange}
+                                placeholder="https://chat.whatsapp.com/..."
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="whatsappGroupLinkFemale" className="block text-sm font-medium mb-2">
+                                মেয়েদের গ্রুপ লিঙ্ক {formData.publishImmediately && <span className="text-red-500">*</span>}
+                            </label>
+                            <Input
+                                id="whatsappGroupLinkFemale"
+                                name="whatsappGroupLinkFemale"
+                                type="url"
+                                value={formData.whatsappGroupLinkFemale}
+                                onChange={handleChange}
+                                placeholder="https://chat.whatsapp.com/..."
+                            />
                         </div>
                     </div>
 
