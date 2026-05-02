@@ -46,9 +46,9 @@ export default async function StudentProfilePage() {
         <div className="min-h-screen bg-background p-6">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex justify-between items-center flex-col md:flex-row gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold">প্রোফাইল</h1>
+                        <h1 className="text-xl md:text-3xl font-bold">প্রোফাইল</h1>
                         <p className="text-muted-foreground mt-1">আপনার ব্যক্তিগত তথ্য দেখুন এবং পরিবর্তন করুন</p>
                     </div>
                     <Link

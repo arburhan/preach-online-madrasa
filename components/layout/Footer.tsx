@@ -260,10 +260,10 @@ export default function Footer() {
                         <p className="text-sm text-muted-foreground text-center md:text-left">
                             © {currentYear} ইসলামিক অনলাইন একাডেমি। সর্বস্বত্ব সংরক্ষিত।
                         </p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                        <Link href={"https://github.com/arburhan"} className="text-sm text-muted-foreground flex items-center gap-1.5">
                             <Heart className="h-4 w-4 text-red-500 fill-red-500" />
                             <span>ভালোবাসায় তৈরি</span>
-                        </p>
+                        </Link>
                     </div>
                 </div>
             </div>
