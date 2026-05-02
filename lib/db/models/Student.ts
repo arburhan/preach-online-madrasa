@@ -35,6 +35,7 @@ export interface IStudent extends Document {
     enrolledCourses?: Array<{
         course: Types.ObjectId;
         lastWatchedLesson?: Types.ObjectId;
+        whatsappDismissed?: boolean;
         enrolledAt: Date;
     }>;
 
@@ -113,6 +114,10 @@ const StudentSchema = new Schema<IStudent>(
                 lastWatchedLesson: {
                     type: Schema.Types.ObjectId,
                     ref: 'Lesson',
+                },
+                whatsappDismissed: {
+                    type: Boolean,
+                    default: false,
                 },
                 enrolledAt: {
                     type: Date,

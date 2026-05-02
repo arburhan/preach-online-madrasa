@@ -79,6 +79,33 @@ export default function EnrollButton({
                 return;
             }
 
+            if (!isFree) {
+                // Paid course — initiate payment
+                const paymentRes = await fetch('/api/payment/initiate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ courseId }),
+                });
+
+                const paymentData = await paymentRes.json();
+
+                if (!paymentRes.ok) {
+                    toast.error(paymentData.error || 'পেমেন্ট শুরু করতে সমস্যা হয়েছে');
+                    return;
+                }
+
+                if (paymentData.payment_url) {
+                    // Redirect to Paystation payment page
+                    toast.info('পেমেন্ট পেজে নিয়ে যাওয়া হচ্ছে...');
+                    window.location.href = paymentData.payment_url;
+                    return;
+                }
+
+                toast.error('পেমেন্ট URL পাওয়া যায়নি। পরে আবার চেষ্টা করুন।');
+                return;
+            }
+
+            // Free course — direct enrollment
             const response = await fetch(`/api/courses/${courseId}/enroll`, {
                 method: 'POST',
             });
@@ -86,12 +113,7 @@ export default function EnrollButton({
             const data = await response.json();
 
             if (!response.ok) {
-                if (response.status === 402) {
-                    // Payment required
-                    toast.error('এই কোর্সটি পেইড। পেমেন্ট সিস্টেম শীঘ্রই আসছে।');
-                } else {
-                    toast.error(data.error || 'নথিভুক্তি ব্যর্থ হয়েছে');
-                }
+                toast.error(data.error || 'নথিভুক্তি ব্যর্থ হয়েছে');
                 return;
             }
 

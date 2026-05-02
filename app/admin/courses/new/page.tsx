@@ -275,6 +275,8 @@ export default function NewCoursePage() {
                                     value={formData.price}
                                     onChange={handleChange}
                                     disabled={formData.isFree}
+                                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                                    onKeyDown={(e) => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); }}
                                 />
                             </div>
                         </div>
