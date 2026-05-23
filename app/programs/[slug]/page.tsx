@@ -324,6 +324,8 @@ export default async function ProgramDetailPage({
                                 programSlug={program.slug}
                                 programTitle={program.titleBn}
                                 isEnrolled={isEnrolled}
+                                isFree={program.isFree}
+                                price={program.discountPrice || program.price}
                             />
 
                             <div className="space-y-3 text-sm">

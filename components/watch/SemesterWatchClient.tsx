@@ -6,7 +6,7 @@ import NoteEditor from '@/components/notes/NoteEditor';
 import ExamView from '@/components/exams/ExamView';
 import StudentModuleAccordion from '@/components/student/StudentModuleAccordion';
 import Link from 'next/link';
-import { BookOpen, Clock, FileText, Loader2, CheckCircle, Lock, PlayCircle, Award } from 'lucide-react';
+import { BookOpen, Clock, FileText, Loader2, CheckCircle, Lock, PlayCircle, Award, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ContentItem {
@@ -50,6 +50,10 @@ interface SemesterWatchClientProps {
     semesterTitle: string;
     programTitle: string;
     initialLesson?: Lesson;
+    whatsappGroupLinkMale?: string;
+    whatsappGroupLinkFemale?: string;
+    studentGender?: 'male' | 'female';
+    whatsappDismissed?: boolean;
 }
 
 export default function SemesterWatchClient({
@@ -59,6 +63,10 @@ export default function SemesterWatchClient({
     semesterTitle,
     programTitle,
     initialLesson,
+    whatsappGroupLinkMale,
+    whatsappGroupLinkFemale,
+    studentGender,
+    whatsappDismissed: initialWhatsappDismissed = false,
 }: SemesterWatchClientProps) {
     const [content, setContent] = useState<ContentItem[]>([]);
     const [modules, setModules] = useState<ModuleItem[]>([]);
@@ -67,6 +75,8 @@ export default function SemesterWatchClient({
     const [currentLesson, setCurrentLesson] = useState<Lesson | null>(initialLesson || null);
     const [loading, setLoading] = useState(true);
     const [allContentCompleted, setAllContentCompleted] = useState(false);
+    const [whatsappHidden, setWhatsappHidden] = useState(initialWhatsappDismissed);
+    const [dismissing, setDismissing] = useState(false);
 
     // Load unified content sequence
     useEffect(() => {
@@ -158,6 +168,91 @@ export default function SemesterWatchClient({
                 >
                     ← সেমিস্টারে ফিরে যান
                 </Link>
+
+                {/* WhatsApp Banner */}
+                {(() => {
+                    const hasAnyLink = whatsappGroupLinkMale || whatsappGroupLinkFemale;
+                    if (!hasAnyLink || whatsappHidden) return null;
+                    const targetLink = studentGender === 'female' ? whatsappGroupLinkFemale : studentGender === 'male' ? whatsappGroupLinkMale : null;
+
+                    const handleDismiss = async () => {
+                        setDismissing(true);
+                        try {
+                            await fetch(`/api/programs/${programId}/dismiss-whatsapp`, { method: 'POST' });
+                            setWhatsappHidden(true);
+                        } catch (error) {
+                            console.error('Failed to dismiss WhatsApp:', error);
+                        } finally {
+                            setDismissing(false);
+                        }
+                    };
+
+                    if (targetLink) {
+                        return (
+                            <div className="space-y-2 mb-4">
+                                <a
+                                    href={targetLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 p-4 rounded-xl bg-linear-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl group"
+                                >
+                                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                                        <MessageCircle className="h-6 w-6" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-bold text-lg">হোয়াটসঅ্যাপ গ্রুপে যোগ দিন</p>
+                                        <p className="text-sm text-white/80">প্রোগ্রামের গ্রুপে যুক্ত হয়ে আপডেট পান</p>
+                                    </div>
+                                    <span className="text-white/80 text-2xl group-hover:translate-x-1 transition-transform">→</span>
+                                </a>
+                                <button
+                                    onClick={handleDismiss}
+                                    disabled={dismissing}
+                                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-green-500/30 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-950/40 transition-colors text-sm font-medium disabled:opacity-50"
+                                >
+                                    {dismissing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                                    গ্রুপে যুক্ত হয়েছি
+                                </button>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <div className="space-y-2 mb-4">
+                            <div className="rounded-xl border border-green-500/30 bg-green-50 dark:bg-green-950/20 p-4 space-y-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-green-600 rounded-lg">
+                                        <MessageCircle className="h-5 w-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-green-800 dark:text-green-200">হোয়াটসঅ্যাপ গ্রুপে যোগ দিন</p>
+                                        <p className="text-sm text-green-700 dark:text-green-300">আপনার জন্য নির্ধারিত গ্রুপে যোগ দিন</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {whatsappGroupLinkMale && (
+                                        <a href={whatsappGroupLinkMale} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                                            <MessageCircle className="h-4 w-4" /> ছেলেদের গ্রুপ
+                                        </a>
+                                    )}
+                                    {whatsappGroupLinkFemale && (
+                                        <a href={whatsappGroupLinkFemale} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                                            <MessageCircle className="h-4 w-4" /> মেয়েদের গ্রুপ
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleDismiss}
+                                disabled={dismissing}
+                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-green-500/30 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-950/40 transition-colors text-sm font-medium disabled:opacity-50"
+                            >
+                                {dismissing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                                গ্রুপে যুক্ত হয়েছি
+                            </button>
+                        </div>
+                    );
+                })()}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Content Area */}

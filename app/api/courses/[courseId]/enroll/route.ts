@@ -3,6 +3,7 @@ import connectDB from '@/lib/db/mongodb';
 import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
 import { getCurrentUser } from '@/lib/auth/rbac';
+import { sendPaymentConfirmationEmail, sendEnrollmentWelcomeEmail } from '@/lib/email/mailer';
 
 // POST /api/courses/[id]/enroll - Enroll in a course
 export async function POST(
@@ -89,6 +90,33 @@ export async function POST(
         await Course.findByIdAndUpdate(courseId, {
             $inc: { enrolledCount: 1 },
         });
+
+        // Send enrollment emails (free course)
+        const studentName = userData?.name || 'শিক্ষার্থী';
+        const studentEmail = userData?.email || '';
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+        if (studentEmail) {
+            sendPaymentConfirmationEmail({
+                studentName,
+                studentEmail,
+                courseName: course.titleBn,
+                amount: 0,
+                transactionId: 'FREE',
+                invoiceNumber: `FREE-${Date.now()}`,
+                paymentDate: new Date(),
+            }).catch(err => console.error('Payment email error:', err));
+
+            setTimeout(() => {
+                sendEnrollmentWelcomeEmail({
+                    studentName,
+                    studentEmail,
+                    courseName: course.titleBn,
+                    amount: 0,
+                    courseUrl: `${baseUrl}/student/watch/${courseId}`,
+                }).catch(err => console.error('Enrollment email error:', err));
+            }, 3000);
+        }
 
         return NextResponse.json({
             message: 'কোর্সে নথিভুক্তি সফল হয়েছে',

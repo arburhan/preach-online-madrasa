@@ -25,6 +25,10 @@ export interface IProgram extends Document {
     discountPrice?: number; // ছাড়কৃত মূল্য
     isFree: boolean;        // বিনামূল্যে কিনা
 
+    // WhatsApp Group Links
+    whatsappGroupLinkMale?: string;
+    whatsappGroupLinkFemale?: string;
+
     // Content (NEW - Lexical JSON)
     contentBn?: string;  // Lexical JSON for "কি কি থাকবে"
 
@@ -116,6 +120,15 @@ const ProgramSchema = new Schema<IProgram>(
             default: false,
         },
 
+        whatsappGroupLinkMale: {
+            type: String,
+            trim: true,
+        },
+        whatsappGroupLinkFemale: {
+            type: String,
+            trim: true,
+        },
+
         contentBn: {
             type: String,
         },
@@ -177,7 +190,7 @@ const ProgramSchema = new Schema<IProgram>(
 );
 
 // Indexes
-ProgramSchema.index({ slug: 1 });
+// slug is already indexed by unique: true in the schema definition
 ProgramSchema.index({ status: 1 });
 ProgramSchema.index({ isPopular: 1, isFeatured: 1 });
 ProgramSchema.index({ createdAt: -1 });

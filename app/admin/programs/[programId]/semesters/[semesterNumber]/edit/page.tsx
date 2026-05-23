@@ -60,13 +60,24 @@ export default function EditSemesterPage({ params }: { params: Promise<PageParam
         setSaving(true);
 
         try {
-            // For now, semester update would need a new API route
-            // This is a placeholder that shows the UI works
+            const response = await fetch(`/api/admin/programs/${programId}/semesters/${semesterNumber}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'সেমিস্টার আপডেট করতে সমস্যা হয়েছে');
+            }
+
             toast.success('সেমিস্টার আপডেট হয়েছে!');
             router.push(`${basePath}/programs/${programId}/semesters/${semesterNumber}`);
+            router.refresh();
         } catch (error) {
             console.error(error);
-            toast.error('সমস্যা হয়েছে');
+            const errorMessage = error instanceof Error ? error.message : 'সমস্যা হয়েছে';
+            toast.error(errorMessage);
         } finally {
             setSaving(false);
         }

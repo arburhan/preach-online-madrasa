@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
 import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
+import Program from '@/lib/db/models/LongCourse';
 import Order, { OrderStatus, PaymentMethod } from '@/lib/db/models/Order';
 import { getCurrentUser } from '@/lib/auth/rbac';
 
-// POST /api/payment/initiate - Initiate payment for course enrollment
+// POST /api/payment/initiate - Initiate payment for course or program enrollment
 export async function POST(request: NextRequest) {
     try {
         const user = await getCurrentUser();
@@ -18,95 +19,116 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { courseId } = body;
+        const { courseId, programId } = body;
 
-        if (!courseId) {
+        if (!courseId && !programId) {
             return NextResponse.json(
-                { error: 'কোর্স আইডি প্রয়োজন' },
+                { error: 'কোর্স বা প্রোগ্রাম আইডি প্রয়োজন' },
                 { status: 400 }
             );
         }
 
         await connectDB();
 
-        // Fetch course
-        const course = await Course.findById(courseId);
-        if (!course) {
-            return NextResponse.json(
-                { error: 'কোর্স পাওয়া যায়নি' },
-                { status: 404 }
-            );
-        }
+        // Determine if this is for a course or program
+        const isProgram = !!programId;
+        let itemPrice: number;
 
-        // Check if course is published
-        if (course.status !== 'published') {
-            return NextResponse.json(
-                { error: 'এই কোর্সটি এখনো প্রকাশিত হয়নি' },
-                { status: 400 }
-            );
-        }
+        if (isProgram) {
+            // Program payment
+            const program = await Program.findById(programId);
+            if (!program) {
+                return NextResponse.json({ error: 'প্রোগ্রাম পাওয়া যায়নি' }, { status: 404 });
+            }
+            if (program.status !== 'published') {
+                return NextResponse.json({ error: 'এই প্রোগ্রামটি এখনো প্রকাশিত হয়নি' }, { status: 400 });
+            }
+            if (program.isFree) {
+                return NextResponse.json({ error: 'এই প্রোগ্রামটি বিনামূল্যে, সরাসরি এনরোল করুন' }, { status: 400 });
+            }
 
-        // Check if course is free (no payment needed)
-        if (course.isFree) {
-            return NextResponse.json(
-                { error: 'এই কোর্সটি বিনামূল্যে, সরাসরি এনরোল করুন' },
-                { status: 400 }
-            );
+            itemPrice = program.discountPrice || program.price;
+        } else {
+            // Course payment
+            const course = await Course.findById(courseId);
+            if (!course) {
+                return NextResponse.json({ error: 'কোর্স পাওয়া যায়নি' }, { status: 404 });
+            }
+            if (course.status !== 'published') {
+                return NextResponse.json({ error: 'এই কোর্সটি এখনো প্রকাশিত হয়নি' }, { status: 400 });
+            }
+            if (course.isFree) {
+                return NextResponse.json({ error: 'এই কোর্সটি বিনামূল্যে, সরাসরি এনরোল করুন' }, { status: 400 });
+            }
+
+            itemPrice = course.price;
         }
 
         // Paystation minimum payment amount is 20 BDT
-        if (course.price < 20) {
+        if (itemPrice < 20) {
             return NextResponse.json(
-                { error: 'সর্বনিম্ন পেমেন্ট ২০ টাকা। কোর্সের মূল্য কমপক্ষে ২০ টাকা হতে হবে।' },
+                { error: 'সর্বনিম্ন পেমেন্ট ২০ টাকা। মূল্য কমপক্ষে ২০ টাকা হতে হবে।' },
                 { status: 400 }
             );
         }
 
         // Check if already enrolled
-        const userData = await Student.findById(user.id).select('enrolledCourses name email phone address');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const alreadyEnrolled = userData?.enrolledCourses?.some((e: any) => {
-            if (e?.toString && typeof e.toString === 'function' && !e.course) {
-                return e.toString() === courseId;
-            }
-            return e?.course?.toString() === courseId;
-        });
+        const userData = await Student.findById(user.id).select('enrolledCourses enrolledPrograms name email phone address');
 
-        if (alreadyEnrolled) {
-            return NextResponse.json(
-                { error: 'আপনি ইতিমধ্যে এই কোর্সে নথিভুক্ত আছেন' },
-                { status: 400 }
+        if (isProgram) {
+            const alreadyEnrolled = userData?.enrolledPrograms?.some(
+                (e: { program: { toString: () => string } }) => e.program?.toString() === programId
             );
+            if (alreadyEnrolled) {
+                return NextResponse.json({ error: 'আপনি ইতিমধ্যে এই প্রোগ্রামে নথিভুক্ত আছেন' }, { status: 400 });
+            }
+        } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const alreadyEnrolled = userData?.enrolledCourses?.some((e: any) => {
+                if (e?.toString && typeof e.toString === 'function' && !e.course) {
+                    return e.toString() === courseId;
+                }
+                return e?.course?.toString() === courseId;
+            });
+            if (alreadyEnrolled) {
+                return NextResponse.json({ error: 'আপনি ইতিমধ্যে এই কোর্সে নথিভুক্ত আছেন' }, { status: 400 });
+            }
         }
 
-        // Mark any existing pending orders as failed (prevent duplicate invoice errors)
-        await Order.updateMany(
-            {
-                user: user.id,
-                course: courseId,
-                status: OrderStatus.PENDING,
-            },
-            { status: OrderStatus.FAILED }
-        );
+        // Build order query to mark old pending orders as failed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pendingQuery: any = { user: user.id, status: OrderStatus.PENDING };
+        if (isProgram) {
+            pendingQuery.program = programId;
+        } else {
+            pendingQuery.course = courseId;
+        }
+        await Order.updateMany(pendingQuery, { status: OrderStatus.FAILED });
 
         // Always generate a fresh unique invoice number
         const invoiceNumber = `IOA-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
         // Create order
-        const order = await Order.create({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const orderData: any = {
             user: user.id,
-            course: courseId,
-            amount: course.price,
+            amount: itemPrice,
             currency: 'BDT',
             paymentMethod: PaymentMethod.PAYSTATION,
             invoiceNumber,
             status: OrderStatus.PENDING,
-        });
+        };
+        if (isProgram) {
+            orderData.program = programId;
+        } else {
+            orderData.course = courseId;
+        }
+        const order = await Order.create(orderData);
 
         // Initiate Paystation payment
         const paymentUrl = await initiatePaystationPayment({
             invoiceNumber,
-            amount: course.price,
+            amount: itemPrice,
             customerName: userData?.name || 'Student',
             customerEmail: userData?.email || user.email || '',
             customerPhone: userData?.phone || '01700000000',
@@ -114,7 +136,6 @@ export async function POST(request: NextRequest) {
         });
 
         if (!paymentUrl) {
-            // Mark order as failed
             await Order.findByIdAndUpdate(order._id, { status: OrderStatus.FAILED });
             return NextResponse.json(
                 { error: 'পেমেন্ট সিস্টেমে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।' },

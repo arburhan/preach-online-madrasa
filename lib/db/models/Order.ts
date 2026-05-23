@@ -20,7 +20,8 @@ export enum PaymentMethod {
 export interface IOrder extends Document {
     // References
     user: mongoose.Types.ObjectId;
-    course: mongoose.Types.ObjectId;
+    course?: mongoose.Types.ObjectId;
+    program?: mongoose.Types.ObjectId;
 
     // Payment details
     amount: number;
@@ -52,7 +53,10 @@ const OrderSchema = new Schema<IOrder>(
         course: {
             type: Schema.Types.ObjectId,
             ref: 'Course',
-            required: [true, 'Course reference is required'],
+        },
+        program: {
+            type: Schema.Types.ObjectId,
+            ref: 'LongCourse',
         },
         amount: {
             type: Number,

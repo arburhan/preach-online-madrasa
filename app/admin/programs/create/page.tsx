@@ -37,6 +37,8 @@ export default function CreateProgramPage() {
         status: 'draft',
         isPopular: false,
         isFeatured: false,
+        whatsappGroupLinkMale: '',
+        whatsappGroupLinkFemale: '',
     });
 
     const [features, setFeatures] = useState<string[]>(['']);
@@ -484,6 +486,38 @@ export default function CreateProgramPage() {
                                 </div>
                             </div>
                         )}
+                    </div>
+
+                    {/* WhatsApp Group Links */}
+                    <div className="bg-card rounded-xl border p-6 space-y-6">
+                        <h2 className="text-xl font-semibold border-b pb-2">হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক</h2>
+                        <p className="text-sm text-muted-foreground">
+                            শিক্ষার্থীদের জন্য হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক যোগ করুন। ভিডিও দেখার সময় এটি দেখাবে।
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">ছেলেদের গ্রুপ লিঙ্ক</label>
+                                <input
+                                    type="url"
+                                    name="whatsappGroupLinkMale"
+                                    value={formData.whatsappGroupLinkMale}
+                                    onChange={handleChange}
+                                    placeholder="https://chat.whatsapp.com/..."
+                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">মেয়েদের গ্রুপ লিঙ্ক</label>
+                                <input
+                                    type="url"
+                                    name="whatsappGroupLinkFemale"
+                                    value={formData.whatsappGroupLinkFemale}
+                                    onChange={handleChange}
+                                    placeholder="https://chat.whatsapp.com/..."
+                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     {/* Features */}
