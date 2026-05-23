@@ -16,9 +16,11 @@ interface LessonListProps {
         isFree: boolean;
     }>;
     courseId: string;
+    basePath?: string; // '/admin' or '/teacher'
+    semesterInfo?: { programId: string; semesterNumber: number }; // For program lessons
 }
 
-export default function LessonList({ lessons, courseId }: LessonListProps) {
+export default function LessonList({ lessons, courseId, basePath, semesterInfo }: LessonListProps) {
     const router = useRouter();
     const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -93,7 +95,13 @@ export default function LessonList({ lessons, courseId }: LessonListProps) {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => router.push(`/teacher/courses/${courseId}/lessons/${lesson._id}`)}
+                            onClick={() => {
+                                if (semesterInfo) {
+                                    router.push(`${basePath || '/admin'}/programs/${semesterInfo.programId}/semesters/${semesterInfo.semesterNumber}/lessons/${lesson._id}/edit`);
+                                } else {
+                                    router.push(`/teacher/courses/${courseId}/lessons/${lesson._id}`);
+                                }
+                            }}
                         >
                             <Edit className="h-4 w-4" />
                         </Button>

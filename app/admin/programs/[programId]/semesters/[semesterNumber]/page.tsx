@@ -252,7 +252,12 @@ export default async function SemesterManagePage({ params }: PageProps) {
                             </div>
 
                             {serializedLessons.length > 0 ? (
-                                <LessonList lessons={serializedLessons} courseId={programId} />
+                                <LessonList
+                                    lessons={serializedLessons}
+                                    courseId={programId}
+                                    basePath={isAdmin ? '/admin' : '/teacher'}
+                                    semesterInfo={{ programId, semesterNumber: semNum }}
+                                />
                             ) : (
                                 <div className="text-center py-8 border-2 border-dashed rounded-lg">
                                     <BookOpen className="h-10 w-10 text-muted-foreground mx-auto mb-3" />

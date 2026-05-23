@@ -12,9 +12,11 @@ interface EnrollButtonProps {
     programSlug?: string;
     programTitle: string;
     isEnrolled?: boolean;
+    isFree?: boolean;
+    price?: number;
 }
 
-export function EnrollButton({ programId, programSlug, programTitle: _programTitle, isEnrolled = false }: EnrollButtonProps) {
+export function EnrollButton({ programId, programSlug, isEnrolled = false, isFree = true, price = 0 }: EnrollButtonProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [enrolled, setEnrolled] = useState(isEnrolled);
@@ -65,7 +67,32 @@ export function EnrollButton({ programId, programSlug, programTitle: _programTit
                 return;
             }
 
-            // Call enroll API
+            if (!isFree) {
+                // Paid program — initiate payment
+                const paymentRes = await fetch('/api/payment/initiate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ programId }),
+                });
+
+                const paymentData = await paymentRes.json();
+
+                if (!paymentRes.ok) {
+                    toast.error(paymentData.error || 'পেমেন্ট শুরু করতে সমস্যা হয়েছে');
+                    return;
+                }
+
+                if (paymentData.payment_url) {
+                    toast.info('পেমেন্ট পেজে নিয়ে যাওয়া হচ্ছে...');
+                    window.location.href = paymentData.payment_url;
+                    return;
+                }
+
+                toast.error('পেমেন্ট URL পাওয়া যায়নি। পরে আবার চেষ্টা করুন।');
+                return;
+            }
+
+            // Free program — direct enrollment
             const res = await fetch(`/api/programs/${programId}/enroll`, {
                 method: 'POST',
             });
@@ -101,6 +128,8 @@ export function EnrollButton({ programId, programSlug, programTitle: _programTit
                     </>
                 ) : enrolled ? (
                     'প্রোগ্রামে যান'
+                ) : !isFree && price > 0 ? (
+                    `এনরোল করুন — ৳${price}`
                 ) : (
                     'এনরোল করুন'
                 )}

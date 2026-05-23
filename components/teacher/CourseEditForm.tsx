@@ -35,7 +35,7 @@ const isValidJSON = (str: string) => {
     try {
         JSON.parse(str);
         return true;
-    } catch (e) {
+    } catch {
         return false;
     }
 };
@@ -342,6 +342,8 @@ export default function CourseEditForm({ course }: CourseEditFormProps) {
                                 step="1"
                                 value={formData.price}
                                 onChange={handleChange}
+                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                                onKeyDown={(e) => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); }}
                                 className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                             />
                         </div>

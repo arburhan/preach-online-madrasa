@@ -4,7 +4,7 @@ import connectDB from '@/lib/db/mongodb';
 import Student from '@/lib/db/models/Student';
 import Course from '@/lib/db/models/Course';
 import LongCourse from '@/lib/db/models/LongCourse';
-import { BookOpen, GraduationCap, Clock, Award, MessageCircle } from 'lucide-react';
+import { BookOpen, GraduationCap, Clock, Award } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -19,12 +19,10 @@ export default async function StudentDashboard() {
 
     await connectDB();
 
-    // Get user's enrolled courses, programs AND gender
+    // Get user's enrolled courses and programs
     const userData = await Student.findById(user.id)
-        .select('enrolledCourses enrolledPrograms gender')
+        .select('enrolledCourses enrolledPrograms')
         .lean();
-
-    const studentGender = (userData as any)?.gender as 'male' | 'female' | undefined;
 
     // Extract course IDs from both old format (ObjectId) and new format ({course, lastWatchedLesson, enrolledAt})
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,7 +49,7 @@ export default async function StudentDashboard() {
     const enrolledCourses: any[] = await Course.find({
         _id: { $in: enrolledCourseIds }
     })
-        .select('titleBn titleEn thumbnail level descriptionBn instructors slug whatsappGroupLinkMale whatsappGroupLinkFemale')
+        .select('titleBn titleEn thumbnail level descriptionBn instructors slug')
         .lean();
 
     // Fetch enrolled programs
@@ -84,14 +82,9 @@ export default async function StudentDashboard() {
             {/* Header */}
             <header className="border-b bg-card">
                 <div className="container mx-auto px-4 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold">আসসালামু আলাইকুম, {user.name}</h1>
-                            <p className="text-muted-foreground mt-1">আপনার শিক্ষার যাত্রা চালিয়ে যান</p>
-                        </div>
-                        <Link href="/">
-                            <Button variant="outline">হোম পেজ</Button>
-                        </Link>
+                    <div className="text-center md:text-left">
+                        <h1 className="text-xl md:text-3xl font-bold">আসসালামু আলাইকুম, {user.name}</h1>
+                        <p className="text-muted-foreground mt-1">আপনার শিক্ষার যাত্রা চালিয়ে যান</p>
                     </div>
                 </div>
             </header>
@@ -225,68 +218,46 @@ export default async function StudentDashboard() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {enrolledCourses.map((course) => {
-                                const whatsappLink =
-                                    studentGender === 'female'
-                                        ? course.whatsappGroupLinkFemale
-                                        : studentGender === 'male'
-                                        ? course.whatsappGroupLinkMale
-                                        : null;
-
-                                return (
-                                    <div
-                                        key={course._id.toString()}
-                                        className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow"
-                                    >
-                                        {course.thumbnail && (
+                            {enrolledCourses.map((course) => (
+                                <div
+                                    key={course._id.toString()}
+                                    className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow"
+                                >
+                                    {course.thumbnail && (
+                                        <Image
+                                            src={course.thumbnail}
+                                            alt={course.titleBn}
+                                            width={400}
+                                            height={192}
+                                            className="w-full h-48 object-cover"
+                                        />
+                                    )}
+                                    <div className="p-6">
+                                        <h3 className="font-bold text-lg mb-2 transition-colors">
+                                            {course.titleBn}
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                                             <Image
-                                                src={course.thumbnail}
-                                                alt={course.titleBn}
-                                                width={400}
-                                                height={192}
-                                                className="w-full h-48 object-cover"
+                                                src={(course.instructors?.[0] && teacherMap.get(course.instructors[0].toString())?.image) || '/placeholder-avatar.png'}
+                                                alt="Instructor"
+                                                width={24}
+                                                height={24}
+                                                className="w-6 h-6 rounded-full"
                                             />
-                                        )}
-                                        <div className="p-6">
-                                            <h3 className="font-bold text-lg mb-2 transition-colors">
-                                                {course.titleBn}
-                                            </h3>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                                                <Image
-                                                    src={(course.instructors?.[0] && teacherMap.get(course.instructors[0].toString())?.image) || '/placeholder-avatar.png'}
-                                                    alt="Instructor"
-                                                    width={24}
-                                                    height={24}
-                                                    className="w-6 h-6 rounded-full"
-                                                />
-                                                <span>
-                                                    {course.instructors?.map((id: ObjectId) => teacherMap.get(id.toString())?.name).filter(Boolean).join(', ') || 'Unknown'}
-                                                </span>
-                                            </div>
-
-                                            {/* WhatsApp Group Join Button */}
-                                            {whatsappLink && (
-                                                <a
-                                                    href={whatsappLink}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 mb-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                                                >
-                                                    <MessageCircle className="h-4 w-4 shrink-0" />
-                                                    হোয়াটসঅ্যাপ গ্রুপে যোগ দিন
-                                                </a>
-                                            )}
-
-                                            <Link
-                                                href={`/student/watch/${course.slug || course._id}`}
-                                                className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
-                                            >
-                                                ক্লাস ভিডিও দেখুন
-                                            </Link>
+                                            <span>
+                                                {course.instructors?.map((id: ObjectId) => teacherMap.get(id.toString())?.name).filter(Boolean).join(', ') || 'Unknown'}
+                                            </span>
                                         </div>
+
+                                        <Link
+                                            href={`/student/watch/${course.slug || course._id}`}
+                                            className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+                                        >
+                                            ক্লাস ভিডিও দেখুন
+                                        </Link>
                                     </div>
-                                );
-                            })}
+                                </div>
+                            ))}
                         </div>
                     )}
                 </section>

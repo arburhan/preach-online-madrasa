@@ -35,14 +35,16 @@ export interface IStudent extends Document {
     enrolledCourses?: Array<{
         course: Types.ObjectId;
         lastWatchedLesson?: Types.ObjectId;
+        whatsappDismissed?: boolean;
         enrolledAt: Date;
     }>;
 
     // Program (long course) enrollments
     enrolledPrograms?: Array<{
         program: Types.ObjectId;
-        currentSemesterNumber: number;           // বর্তমানে কোন সেমিস্টারে আছে
-        completedSemesterNumbers: number[];      // কোন কোন সেমিস্টার শেষ করেছে
+        currentSemesterNumber: number;
+        completedSemesterNumbers: number[];
+        whatsappDismissed?: boolean;
         enrolledAt: Date;
     }>;
 
@@ -114,6 +116,10 @@ const StudentSchema = new Schema<IStudent>(
                     type: Schema.Types.ObjectId,
                     ref: 'Lesson',
                 },
+                whatsappDismissed: {
+                    type: Boolean,
+                    default: false,
+                },
                 enrolledAt: {
                     type: Date,
                     default: Date.now,
@@ -135,6 +141,10 @@ const StudentSchema = new Schema<IStudent>(
                 completedSemesterNumbers: [{
                     type: Number,
                 }],
+                whatsappDismissed: {
+                    type: Boolean,
+                    default: false,
+                },
                 enrolledAt: {
                     type: Date,
                     default: Date.now,

@@ -49,6 +49,8 @@ interface ProgramData {
     features: string[];
     maleInstructors?: string[];
     femaleInstructors?: string[];
+    whatsappGroupLinkMale?: string;
+    whatsappGroupLinkFemale?: string;
 }
 
 export default function EditProgramPage() {
@@ -76,7 +78,7 @@ export default function EditProgramPage() {
             try {
                 const [programRes, semesterRes, teacherRes] = await Promise.all([
                     fetch(`/api/programs/${programId}`),
-                    fetch('/api/semesters'),
+                    fetch(`/api/admin/programs/${programId}/semesters`),
                     fetch('/api/admin/teachers?status=approved')
                 ]);
 
@@ -85,6 +87,19 @@ export default function EditProgramPage() {
                 const teacherData = await teacherRes.json();
 
                 if (!programRes.ok) throw new Error('প্রোগ্রাম পাওয়া যায়নি');
+
+                // Extract instructor IDs — API may return ObjectId strings or populated objects
+                const maleInstructorIds = (program.maleInstructors || []).map(
+                    (i: string | { _id: string }) => typeof i === 'string' ? i : i._id
+                );
+                const femaleInstructorIds = (program.femaleInstructors || []).map(
+                    (i: string | { _id: string }) => typeof i === 'string' ? i : i._id
+                );
+
+                // Extract semester IDs — may be populated objects or strings
+                const semesterIds = (program.semesters || []).map(
+                    (s: string | { _id: string }) => typeof s === 'string' ? s : s._id
+                );
 
                 setFormData({
                     titleBn: program.titleBn || '',
@@ -103,18 +118,28 @@ export default function EditProgramPage() {
                     status: program.status || 'draft',
                     isPopular: program.isPopular || false,
                     isFeatured: program.isFeatured || false,
-                    semesters: program.semesters?.map((s: { _id: string }) => s._id) || [],
+                    semesters: semesterIds,
                     features: program.features || [],
-                    maleInstructors: program.maleInstructors || [],
-                    femaleInstructors: program.femaleInstructors || [],
+                    maleInstructors: maleInstructorIds,
+                    femaleInstructors: femaleInstructorIds,
+                    whatsappGroupLinkMale: program.whatsappGroupLinkMale || '',
+                    whatsappGroupLinkFemale: program.whatsappGroupLinkFemale || '',
                 });
 
                 setFeatures(program.features || ['']);
-                setSelectedSemesters(program.semesters?.map((s: { _id: string }) => s._id) || []);
-                setSelectedMaleTeachers(program.maleInstructors || []);
-                setSelectedFemaleTeachers(program.femaleInstructors || []);
+                setSelectedSemesters(semesterIds);
+                setSelectedMaleTeachers(maleInstructorIds);
+                setSelectedFemaleTeachers(femaleInstructorIds);
 
-                if (Array.isArray(semesterData)) setSemesters(semesterData);
+                // Use ProgramSemesters from the admin API
+                if (Array.isArray(semesterData)) {
+                    setSemesters(semesterData.map((s: { _id: string; semesterNumber: number; titleBn: string; status: string }) => ({
+                        _id: s._id,
+                        number: s.semesterNumber,
+                        titleBn: s.titleBn,
+                        level: s.status,
+                    })));
+                }
                 if (Array.isArray(teacherData)) {
                     setMaleTeachers(teacherData.filter((t: Teacher) => t.gender === 'male'));
                     setFemaleTeachers(teacherData.filter((t: Teacher) => t.gender === 'female'));
@@ -451,31 +476,66 @@ export default function EditProgramPage() {
                         </div>
                     </div>
 
+                    {/* WhatsApp Group Links */}
+                    <div className="bg-card rounded-xl border p-6 space-y-6">
+                        <h2 className="text-xl font-semibold border-b pb-2">হোয়াটসঅ্যাপ গ্রুপ লিঙ্ক</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">ছেলেদের গ্রুপ লিঙ্ক</label>
+                                <input
+                                    type="url"
+                                    name="whatsappGroupLinkMale"
+                                    value={formData.whatsappGroupLinkMale || ''}
+                                    onChange={handleChange}
+                                    placeholder="https://chat.whatsapp.com/..."
+                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">মেয়েদের গ্রুপ লিঙ্ক</label>
+                                <input
+                                    type="url"
+                                    name="whatsappGroupLinkFemale"
+                                    value={formData.whatsappGroupLinkFemale || ''}
+                                    onChange={handleChange}
+                                    placeholder="https://chat.whatsapp.com/..."
+                                    className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Semesters */}
                     <div className="bg-card rounded-xl border p-6 space-y-4">
-                        <h2 className="text-xl font-semibold border-b pb-2">সেমিস্টার</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {semesters.map(semester => (
-                                <label
-                                    key={semester._id}
-                                    className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer ${selectedSemesters.includes(semester._id)
-                                        ? 'border-primary bg-primary/5'
-                                        : 'hover:bg-muted'
-                                        }`}
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedSemesters.includes(semester._id)}
-                                        onChange={() => setSelectedSemesters(prev =>
-                                            prev.includes(semester._id)
-                                                ? prev.filter(id => id !== semester._id)
-                                                : [...prev, semester._id]
-                                        )}
-                                    />
-                                    <span className="text-sm">{semester.titleBn}</span>
-                                </label>
-                            ))}
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-semibold border-b pb-2">সেমিস্টার</h2>
+                            <p className="text-xs text-muted-foreground">
+                                সেমিস্টার পরিচালনা করতে প্রোগ্রাম বিস্তারিত পৃষ্ঠায় যান
+                            </p>
                         </div>
+                        {semesters.length > 0 ? (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                {semesters.map(semester => (
+                                    <div
+                                        key={semester._id}
+                                        className="flex items-center justify-between p-3 rounded-lg border bg-muted/50"
+                                    >
+                                        <span className="text-sm font-medium">{semester.titleBn}</span>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                            semester.level === 'active'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-amber-100 text-amber-700'
+                                        }`}>
+                                            {semester.level === 'active' ? 'সক্রিয়' : 'ড্রাফট'}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg">
+                                এখনো কোনো সেমিস্টার তৈরি হয়নি
+                            </p>
+                        )}
                     </div>
 
                     {/* Features */}

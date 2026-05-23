@@ -64,6 +64,18 @@ export default async function WatchLessonPage({ params }: PageProps) {
             return e?.course?.toString() === courseId;
         }
     ) || false;
+
+    // Extract whatsappDismissed from enrollment
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enrollment = user?.enrolledCourses?.find((e: any) => {
+        if (e?.toString && typeof e.toString === 'function' && !e.course) {
+            return e.toString() === courseId;
+        }
+        return e?.course?.toString() === courseId;
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whatsappDismissed = (enrollment as any)?.whatsappDismissed === true;
+
     const isInstructor = Array.isArray(course.instructors)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? course.instructors.some((inst: any) => inst._id?.toString() === session.user.id)
@@ -88,6 +100,7 @@ export default async function WatchLessonPage({ params }: PageProps) {
                 whatsappGroupLinkMale={courseAny.whatsappGroupLinkMale || undefined}
                 whatsappGroupLinkFemale={courseAny.whatsappGroupLinkFemale || undefined}
                 studentGender={user?.gender || undefined}
+                whatsappDismissed={whatsappDismissed}
             />
         );
     }
@@ -135,6 +148,7 @@ export default async function WatchLessonPage({ params }: PageProps) {
                     whatsappGroupLinkMale={courseAny.whatsappGroupLinkMale || undefined}
                     whatsappGroupLinkFemale={courseAny.whatsappGroupLinkFemale || undefined}
                     studentGender={user?.gender || undefined}
+                    whatsappDismissed={whatsappDismissed}
                 />
             );
         }
@@ -202,6 +216,7 @@ export default async function WatchLessonPage({ params }: PageProps) {
             whatsappGroupLinkMale={courseAny.whatsappGroupLinkMale || undefined}
             whatsappGroupLinkFemale={courseAny.whatsappGroupLinkFemale || undefined}
             studentGender={user?.gender || undefined}
+            whatsappDismissed={whatsappDismissed}
         />
     );
 }

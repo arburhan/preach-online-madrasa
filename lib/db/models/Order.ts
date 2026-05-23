@@ -11,6 +11,7 @@ export enum OrderStatus {
 
 // Payment method enum
 export enum PaymentMethod {
+    PAYSTATION = 'paystation',
     SSL_COMMERZ = 'ssl_commerz',
     MANUAL = 'manual', // For admin manual enrollment
 }
@@ -19,15 +20,17 @@ export enum PaymentMethod {
 export interface IOrder extends Document {
     // References
     user: mongoose.Types.ObjectId;
-    course: mongoose.Types.ObjectId;
+    course?: mongoose.Types.ObjectId;
+    program?: mongoose.Types.ObjectId;
 
     // Payment details
     amount: number;
     currency: string;
     paymentMethod: PaymentMethod;
 
-    // SSL Commerz specific fields
-    transactionId?: string; // SSL Commerz transaction ID
+    // SSL Commerz / Paystation specific fields
+    transactionId?: string; // Payment gateway transaction ID
+    invoiceNumber?: string; // Unique invoice number
     paymentGatewayData?: Record<string, unknown>; // Store gateway response
 
     // Order status
@@ -50,7 +53,10 @@ const OrderSchema = new Schema<IOrder>(
         course: {
             type: Schema.Types.ObjectId,
             ref: 'Course',
-            required: [true, 'Course reference is required'],
+        },
+        program: {
+            type: Schema.Types.ObjectId,
+            ref: 'LongCourse',
         },
         amount: {
             type: Number,
@@ -65,11 +71,15 @@ const OrderSchema = new Schema<IOrder>(
         paymentMethod: {
             type: String,
             enum: Object.values(PaymentMethod),
-            default: PaymentMethod.SSL_COMMERZ,
+            default: PaymentMethod.PAYSTATION,
         },
         transactionId: {
             type: String,
             sparse: true, // Allow null but must be unique if present
+        },
+        invoiceNumber: {
+            type: String,
+            sparse: true,
         },
         paymentGatewayData: {
             type: Schema.Types.Mixed,

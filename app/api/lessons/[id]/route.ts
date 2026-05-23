@@ -74,17 +74,29 @@ export async function PUT(
             );
         }
 
-        // Check if user is the course instructor or admin
-        const course = lesson.course as unknown as ICourse;
-        const isInstructor = course.instructors && course.instructors.some(
-            (inst) => inst.toString() === user.id
-        );
-
-        if (!isInstructor && user.role !== 'admin') {
-            return NextResponse.json(
-                { error: 'আপনার এই পাঠ সম্পাদনার অনুমতি নেই' },
-                { status: 403 }
+        // For program lessons (no course, uses programSemester), allow admin access
+        if (lesson.programSemester && !lesson.course) {
+            if (user.role !== 'admin') {
+                // For non-admin, check if they are an instructor of the program
+                // For simplicity, only admins can edit program lessons via this route
+                return NextResponse.json(
+                    { error: 'আপনার এই পাঠ সম্পাদনার অনুমতি নেই' },
+                    { status: 403 }
+                );
+            }
+        } else if (lesson.course) {
+            // Check if user is the course instructor or admin
+            const course = lesson.course as unknown as ICourse;
+            const isInstructor = course.instructors && course.instructors.some(
+                (inst) => inst.toString() === user.id
             );
+
+            if (!isInstructor && user.role !== 'admin') {
+                return NextResponse.json(
+                    { error: 'আপনার এই পাঠ সম্পাদনার অনুমতি নেই' },
+                    { status: 403 }
+                );
+            }
         }
 
         const body = await request.json();

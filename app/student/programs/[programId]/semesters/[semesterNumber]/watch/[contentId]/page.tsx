@@ -49,7 +49,7 @@ export default async function SemesterWatchContentPage({ params }: PageProps) {
     // Check enrollment
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const student: any = await Student.findById(session.user.id)
-        .select('enrolledPrograms')
+        .select('enrolledPrograms gender')
         .lean();
 
     const enrollment = student?.enrolledPrograms?.find(
@@ -132,6 +132,10 @@ export default async function SemesterWatchContentPage({ params }: PageProps) {
             semesterTitle={semester.titleBn || `সেমিস্টার ${semesterNumber}`}
             programTitle={program.titleBn}
             initialLesson={initialLesson || undefined}
+            whatsappGroupLinkMale={program.whatsappGroupLinkMale || ''}
+            whatsappGroupLinkFemale={program.whatsappGroupLinkFemale || ''}
+            studentGender={student?.gender || undefined}
+            whatsappDismissed={enrollment?.whatsappDismissed || false}
         />
     );
 }
