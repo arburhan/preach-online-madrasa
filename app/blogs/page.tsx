@@ -78,7 +78,7 @@ export default function BlogsPage() {
     return (
         <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
             {/* Hero Section */}
-            <section className="relative py-16 md:py-24 bg-linear-to-br from-primary/10 via-purple-500/5 to-background">
+            <section className="relative py-5 md:py-12 bg-linear-to-br from-primary/10 via-purple-500/5 to-background">
                 <div className="container mx-auto px-4">
                     <div className="text-center max-w-3xl mx-auto">
                         <h1 className="text-4xl md:text-5xl font-bold mb-4">

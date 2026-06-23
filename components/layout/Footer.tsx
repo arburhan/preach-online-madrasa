@@ -250,6 +250,18 @@ export default function Footer() {
                     <p className="text-[10px] text-muted-foreground/70 mt-3">
                         * উপরোক্ত তথ্য গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের ট্রেড লাইসেন্স অনুযায়ী প্রদত্ত।
                     </p>
+
+                    {/* Payment Gateway */}
+                    <div className="mt-4 text-center">
+                        <p className="text-xs font-semibold text-muted-foreground mb-2">পেমেন্ট পদ্ধতি</p>
+                        <Image
+                            src="/paymentGateway.png"
+                            alt="Supported Payment Gateways"
+                            width={500}
+                            height={500}
+                            className=" mx-auto w-auto object-contain"
+                        />
+                    </div>
                 </div>
             </div>
 

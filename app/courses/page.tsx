@@ -97,7 +97,7 @@ export default async function PublicCoursesPage() {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <div className="bg-linear-to-br from-[#3fdaa6] via-[#b3f2d4] to-[#3fdaa6] py-16 ">
+            <div className="bg-linear-to-br from-primary/10 via-background to-accent/10 py-16 ">
                 <div className="container mx-auto px-4 text-center">
                     <h1 className="text-3xl md:text-4xl font-bold mb-4 text-black">সকল কোর্স ও প্রোগ্রাম</h1>
                     <p className="md:text-lg text-blue-950">
