@@ -27,28 +27,24 @@ export const metadata: Metadata = {
 export default async function PublicCoursesPage() {
     await connectDB();
 
-    // Get current session (if any)
-    const session = await auth();
+    // Parallel fetch: session, courses, and programs
+    const [session, courses, programs] = await Promise.all([
+        auth(),
+        Course.find({ status: 'published' })
+            .sort({ createdAt: -1 })
+            .lean(),
+        Program.find({ status: 'published' })
+            .sort({ isFeatured: -1, isPopular: -1, order: 1 })
+            .lean() as Promise<any[]>,
+    ]);
 
-    // Fetch all published courses
-    const courses = await Course.find({ status: 'published' })
-        .sort({ createdAt: -1 })
-        .lean();
-
-    // Manually fetch all teachers
+    // Fetch teachers for course instructors (depends on course data)
     const Teacher = (await import('@/lib/db/models/Teacher')).default;
     const allInstructorIds = courses.flatMap(c => c.instructors || []);
     const teachers = await Teacher.find({ _id: { $in: allInstructorIds } })
         .select('_id name')
         .lean();
-
     const teacherMap = new Map(teachers.map(t => [t._id.toString(), t]));
-
-    // Fetch published programs (long courses)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const programs: any[] = await Program.find({ status: 'published' })
-        .sort({ isFeatured: -1, isPopular: -1, order: 1 })
-        .lean();
 
     // Serialize courses
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

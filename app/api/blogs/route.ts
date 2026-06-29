@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongodb';
 import BlogPost from '@/lib/db/models/BlogPost';
+import { Category } from '@/lib/db/models';
 import '@/lib/db/models/Admin';
 
 // GET - Get blog posts for public (only published)
@@ -21,29 +22,34 @@ export async function GET(request: NextRequest) {
             query.isFeatured = true;
         }
 
-        // Join with Category to filter by slug if provided
-        const skip = (page - 1) * limit;
-
-        const postsQuery = BlogPost.find(query)
-            .populate('category', 'nameBn nameEn')
-            .populate('author', 'name')
-            .sort({ publishedAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .lean();
-
-        // Get all posts first, then filter by category slug if needed
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let posts: any[] = await postsQuery;
-
+        // Filter by category at DB level instead of JS level
         if (categorySlug) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            posts = posts.filter((post: any) =>
-                post.category?.nameEn?.toLowerCase() === categorySlug.toLowerCase()
-            );
+            const category = await Category.findOne({
+                nameEn: { $regex: new RegExp(`^${categorySlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+            }).select('_id').lean();
+            if (category) {
+                query.category = category._id;
+            } else {
+                // Category not found, return empty results
+                return NextResponse.json({
+                    posts: [],
+                    pagination: { page, limit, total: 0, totalPages: 0 },
+                });
+            }
         }
 
-        const total = await BlogPost.countDocuments(query);
+        const skip = (page - 1) * limit;
+
+        const [posts, total] = await Promise.all([
+            BlogPost.find(query)
+                .populate('category', 'nameBn nameEn')
+                .populate('author', 'name')
+                .sort({ publishedAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            BlogPost.countDocuments(query),
+        ]);
 
         return NextResponse.json({
             posts,

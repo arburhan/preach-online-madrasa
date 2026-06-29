@@ -40,6 +40,7 @@ export default function Navbar() {
     };
 
     const handleSignOut = async () => {
+        setMobileMenuOpen(false);
         await signOut({ callbackUrl: '/' });
     };
 
@@ -163,13 +164,13 @@ export default function Navbar() {
                         <div className="flex flex-col gap-2 border-t border-border pt-4">
                             {isLoggedIn ? (
                                 <>
-                                    <Link href="/student/profile">
+                                    <Link href="/student/profile" onClick={() => setMobileMenuOpen(false)}>
                                         <Button variant="ghost" className="w-full justify-start gap-2">
                                             <UserCircle className="h-4 w-4" />
                                             প্রোফাইল
                                         </Button>
                                     </Link>
-                                    <Link href={getDashboardLink()}>
+                                    <Link href={getDashboardLink()} onClick={() => setMobileMenuOpen(false)}>
                                         <Button variant="ghost" className="w-full justify-start gap-2">
                                             <LayoutDashboard className="h-4 w-4" />
                                             ড্যাশবোর্ড
@@ -186,12 +187,12 @@ export default function Navbar() {
                                 </>
                             ) : (
                                 <>
-                                    <Link href="/auth/signin" className="w-full">
+                                    <Link href="/auth/signin" className="w-full" onClick={() => setMobileMenuOpen(false)}>
                                         <Button variant="ghost" className="w-full">
                                             লগইন
                                         </Button>
                                     </Link>
-                                    <Link href="/auth/signup" className="w-full">
+                                    <Link href="/auth/signup" className="w-full" onClick={() => setMobileMenuOpen(false)}>
                                         <Button className="w-full">নিবন্ধন করুন</Button>
                                     </Link>
                                 </>

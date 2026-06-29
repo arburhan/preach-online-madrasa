@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import {
     Facebook,
@@ -8,14 +6,12 @@ import {
     Phone,
     MapPin,
     Heart,
-    ArrowUp,
     BadgeCheck,
     Briefcase,
     MapPinned,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import ScrollToTop from './ScrollToTop';
 
 const quickLinks = [
     { name: 'হোম', href: '/' },
@@ -36,33 +32,8 @@ const socialLinks = [
     { name: 'YouTube', icon: Youtube, href: 'https://youtube.com', color: 'hover:text-red-500' },
 ];
 
-// Routes where footer should be hidden (dashboard areas with sidebars)
-const hiddenRoutes = ['/admin'];
-
 export default function Footer() {
-    const [showScrollTop, setShowScrollTop] = useState(false);
     const currentYear = new Date().getFullYear();
-    const pathname = usePathname();
-
-    // Hide footer on dashboard routes
-    const shouldHideFooter = hiddenRoutes.some(route => pathname.startsWith(route));
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setShowScrollTop(window.scrollY > 300);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // Don't render footer on dashboard routes
-    if (shouldHideFooter) {
-        return null;
-    }
 
     return (
         <footer className="relative bg-linear-to-br from-primary/10 via-background to-accent/10 border-t">
@@ -199,7 +170,7 @@ export default function Footer() {
                                 </div>
                                 <div>
                                     <span className="text-xs text-muted-foreground/70">ঠিকানা</span>
-                                    <p className="text-sm">মাদরাসাতুদ দাওয়াহ, বাসা নং: ০৩, ব্লক: বি, ফকিরবাড়ি মার্কেট, মিরপুর-১০,  ঢাকা-১২১৬।</p>
+                                    <p className="text-sm">মাদরাসাতুদ দাওয়াহ, বাসা নং: ০৩, ব্লক: বি, ফকিরবাড়ি মার্কেট, মিরপুর-১০,  ঢাকা-১২১৬।</p>
                                 </div>
                             </li>
                         </ul>
@@ -258,7 +229,8 @@ export default function Footer() {
                             src="/paymentGateway.png"
                             alt="Supported Payment Gateways"
                             width={500}
-                            height={500}
+                            height={100}
+                            sizes="(max-width: 768px) 90vw, 500px"
                             className=" mx-auto w-auto object-contain"
                         />
                     </div>
@@ -280,15 +252,8 @@ export default function Footer() {
                 </div>
             </div>
 
-            {/* Scroll to Top Button */}
-            <button
-                onClick={scrollToTop}
-                className={`fixed bottom-6 right-6 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 z-50 ${showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-                    }`}
-                aria-label="উপরে যান"
-            >
-                <ArrowUp className="h-5 w-5" />
-            </button>
+            {/* Scroll to Top Button (Client Component) */}
+            <ScrollToTop />
         </footer>
     );
 }

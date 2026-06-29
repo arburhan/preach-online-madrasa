@@ -26,10 +26,12 @@ export async function GET(request: NextRequest) {
         const query: CourseQuery = { status: CourseStatus.PUBLISHED };
 
         if (search) {
+            // Escape regex special characters to prevent ReDoS
+            const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             query.$or = [
-                { titleBn: { $regex: search, $options: 'i' } },
-                { titleEn: { $regex: search, $options: 'i' } },
-                { descriptionBn: { $regex: search, $options: 'i' } },
+                { titleBn: { $regex: escapedSearch, $options: 'i' } },
+                { titleEn: { $regex: escapedSearch, $options: 'i' } },
+                { descriptionBn: { $regex: escapedSearch, $options: 'i' } },
             ];
         }
 

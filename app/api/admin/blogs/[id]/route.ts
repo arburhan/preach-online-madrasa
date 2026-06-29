@@ -3,12 +3,17 @@ import connectDB from '@/lib/db/mongodb';
 import BlogPost from '@/lib/db/models/BlogPost';
 import { requireAuth } from '@/lib/auth/rbac';
 
-// GET - Get single blog post by ID
+// GET - Get single blog post by ID (admin only)
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const user = await requireAuth();
+        if (user.role !== 'admin') {
+            return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+        }
+
         const { id } = await params;
         await connectDB();
 
