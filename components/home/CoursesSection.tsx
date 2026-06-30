@@ -86,7 +86,7 @@ export default async function CoursesSection() {
 
     return (
         <section className="py-20 bg-muted/30">
-            <div className="container mx-auto px-4">
+            <div className="container mx-auto px-4 md:px-8">
 
                 {/* Courses Section */}
                 {hasCourses && (
@@ -104,7 +104,7 @@ export default async function CoursesSection() {
                         </div>
 
                         {/* Courses Grid - Reusing CourseCard */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {serializedCourses.map((course) => (
                                 <CourseCard
                                     key={course._id}
@@ -143,7 +143,7 @@ export default async function CoursesSection() {
                         </div>
 
                         {/* Programs Grid - Reusing ProgramsCard */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {serializedPrograms.map((program) => (
                                 <ProgramsCard key={program._id} program={program} />
                             ))}

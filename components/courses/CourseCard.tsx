@@ -28,7 +28,7 @@ export default function CourseCard({ course }: CourseCardProps) {
         <div className="bg-card border rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
             {/* Thumbnail */}
             <Link href={`/courses/${course.slug}`}>
-                <div className="relative h-48 bg-gray-200 dark:bg-gray-800">
+                <div className="relative h-64 bg-gray-200 dark:bg-gray-800">
                     {course.thumbnailUrl ? (
                         <Image
                             src={course.thumbnailUrl}
@@ -45,9 +45,9 @@ export default function CourseCard({ course }: CourseCardProps) {
             </Link>
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-4">
                 <Link href={`/courses/${course.slug}`}>
-                    <h3 className="text-xl font-bold mb-2 hover:text-primary transition-colors line-clamp-2">
+                    <h3 className="text-lg font-bold mb-2 hover:text-primary transition-colors line-clamp-2">
                         {course.titleBn}
                     </h3>
                 </Link>

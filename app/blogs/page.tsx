@@ -87,7 +87,7 @@ export default async function BlogsPage() {
                 {featuredPosts.length > 0 && (
                     <section className="mb-12">
                         <h2 className="text-2xl font-bold mb-6">ফিচারড পোষ্ট</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                             {featuredPosts.map((post) => (
                                 <Link
                                     key={post._id}
@@ -99,10 +99,8 @@ export default async function BlogsPage() {
                                             <Image
                                                 src={post.thumbnail}
                                                 alt={post.title}
-                                                width={500}
-                                                height={300}
-                                                sizes="(max-width: 768px) 100vw, 33vw"
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
                                             />
                                             <div className="absolute top-3 left-3">
                                                 <span className="px-2 py-1 text-xs font-medium rounded-full bg-primary text-white">
@@ -111,7 +109,7 @@ export default async function BlogsPage() {
                                             </div>
                                         </div>
                                     )}
-                                    <div className="p-5">
+                                    <div className="p-4">
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                                             <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                                                 {post.category?.nameBn}

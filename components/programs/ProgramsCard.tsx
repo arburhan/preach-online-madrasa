@@ -27,14 +27,13 @@ export default function ProgramsCard({ program }: ProgramsCardProps) {
     return (
         <div className="bg-card rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
             {/* Thumbnail */}
-            <div className="h-68 bg-linear-to-br from-purple-500 to-indigo-600 relative">
+            <div className="h-64 bg-linear-to-br from-purple-500 to-indigo-600 relative">
                 {program.thumbnail ? (
                     <Image
                         src={program.thumbnail}
                         alt={program.titleBn}
-                        width={500}
-                        height={500}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -55,7 +54,7 @@ export default function ProgramsCard({ program }: ProgramsCardProps) {
             </div>
 
             <div className="p-4">
-                <h3 className="font-bold text-lg mb-2">{program.titleBn}</h3>
+                <h3 className="font-bold text-base mb-2">{program.titleBn}</h3>
 
                 {/* Meta */}
                 <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">

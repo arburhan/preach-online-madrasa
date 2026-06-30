@@ -82,7 +82,7 @@ export default function BlogsClient({ initialPosts, categories }: BlogsClientPro
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {posts.map((post) => (
                             <Link
                                 key={post._id}
@@ -101,13 +101,13 @@ export default function BlogsClient({ initialPosts, categories }: BlogsClientPro
                                         />
                                     </div>
                                 )}
-                                <div className="p-5">
+                                <div className="p-4">
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                                         <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                                             {post.category?.nameBn}
                                         </span>
                                     </div>
-                                    <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                    <h3 className="font-bold text-base mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                                         {post.title}
                                     </h3>
                                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">

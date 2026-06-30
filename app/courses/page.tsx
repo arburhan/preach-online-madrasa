@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
-import Program from '@/lib/db/models/LongCourse';
+import Program, { IProgram } from '@/lib/db/models/LongCourse';
 import '@/lib/db/models/Teacher'; // For populate
 import { BookOpen, GraduationCap } from 'lucide-react';
 import CourseCard from '@/components/courses/CourseCard';
@@ -35,7 +35,7 @@ export default async function PublicCoursesPage() {
             .lean(),
         Program.find({ status: 'published' })
             .sort({ isFeatured: -1, isPopular: -1, order: 1 })
-            .lean() as Promise<any[]>,
+            .lean() as Promise<IProgram[]>,
     ]);
 
     // Fetch teachers for course instructors (depends on course data)
@@ -110,7 +110,7 @@ export default async function PublicCoursesPage() {
                             <GraduationCap className="h-6 w-6 text-primary" />
                             <h2 className="text-2xl font-bold">সেমিস্টার ভিত্তিক প্রোগ্রাম</h2>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {serializedPrograms.map((program) => (
                                 <ProgramsCard key={program._id} program={program} />
                             ))}
@@ -141,7 +141,7 @@ export default async function PublicCoursesPage() {
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                 {serializedCourses.map((course) => (
                                     <CourseCard
                                         key={course._id}
