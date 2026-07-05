@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 export default function TeacherRegisterPage() {
     const router = useRouter();
@@ -90,8 +91,8 @@ export default function TeacherRegisterPage() {
                 {/* Logo */}
                 <div className="mb-8 text-center">
                     <Link href="/" className="inline-flex flex-col items-center gap-3">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
-                            <BookOpen className="h-9 w-9" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20">
+                            <Image src="/icon.svg" alt="Islamic Online Academy Logo" width={60} height={60} className='rounded-3xl' />
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold">Islamic Online Academy</h1>

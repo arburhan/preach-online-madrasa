@@ -21,15 +21,18 @@ export async function GET(request: NextRequest) {
             $or?: Array<{ [key: string]: { $regex: string; $options: string } }>;
             level?: string;
             isFree?: boolean;
+            isDeleted?: boolean | { $ne: boolean };
         }
 
-        const query: CourseQuery = { status: CourseStatus.PUBLISHED };
+        const query: CourseQuery = { status: CourseStatus.PUBLISHED, isDeleted: { $ne: true } };
 
         if (search) {
+            // Escape regex special characters to prevent ReDoS
+            const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             query.$or = [
-                { titleBn: { $regex: search, $options: 'i' } },
-                { titleEn: { $regex: search, $options: 'i' } },
-                { descriptionBn: { $regex: search, $options: 'i' } },
+                { titleBn: { $regex: escapedSearch, $options: 'i' } },
+                { titleEn: { $regex: escapedSearch, $options: 'i' } },
+                { descriptionBn: { $regex: escapedSearch, $options: 'i' } },
             ];
         }
 

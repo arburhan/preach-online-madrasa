@@ -36,7 +36,7 @@ export default async function StatisticsPage() {
     await connectDB();
 
     // Get top courses by enrollment
-    const topCoursesData = await Course.find({ status: 'published' })
+    const topCoursesData = await Course.find({ status: 'published', isDeleted: { $ne: true } })
         .sort({ enrolledCount: -1 })
         .limit(10)
         .populate('instructors', 'name')

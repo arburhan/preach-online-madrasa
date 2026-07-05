@@ -12,7 +12,16 @@ export async function proxy(request: NextRequest) {
 
     // If accessing protected route without session, redirect to signin
     if (isProtectedRoute && !session) {
-        return NextResponse.redirect(new URL('/auth/signin', request.url));
+        // For API routes, return JSON error instead of redirect
+        if (pathname.startsWith('/api/')) {
+            return NextResponse.json(
+                { error: 'অননুমোদিত অ্যাক্সেস' },
+                { status: 401 }
+            );
+        }
+        const signInUrl = new URL('/auth/signin', request.url);
+        signInUrl.searchParams.set('callbackUrl', pathname);
+        return NextResponse.redirect(signInUrl);
     }
 
     // Role-based access control
@@ -21,6 +30,12 @@ export async function proxy(request: NextRequest) {
 
         // Admin routes - only admins
         if (pathname.startsWith('/admin') && userRole !== 'admin') {
+            if (pathname.startsWith('/api/admin')) {
+                return NextResponse.json(
+                    { error: 'অ্যাক্সেস অস্বীকৃত' },
+                    { status: 403 }
+                );
+            }
             return NextResponse.redirect(new URL('/unauthorized', request.url));
         }
 
@@ -35,6 +50,32 @@ export async function proxy(request: NextRequest) {
         }
     }
 
+    // Protected API routes - require authentication
+    const protectedApiRoutes = [
+        '/api/admin',
+        '/api/notes',
+        '/api/progress',
+    ];
+
+    const isProtectedApi = protectedApiRoutes.some(route => pathname.startsWith(route));
+    if (isProtectedApi && !session?.user) {
+        return NextResponse.json(
+            { error: 'অননুমোদিত অ্যাক্সেস' },
+            { status: 401 }
+        );
+    }
+
+    // Admin API routes - require admin or teacher role
+    if (pathname.startsWith('/api/admin') && session?.user) {
+        const role = session.user.role;
+        if (!['admin', 'teacher'].includes(role)) {
+            return NextResponse.json(
+                { error: 'অ্যাক্সেস অস্বীকৃত' },
+                { status: 403 }
+            );
+        }
+    }
+
     return NextResponse.next();
 }
 
@@ -43,6 +84,7 @@ export const config = {
         '/student/:path*',
         '/teacher/:path*',
         '/admin/:path*',
+        '/api/admin/:path*',
         '/api/courses/:path*',
         '/api/lessons/:path*',
         '/api/notes/:path*',

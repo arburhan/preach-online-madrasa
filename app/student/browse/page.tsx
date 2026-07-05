@@ -12,7 +12,7 @@ export default async function BrowseCoursesPage() {
     await connectDB();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const courses: any[] = await Course.find({ status: 'published' })
+    const courses: any[] = await Course.find({ status: 'published', isDeleted: { $ne: true } })
         .sort({ createdAt: -1 })
         .lean();
 

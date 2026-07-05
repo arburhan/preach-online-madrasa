@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 export default function SignInPage() {
     const router = useRouter();
@@ -52,12 +53,12 @@ export default function SignInPage() {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-primary/10 via-background to-accent/10 px-4">
-            <div className="w-full max-w-md">
+            <div className="w-full max-w-md py-5 md:py-8">
                 {/* Logo */}
-                <div className="mb-8 text-center">
+                <div className="mb-5 text-center">
                     <Link href="/" className="inline-flex flex-col items-center gap-3">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
-                            <BookOpen className="h-9 w-9" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20">
+                            <Image src="/icon.svg" alt="Islamic Online Academy Logo" width={60} height={60} className='rounded-3xl' />
                         </div>
                         <h1 className="text-2xl font-bold text-primary">অনলাইন একাডেমি</h1>
                     </Link>

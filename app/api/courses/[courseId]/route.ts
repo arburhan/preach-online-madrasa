@@ -17,7 +17,7 @@ export async function GET(
             .populate('instructors', 'name image bio qualifications')
             .lean();
 
-        if (!course) {
+        if (!course || course.isDeleted) {
             return NextResponse.json(
                 { error: 'কোর্স পাওয়া যায়নি' },
                 { status: 404 }
@@ -106,7 +106,7 @@ export async function PUT(
     }
 }
 
-// DELETE /api/courses/[id] - Delete course
+// DELETE /api/courses/[id] - Soft delete course (admin only)
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ courseId: string }> }
@@ -114,9 +114,9 @@ export async function DELETE(
     try {
         const user = await getCurrentUser();
 
-        if (!user || !['teacher', 'admin'].includes(user.role)) {
+        if (!user || user.role !== 'admin') {
             return NextResponse.json(
-                { error: 'অনুমতি নেই' },
+                { error: 'শুধুমাত্র অ্যাডমিন কোর্স মুছে ফেলতে পারবে' },
                 { status: 403 }
             );
         }
@@ -133,27 +133,22 @@ export async function DELETE(
             );
         }
 
-        // Check if user is one of the instructors or admin
-        const isInstructor = Array.isArray(course.instructors)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ? course.instructors.some((inst: any) => inst._id?.toString() === user.id)
-            : false;
-
-        if (!isInstructor && user.role !== 'admin') {
+        if (course.isDeleted) {
             return NextResponse.json(
-                { error: 'আপনার এই কোর্স মুছে ফেলার অনুমতি নেই' },
-                { status: 403 }
+                { error: 'কোর্সটি ইতিমধ্যে মুছে ফেলা হয়েছে' },
+                { status: 400 }
             );
         }
 
-        // Delete all lessons associated with this course
-        await Lesson.deleteMany({ course: courseId });
-
-        // Delete the course
-        await Course.findByIdAndDelete(courseId);
+        // Soft delete - move to trash
+        await Course.findByIdAndUpdate(courseId, {
+            isDeleted: true,
+            deletedAt: new Date(),
+            deletedBy: user.id,
+        });
 
         return NextResponse.json({
-            message: 'কোর্স মুছে ফেলা হয়েছে',
+            message: 'কোর্সটি ট্র্যাশে সরানো হয়েছে। ৩০ দিনের মধ্যে পুনরুদ্ধার করতে পারবেন।',
         });
     } catch (error) {
         console.error('Delete course error:', error);

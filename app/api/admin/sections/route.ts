@@ -6,7 +6,16 @@ import { requireAuth } from '@/lib/auth/rbac';
 // GET /api/admin/sections?courseId=xxx or ?subjectId=xxx
 export async function GET(req: NextRequest) {
     try {
-        await requireAuth();
+        const user = await requireAuth();
+
+        // Only admin and teacher can view sections
+        if (!['admin', 'teacher'].includes(user.role)) {
+            return NextResponse.json(
+                { error: 'অ্যাক্সেস অস্বীকৃত' },
+                { status: 403 }
+            );
+        }
+
         await connectDB();
 
         const { searchParams } = new URL(req.url);
@@ -34,7 +43,16 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/sections
 export async function POST(req: NextRequest) {
     try {
-        await requireAuth();
+        const user = await requireAuth();
+
+        // Only admin and teacher can create sections
+        if (!['admin', 'teacher'].includes(user.role)) {
+            return NextResponse.json(
+                { error: 'শুধুমাত্র অ্যাডমিন এবং শিক্ষক সেকশন তৈরি করতে পারবেন' },
+                { status: 403 }
+            );
+        }
+
         await connectDB();
 
         const body = await req.json();

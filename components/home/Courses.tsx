@@ -13,7 +13,7 @@ export default async function Courses() {
     const session = await auth();
 
     // Fetch all published courses
-    const courses = await Course.find({ status: 'published' })
+    const courses = await Course.find({ status: 'published', isDeleted: { $ne: true } })
         .sort({ createdAt: -1 })
         .lean();
 

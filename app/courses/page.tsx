@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { auth } from '@/lib/auth/auth.config';
 import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
-import Program from '@/lib/db/models/LongCourse';
+import Program, { IProgram } from '@/lib/db/models/LongCourse';
 import '@/lib/db/models/Teacher'; // For populate
 import { BookOpen, GraduationCap } from 'lucide-react';
 import CourseCard from '@/components/courses/CourseCard';
@@ -27,28 +27,24 @@ export const metadata: Metadata = {
 export default async function PublicCoursesPage() {
     await connectDB();
 
-    // Get current session (if any)
-    const session = await auth();
+    // Parallel fetch: session, courses, and programs
+    const [session, courses, programs] = await Promise.all([
+        auth(),
+        Course.find({ status: 'published', isDeleted: { $ne: true } })
+            .sort({ createdAt: -1 })
+            .lean(),
+        Program.find({ status: 'published' })
+            .sort({ isFeatured: -1, isPopular: -1, order: 1 })
+            .lean() as Promise<IProgram[]>,
+    ]);
 
-    // Fetch all published courses
-    const courses = await Course.find({ status: 'published' })
-        .sort({ createdAt: -1 })
-        .lean();
-
-    // Manually fetch all teachers
+    // Fetch teachers for course instructors (depends on course data)
     const Teacher = (await import('@/lib/db/models/Teacher')).default;
     const allInstructorIds = courses.flatMap(c => c.instructors || []);
     const teachers = await Teacher.find({ _id: { $in: allInstructorIds } })
         .select('_id name')
         .lean();
-
     const teacherMap = new Map(teachers.map(t => [t._id.toString(), t]));
-
-    // Fetch published programs (long courses)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const programs: any[] = await Program.find({ status: 'published' })
-        .sort({ isFeatured: -1, isPopular: -1, order: 1 })
-        .lean();
 
     // Serialize courses
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,7 +93,7 @@ export default async function PublicCoursesPage() {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <div className="bg-linear-to-br from-[#3fdaa6] via-[#b3f2d4] to-[#3fdaa6] py-16 ">
+            <div className="bg-linear-to-br from-primary/10 via-background to-accent/10 py-16 ">
                 <div className="container mx-auto px-4 text-center">
                     <h1 className="text-3xl md:text-4xl font-bold mb-4 text-black">সকল কোর্স ও প্রোগ্রাম</h1>
                     <p className="md:text-lg text-blue-950">
@@ -114,7 +110,7 @@ export default async function PublicCoursesPage() {
                             <GraduationCap className="h-6 w-6 text-primary" />
                             <h2 className="text-2xl font-bold">সেমিস্টার ভিত্তিক প্রোগ্রাম</h2>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {serializedPrograms.map((program) => (
                                 <ProgramsCard key={program._id} program={program} />
                             ))}
@@ -145,7 +141,7 @@ export default async function PublicCoursesPage() {
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                 {serializedCourses.map((course) => (
                                     <CourseCard
                                         key={course._id}

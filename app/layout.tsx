@@ -5,6 +5,7 @@ import AuthProvider from "@/components/providers/AuthProvider";
 import ToastProvider from "@/components/providers/ToastProvider";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import FooterWrapper from "@/components/layout/FooterWrapper";
 import TawkChat from "@/components/TawkChat";
 import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 import {
@@ -107,7 +108,9 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <Footer />
+          <FooterWrapper>
+            <Footer />
+          </FooterWrapper>
           <ToastProvider />
           <TawkChat />
         </AuthProvider>

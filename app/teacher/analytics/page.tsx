@@ -39,7 +39,8 @@ export default async function TeacherAnalyticsPage() {
 
     // Get teacher's courses
     const courses = await Course.find({
-        instructor: session.user.id
+        instructor: session.user.id,
+        isDeleted: { $ne: true }
     }).select('_id titleBn titleEn').lean();
 
     // Calculate analytics for each course

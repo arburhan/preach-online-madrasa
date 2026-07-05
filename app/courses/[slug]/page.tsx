@@ -170,7 +170,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
             />
             <div className="min-h-screen bg-background">
                 {/* Hero Section */}
-                <div className="bg-linear-to-r from-purple-600 to-blue-600 text-white py-12">
+                <div className="text-foreground py-12 bg-linear-to-br from-primary/10 via-background to-accent/10" >
                     <div className="container mx-auto px-4">
                         <div className="max-w-4xl">
                             <h1 className="text-3xl md:text-5xl font-bold mb-4">
@@ -215,7 +215,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-8">
                             {/* About Course */}
-                            <div className="bg-card border rounded-xl p-6">
+                            <div className="bg-card border rounded-xl p-6 lg:px-16 lg:py-8 lg:text-justify">
                                 <h2 className="text-2xl font-bold mb-4 text-yellow-600">কোর্স সম্পর্কে</h2>
                                 <LexicalRenderer content={serializedCourse.descriptionBn} />
                                 {serializedCourse.descriptionEn && (
@@ -228,7 +228,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                             {/* Instructor */}
                             <div className="bg-card border rounded-xl p-6">
                                 <h2 className="text-2xl font-bold mb-4">উস্তায</h2>
-                                <div className="flex items-start gap-4">
+                                <div className="flex items-center gap-4 ">
                                     <div className="h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
                                         <Users className="h-8 w-8 text-purple-600" />
                                     </div>
@@ -299,7 +299,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                                     </div>
 
                                     {/* Duration */}
-                                    {serializedCourse.totalDuration && (
+                                    {/* {serializedCourse.totalDuration && (
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                                                 <Clock className="h-5 w-5 text-blue-600" />
@@ -309,7 +309,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                                                 <p className="font-semibold">{Math.floor(serializedCourse.totalDuration / 60)} মিনিট</p>
                                             </div>
                                         </div>
-                                    )}
+                                    )} */}
 
                                     {/* Students Enrolled */}
                                     <div className="flex items-center gap-3">

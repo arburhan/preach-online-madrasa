@@ -79,6 +79,11 @@ export interface ICourse extends Document {
     createdAt: Date;
     updatedAt: Date;
     publishedAt?: Date;
+
+    // Soft Delete
+    isDeleted: boolean;
+    deletedAt?: Date;
+    deletedBy?: mongoose.Types.ObjectId;
 }
 
 // Course schema
@@ -211,6 +216,17 @@ const CourseSchema = new Schema<ICourse>(
         completedAt: {
             type: Date,
         },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
+        deletedAt: {
+            type: Date,
+        },
+        deletedBy: {
+            type: Schema.Types.ObjectId,
+            ref: 'Admin',
+        },
     },
     {
         timestamps: true,
@@ -225,6 +241,7 @@ CourseSchema.index({ status: 1 });
 CourseSchema.index({ isFree: 1 });
 CourseSchema.index({ createdAt: -1 });
 CourseSchema.index({ enrolledCount: -1 });
+CourseSchema.index({ isDeleted: 1 });
 
 // Auto-update isFree based on price
 CourseSchema.pre('save', async function () {

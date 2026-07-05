@@ -7,7 +7,16 @@ import { requireAuth } from '@/lib/auth/rbac';
 // POST /api/admin/lessons
 export async function POST(req: NextRequest) {
     try {
-        await requireAuth();
+        const user = await requireAuth();
+
+        // Only admin and teacher can create lessons
+        if (!['admin', 'teacher'].includes(user.role)) {
+            return NextResponse.json(
+                { error: 'শুধুমাত্র অ্যাডমিন এবং শিক্ষক পাঠ তৈরি করতে পারবেন' },
+                { status: 403 }
+            );
+        }
+
         await connectDB();
 
         const body = await req.json();
