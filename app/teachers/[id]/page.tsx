@@ -30,7 +30,8 @@ export default async function TeacherDetailPage({ params }: PageProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const courses: any[] = await Course.find({
         instructors: id,
-        status: 'published'
+        status: 'published',
+        isDeleted: { $ne: true }
     })
         .select('titleBn thumbnail price isFree enrolledStudents')
         .lean();

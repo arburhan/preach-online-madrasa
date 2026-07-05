@@ -12,7 +12,7 @@ export default async function CoursesSection() {
     await connectDB();
 
     // Fetch only 6 published courses for homepage
-    const courses = await Course.find({ status: 'published' })
+    const courses = await Course.find({ status: 'published', isDeleted: { $ne: true } })
         .sort({ createdAt: -1 })
         .limit(6)
         .lean();

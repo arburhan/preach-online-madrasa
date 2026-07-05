@@ -21,9 +21,10 @@ export async function GET(request: NextRequest) {
             $or?: Array<{ [key: string]: { $regex: string; $options: string } }>;
             level?: string;
             isFree?: boolean;
+            isDeleted?: boolean | { $ne: boolean };
         }
 
-        const query: CourseQuery = { status: CourseStatus.PUBLISHED };
+        const query: CourseQuery = { status: CourseStatus.PUBLISHED, isDeleted: { $ne: true } };
 
         if (search) {
             // Escape regex special characters to prevent ReDoS

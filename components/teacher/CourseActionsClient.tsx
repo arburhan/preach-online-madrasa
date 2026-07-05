@@ -18,9 +18,10 @@ import Link from 'next/link';
 interface CourseActionsClientProps {
     courseId: string;
     isCompleted: boolean;
+    basePath?: string;
 }
 
-export default function CourseActionsClient({ courseId, isCompleted: initialCompleted }: CourseActionsClientProps) {
+export default function CourseActionsClient({ courseId, isCompleted: initialCompleted, basePath = '/teacher' }: CourseActionsClientProps) {
     const [isCompleted, setIsCompleted] = useState(initialCompleted);
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -52,7 +53,7 @@ export default function CourseActionsClient({ courseId, isCompleted: initialComp
     return (
         <>
             <div className="flex items-center gap-3">
-                <Link href={`/teacher/courses/${courseId}/statistics`}>
+                <Link href={`${basePath}/courses/${courseId}/statistics`}>
                     <Button variant="outline" size="sm">
                         <BarChart3 className="mr-2 h-4 w-4" />
                         পরিসংখ্যান দেখুন

@@ -62,7 +62,7 @@ export default async function StudentDashboard() {
 
     // Get recent published courses
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const recentCourses: any[] = await Course.find({ status: 'published' })
+    const recentCourses: any[] = await Course.find({ status: 'published', isDeleted: { $ne: true } })
         .sort({ createdAt: -1 })
         .limit(4)
         .lean();

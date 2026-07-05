@@ -4,7 +4,7 @@ import connectDB from '@/lib/db/mongodb';
 import Course from '@/lib/db/models/Course';
 import '@/lib/db/models/Teacher';
 
-import { BookOpen, Users, Video, Calendar, Plus } from 'lucide-react';
+import { BookOpen, Users, Video, Calendar, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -36,10 +36,13 @@ export default async function AdminCoursesPage() {
 
     await connectDB();
 
-    // Get all courses
-    const coursesData = await Course.find()
+    // Get all active (non-deleted) courses
+    const coursesData = await Course.find({ isDeleted: { $ne: true } })
         .sort({ createdAt: -1 })
         .lean();
+
+    // Count trashed courses for badge
+    const trashedCount = await Course.countDocuments({ isDeleted: true });
 
     // Manually fetch all teachers to avoid populate issues
     const Teacher = (await import('@/lib/db/models/Teacher')).default;
@@ -88,12 +91,25 @@ export default async function AdminCoursesPage() {
                         সকল কোর্স দেখুন এবং পরিচালনা করুন
                     </p>
                 </div>
-                <Link href="/admin/courses/new">
-                    <Button className="bg-purple-600 hover:bg-purple-700">
-                        <Plus className="mr-2 h-4 w-4" />
-                        নতুন কোর্স তৈরি করুন
-                    </Button>
-                </Link>
+                <div className="flex items-center gap-3">
+                    <Link href="/admin/courses/trash">
+                        <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            ট্র্যাশ
+                            {trashedCount > 0 && (
+                                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-destructive text-white">
+                                    {trashedCount}
+                                </span>
+                            )}
+                        </Button>
+                    </Link>
+                    <Link href="/admin/courses/new">
+                        <Button className="bg-purple-600 hover:bg-purple-700">
+                            <Plus className="mr-2 h-4 w-4" />
+                            নতুন কোর্স তৈরি করুন
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Stats */}
@@ -207,7 +223,7 @@ export default async function AdminCoursesPage() {
 
                                 {/* Actions */}
                                 <Link
-                                    href={`/teacher/courses/${course._id.toString()}`}
+                                    href={`/admin/courses/${course._id.toString()}`}
                                     className="block w-full text-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                                 >
                                     বিস্তারিত দেখুন

@@ -99,7 +99,7 @@ export default function LessonList({ lessons, courseId, basePath, semesterInfo }
                                 if (semesterInfo) {
                                     router.push(`${basePath || '/admin'}/programs/${semesterInfo.programId}/semesters/${semesterInfo.semesterNumber}/lessons/${lesson._id}/edit`);
                                 } else {
-                                    router.push(`/teacher/courses/${courseId}/lessons/${lesson._id}`);
+                                    router.push(`${basePath || '/teacher'}/courses/${courseId}/lessons/${lesson._id}`);
                                 }
                             }}
                         >

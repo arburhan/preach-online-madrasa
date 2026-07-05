@@ -73,7 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
 
     // ─── Dynamic: Published Courses ───
-    const courses = await Course.find({ status: 'published' })
+    const courses = await Course.find({ status: 'published', isDeleted: { $ne: true } })
         .select('slug updatedAt')
         .lean();
 

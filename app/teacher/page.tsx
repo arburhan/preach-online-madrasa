@@ -18,7 +18,7 @@ export default async function TeacherDashboard() {
 
     // Get teacher's assigned short courses
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const courses: any[] = await Course.find({ instructors: user.id })
+    const courses: any[] = await Course.find({ instructors: user.id, isDeleted: { $ne: true } })
         .sort({ createdAt: -1 })
         .lean();
 

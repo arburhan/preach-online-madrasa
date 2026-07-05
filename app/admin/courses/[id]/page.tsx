@@ -11,21 +11,20 @@ import CourseEditForm from '@/components/teacher/CourseEditForm';
 import LessonList from '@/components/teacher/LessonList';
 import ExamList from '@/components/teacher/ExamList';
 import CourseActionsClient from '@/components/teacher/CourseActionsClient';
+import CourseDeleteButton from '@/components/admin/CourseDeleteButton';
 
-export default async function EditCoursePage({
+export default async function AdminCourseDetailPage({
     params,
 }: {
     params: Promise<{ id: string }>;
 }) {
     const user = await requireAuth();
 
-    if (!['teacher', 'admin'].includes(user.role)) {
+    if (user.role !== 'admin') {
         redirect('/unauthorized');
     }
 
-    // Dynamic base path based on user role
-    const basePath = user.role === 'admin' ? '/admin' : '/teacher';
-
+    const basePath = '/admin';
     const { id } = await params;
 
     await connectDB();
@@ -35,15 +34,6 @@ export default async function EditCoursePage({
 
     if (!course) {
         notFound();
-    }
-
-    // Check if user is one of the instructors or admin
-    const isAssigned = course.instructors?.some(
-        (instructorId: any) => instructorId.toString() === user.id // eslint-disable-line @typescript-eslint/no-explicit-any
-    );
-
-    if (!isAssigned && user.role !== 'admin') {
-        redirect('/unauthorized');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -132,10 +122,14 @@ export default async function EditCoursePage({
                                 কোর্স সম্পাদনা এবং পরিচালনা করুন
                             </p>
                         </div>
-                        <div>
+                        <div className="flex items-center gap-2">
                             <Link href={`/courses/${serializedCourse.slug}`} target="_blank">
                                 <Button variant="outline">প্রিভিউ</Button>
                             </Link>
+                            <CourseDeleteButton
+                                courseId={serializedCourse._id}
+                                courseName={serializedCourse.titleBn}
+                            />
                         </div>
                     </div>
                 </div>
@@ -205,4 +199,3 @@ export default async function EditCoursePage({
         </div>
     );
 }
-

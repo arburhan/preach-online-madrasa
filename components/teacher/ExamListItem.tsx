@@ -27,10 +27,11 @@ interface ExamListItemProps {
         status: string;
     };
     courseId: string;
+    basePath?: string;
     onDelete: () => void;
 }
 
-export default function ExamListItem({ exam, courseId, onDelete }: ExamListItemProps) {
+export default function ExamListItem({ exam, courseId, basePath = '/teacher', onDelete }: ExamListItemProps) {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
@@ -86,7 +87,7 @@ export default function ExamListItem({ exam, courseId, onDelete }: ExamListItemP
                             <><CheckCircle className="h-3 w-3 mr-1" /> প্রকাশিত</>
                         ) : exam.status === 'completed' ? 'সম্পন্ন' : 'ড্রাফট'}
                     </Badge>
-                    <Link href={`/teacher/courses/${courseId}/exams/edit-exam?id=${exam._id}`}>
+                    <Link href={`${basePath}/courses/${courseId}/exams/edit-exam?id=${exam._id}`}>
                         <Button size="sm" variant="outline">
                             <Edit2 className="h-4 w-4 mr-1" />
                             এডিট

@@ -16,9 +16,10 @@ interface Exam {
 interface ExamListProps {
     exams: Exam[];
     courseId: string;
+    basePath?: string;
 }
 
-export default function ExamList({ exams, courseId }: ExamListProps) {
+export default function ExamList({ exams, courseId, basePath }: ExamListProps) {
     const router = useRouter();
     const [examList, setExamList] = useState(exams);
 
@@ -34,6 +35,7 @@ export default function ExamList({ exams, courseId }: ExamListProps) {
                     key={exam._id}
                     exam={exam}
                     courseId={courseId}
+                    basePath={basePath}
                     onDelete={() => handleDelete(exam._id)}
                 />
             ))}

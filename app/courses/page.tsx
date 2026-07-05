@@ -30,7 +30,7 @@ export default async function PublicCoursesPage() {
     // Parallel fetch: session, courses, and programs
     const [session, courses, programs] = await Promise.all([
         auth(),
-        Course.find({ status: 'published' })
+        Course.find({ status: 'published', isDeleted: { $ne: true } })
             .sort({ createdAt: -1 })
             .lean(),
         Program.find({ status: 'published' })
